@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trading Journal - Asian Breakout Pro</title>
+    <title>Trading Journal</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -102,7 +102,6 @@
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
 
-        /* MINI CALENDAR STYLES */
         .calendar-section { padding: 0 20px 20px 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #1c2229; padding: 8px; border-radius: 8px; }
@@ -116,7 +115,18 @@
         .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
         .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
-        .trades-table { padding: 20px; overflow-x: auto; }
+        /* HISTORY HEADER WITH FILTER */
+        .history-controls { 
+            padding: 20px 20px 0 20px; 
+            display: flex; 
+            justify-content: flex-end; 
+            align-items: center; 
+            gap: 10px;
+        }
+        .history-controls label { margin-bottom: 0; }
+        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; }
+
+        .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
@@ -144,12 +154,12 @@
 <body>
 
 <div class="container">
-    <div class="header"><h1>Asian Breakout Journal</h1></div>
+    <div class="header"><h1>Journal</h1></div>
 
     <div class="stats-grid">
-        <div class="stat-card"><h3>Total Trades</h3><div class="value" id="totalTrades">0</div></div>
+        <div class="stat-card"><h3>Trades (View)</h3><div class="value" id="totalTrades">0</div></div>
         <div class="stat-card"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
-        <div class="stat-card"><h3>Total P/L</h3><div class="value" id="totalPL">$0.00</div></div>
+        <div class="stat-card"><h3>P/L (View)</h3><div class="value" id="totalPL">$0.00</div></div>
         <div class="stat-card"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
         <div class="stat-card"><h3>Streak</h3><div class="value" id="currentStreak">-</div></div>
         <div class="stat-card"><h3>Record</h3><div class="value" id="maxStreak">-</div></div>
@@ -216,6 +226,13 @@
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
+    <div class="history-controls">
+        <label>Filter Instrument:</label>
+        <select id="historyInstrumentFilter" onchange="updateStatsAndTable()">
+            <option value="ALL">All Instruments</option>
+        </select>
+    </div>
+
     <div class="trades-table">
         <table>
             <thead><tr><th>Date</th><th>Inst.</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>Res.</th><th>IMG</th><th>Action</th></tr></thead>
@@ -236,7 +253,7 @@
     let equityChart, distributionChart, weekdayChart;
     
     let currentViewDate = new Date();
-    let selectedDateFilter = null; // Für Filter auf einen einzelnen Tag
+    let selectedDateFilter = null;
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
@@ -248,8 +265,15 @@
 
     function populateInstruments() {
         const select = document.getElementById('instrument');
-        select.innerHTML = customInstruments.map(inst => `<option value="${inst}">${inst}</option>`).join('');
+        const filterSelect = document.getElementById('historyInstrumentFilter');
+        
+        const optionsHTML = customInstruments.map(inst => `<option value="${inst}">${inst}</option>`).join('');
+        select.innerHTML = optionsHTML;
         select.value = lastInstrument;
+
+        const currentFilterValue = filterSelect.value;
+        filterSelect.innerHTML = `<option value="ALL">All Instruments</option>` + optionsHTML;
+        filterSelect.value = currentFilterValue;
     }
 
     function addNewInstrument() {
@@ -266,10 +290,9 @@
     }
 
     function refreshApp() {
-        updateStats();
         updateCharts();
         renderCalendar();
-        renderTrades(); // Wird durch renderCalendar gesteuert
+        updateStatsAndTable();
         resetForm();
     }
 
@@ -311,37 +334,63 @@
     }
 
     function filterByDay(dateStr) {
-        if (selectedDateFilter === dateStr) {
-            selectedDateFilter = null; // Toggle aus
-        } else {
-            selectedDateFilter = dateStr;
-        }
+        selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr;
         renderCalendar();
-        renderTrades();
+        updateStatsAndTable();
     }
 
     function changeMonth(val) {
         currentViewDate.setMonth(currentViewDate.getMonth() + val);
-        selectedDateFilter = null; // Filter bei Monatswechsel löschen
+        selectedDateFilter = null;
         renderCalendar();
-        renderTrades();
+        updateStatsAndTable();
     }
 
-    function renderTrades() {
+    function updateStatsAndTable() {
         const year = currentViewDate.getFullYear();
         const month = currentViewDate.getMonth();
+        const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
         
-        // Filter: Entweder ein spezieller Tag ODER der aktuelle Kalendermonat
         let filtered = trades.filter(t => {
             const tDate = new Date(t.date);
-            if (selectedDateFilter) {
-                return t.date === selectedDateFilter;
-            }
-            return tDate.getFullYear() === year && tDate.getMonth() === month;
+            
+            // Zeit-Filter (Tag oder Monat)
+            const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (tDate.getFullYear() === year && tDate.getMonth() === month);
+            
+            // Instrumenten-Filter
+            const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
+            
+            return matchesTime && matchesInstrument;
         });
 
-        const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        const total = filtered.length;
+        const wins = filtered.filter(t => t.result === 'WIN');
+        const totalPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
         
+        document.getElementById('totalTrades').textContent = total;
+        document.getElementById('winRate').textContent = total > 0 ? ((wins.length / total) * 100).toFixed(1) + '%' : '0%';
+        const plElem = document.getElementById('totalPL');
+        plElem.textContent = '$' + totalPL.toFixed(2);
+        plElem.className = 'value ' + (totalPL >= 0 ? 'win' : 'loss');
+        
+        const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
+        document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
+        
+        let curStr = 0; let curType = null; let maxW = 0; let maxL = 0; let tw = 0; let tl = 0;
+        const chrono = [...filtered].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+        chrono.forEach(t => {
+            if (t.result === 'WIN') { tw++; tl = 0; if (tw > maxW) maxW = tw; curStr = tw; curType = 'WIN'; }
+            else if (t.result === 'LOSS') { tl++; tw = 0; if (tl > maxL) maxL = tl; curStr = tl; curType = 'LOSS'; }
+            else { tw = 0; tl = 0; }
+        });
+        document.getElementById('currentStreak').textContent = curStr > 0 ? `${curStr} ${curType}` : '-';
+        document.getElementById('maxStreak').textContent = `W:${maxW}/L:${maxL}`;
+        
+        const lossSum = Math.abs(filtered.filter(t=>t.result==='LOSS').reduce((sum, t) => sum + Number(t.pl), 0));
+        const winSum = filtered.filter(t=>t.result==='WIN').reduce((sum, t) => sum + Number(t.pl), 0);
+        document.getElementById('profitFactor').textContent = lossSum > 0 ? (winSum / lossSum).toFixed(2) : 'N/A';
+
+        const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map((t) => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `
@@ -364,32 +413,6 @@
                 </td>
             </tr>`;
         }).join('');
-    }
-
-    function updateStats() {
-        const total = trades.length;
-        const wins = trades.filter(t => t.result === 'WIN');
-        const totalPL = trades.reduce((sum, t) => sum + Number(t.pl), 0);
-        document.getElementById('totalTrades').textContent = total;
-        document.getElementById('winRate').textContent = total > 0 ? ((wins.length / total) * 100).toFixed(1) + '%' : '0%';
-        const plElem = document.getElementById('totalPL');
-        plElem.textContent = '$' + totalPL.toFixed(2);
-        plElem.className = 'value ' + (totalPL >= 0 ? 'win' : 'loss');
-        const totalR = trades.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-        document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
-        
-        let curStr = 0; let curType = null; let maxW = 0; let maxL = 0; let tw = 0; let tl = 0;
-        const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        chrono.forEach(t => {
-            if (t.result === 'WIN') { tw++; tl = 0; if (tw > maxW) maxW = tw; curStr = tw; curType = 'WIN'; }
-            else if (t.result === 'LOSS') { tl++; tw = 0; if (tl > maxL) maxL = tl; curStr = tl; curType = 'LOSS'; }
-            else { tw = 0; tl = 0; }
-        });
-        document.getElementById('currentStreak').textContent = curStr > 0 ? `${curStr} ${curType}` : '-';
-        document.getElementById('maxStreak').textContent = `W:${maxW}/L:${maxL}`;
-        const lossSum = Math.abs(trades.filter(t=>t.result==='LOSS').reduce((sum, t) => sum + Number(t.pl), 0));
-        const winSum = trades.filter(t=>t.result==='WIN').reduce((sum, t) => sum + Number(t.pl), 0);
-        document.getElementById('profitFactor').textContent = lossSum > 0 ? (winSum / lossSum).toFixed(2) : 'N/A';
     }
 
     function updateCharts() {
@@ -417,14 +440,14 @@
         equityChart = new Chart(ctxE, {
             type: 'line',
             data: { labels: chrono.map((_, i) => i + 1), datasets: [{ data: equityData, borderColor: '#00f2ff', tension: 0.3, fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', pointRadius: 0 }] },
-            options: chartOptions('EQUITY CURVE ($)')
+            options: chartOptions('TOTAL EQUITY CURVE ($)')
         });
 
         if (distributionChart) distributionChart.destroy();
         distributionChart = new Chart(ctxD, {
             type: 'bar',
             data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] },
-            options: chartOptions('TRADE TAGS')
+            options: chartOptions('ALL TIME TAGS')
         });
 
         const dD = [0,0,0,0,0,0,0];
@@ -433,7 +456,7 @@
         weekdayChart = new Chart(ctxW, {
             type: 'bar',
             data: { labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] },
-            options: chartOptions('PROFIT BY WEEKDAY')
+            options: chartOptions('ALL TIME WEEKDAY PROFIT')
         });
     }
 
