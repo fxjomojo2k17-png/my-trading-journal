@@ -263,52 +263,53 @@
 
         const lines = raw.split('\n');
         const newTrades = [];
-        const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+        const months = {Jan:'01',Feb:'02',Mär:'03',Mar:'03',Apr:'04',Mai:'05',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Okt:'10',Oct:'10',Nov:'11',Dez:'12',Dec:'12'};
 
-        lines.forEach(line => {
-            // Erkennt sowohl Tabulatoren als auch mehrfache Leerzeichen
-            let parts = line.split(/\t| {2,}/).map(p => p.trim()).filter(p => p !== "");
+        for(let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if(!line || line.includes('Symbol') || line.includes('Eröffnungsrichtung')) continue;
+
+            // Split by TAB (dein Broker-Format nutzt Tabs)
+            const parts = line.split('\t').map(p => p.trim());
             
-            // Falls einfache Leerzeichen als Trenner genutzt wurden (Notfall-Parsing)
-            if (parts.length < 5) {
-                parts = line.split(' ').map(p => p.trim()).filter(p => p !== "");
-            }
+            console.log(`Zeile ${i+1}:`, parts); // Debug-Ausgabe
 
-            // Überspringe Header oder ungültige Zeilen
-            if (parts.length >= 7 && parts[0] !== "Symbol") {
-                const instrument = parts[0];
-                const directionText = parts[1].toLowerCase();
+            // Erwarte mindestens 7 Spalten: Symbol, Richtung, Datum+Zeit, Entry, Exit, Menge, Netto
+            if (parts.length >= 7) {
+                const instrument = parts[0]; // XAUUSD
+                const directionText = parts[1].toLowerCase(); // Verkaufen/Kaufen
                 const direction = (directionText.includes("kaufen") || directionText.includes("buy")) ? "LONG" : "SHORT";
                 
-                // Datum-Parsing (Beispiel: 15 Jan 2026 03:50:34.934)
-                // Wir suchen nach den Datums-Bestandteilen innerhalb der Teile
-                let dateIdx = parts.findIndex(p => months[p.substring(0,3)]);
-                if (dateIdx !== -1) {
-                    const day = parts[dateIdx-1].padStart(2, '0');
-                    const month = months[parts[dateIdx].substring(0,3)];
-                    const year = parts[dateIdx+1];
-                    const time = parts[dateIdx+2] ? parts[dateIdx+2].substring(0, 5) : "00:00";
+                // Datum-Zeit: "15 Jan 2026 03:50:34.934"
+                const dateTimeParts = parts[2].split(' ');
+                if (dateTimeParts.length >= 4) {
+                    const day = dateTimeParts[0].padStart(2, '0');
+                    const monthKey = dateTimeParts[1];
+                    const month = months[monthKey];
+                    const year = dateTimeParts[2];
+                    const timeFull = dateTimeParts[3]; // 03:50:34.934
+                    const time = timeFull.substring(0, 5); // 03:50
                     
                     const formattedDate = `${year}-${month}-${day}`;
                     
-                    // Werte am Ende der Zeile (Profit steht meist an vorletzter oder letzter Stelle)
-                    const pl = parseFloat(parts[parts.length-2].replace(',', '.'));
-                    const exit = parts[parts.length-4];
-                    const entry = parts[parts.length-5];
-
-                    if (!isNaN(pl)) {
+                    const entry = parseFloat(parts[3]); // Einstiegskurs
+                    const exit = parseFloat(parts[4]); // Schlusskurs
+                    const pl = parseFloat(parts[6]); // Netto USD
+                    
+                    if (!isNaN(entry) && !isNaN(exit) && !isNaN(pl)) {
                         newTrades.push({
                             date: formattedDate,
                             time: time,
                             instrument: instrument,
                             direction: direction,
-                            entry: entry,
-                            exit: exit,
+                            entry: entry.toString(),
+                            exit: exit.toString(),
                             pl: pl,
                             result: pl > 0 ? "WIN" : (pl < 0 ? "LOSS" : "BE"),
                             risk: "100",
                             mistake: "PLAN",
-                            notes: "Importiert am " + new Date().toLocaleDateString()
+                            screenshot: "",
+                            notes: "Broker-Import am " + new Date().toLocaleDateString()
                         });
 
                         if(!customInstruments.includes(instrument)) {
@@ -318,18 +319,23 @@
                     }
                 }
             }
-        });
+        }
 
         if(newTrades.length > 0) {
+            console.log('Importiere Trades:', newTrades);
             const { error } = await _supabase.from('trades').insert(newTrades);
-            if(error) alert("Fehler: " + error.message);
-            else {
-                alert(`${newTrades.length} Trades importiert!`);
+            if(error) {
+                console.error('Supabase Error:', error);
+                alert("Fehler beim Import: " + error.message);
+            } else {
+                alert(`✅ ${newTrades.length} Trades erfolgreich importiert!`);
                 document.getElementById('importArea').value = "";
                 fetchTrades();
             }
         } else {
-            alert("Format nicht erkannt. Bitte kopiere die Zeilen direkt aus der Liste.");
+            alert("❌ Keine gültigen Trades gefunden. Bitte überprüfe das Format:\n\n" +
+                  "Erwartet: Symbol [TAB] Richtung [TAB] Datum Zeit [TAB] Entry [TAB] Exit [TAB] Menge [TAB] Netto\n\n" +
+                  "Öffne die Browser-Konsole (F12) für Details.");
         }
     }
 
