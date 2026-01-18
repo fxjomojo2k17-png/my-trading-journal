@@ -96,18 +96,33 @@
             height: 44px;
         }
 
-        /* FIX FÜR INSTRUMENT CONTAINER */
+        /* FIX: INSTRUMENT CONTAINER & BUTTON ALIGNMENT */
         .instrument-container { 
-            display: grid; 
-            grid-template-columns: 1fr 44px; 
-            gap: 4px; 
+            display: flex;
+            flex-direction: row;
+            gap: 5px; 
             width: 100%;
+            align-items: center;
+        }
+
+        .instrument-container select {
+            flex: 1; /* Nimm den verfügbaren Platz ein */
         }
 
         .btn-add-instrument { 
-            background: #764ba2; color: white; width: 44px; height: 44px; 
-            border-radius: 6px; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            background: #764ba2; 
+            color: white; 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer;
+            flex-shrink: 0; /* Verhindert, dass der Button schrumpft */
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .button-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
@@ -242,7 +257,7 @@
 
 <script>
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
+    const SUPABASE_KEY = 'DEIN_ANON_KEY_HIER'; 
     
     const { createClient } = supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
