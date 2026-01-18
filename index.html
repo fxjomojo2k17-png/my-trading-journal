@@ -243,7 +243,7 @@
     <div class="import-section">
         <div class="import-container">
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
-            <p class="import-info">Kopiere deine Trading-Liste (z.B. aus dem Broker-Terminal) einfach hier hinein. <br>Das System erkennt Instrument, Datum, Entry, Exit und Gewinn automatisch.</p>
+            <p class="import-info">Daten einfügen und Button klicken.</p>
             <textarea id="importArea" class="import-textarea" placeholder="XAUUSD  Verkaufen  15 Jan 2026 ..."></textarea>
             <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Trades jetzt importieren</button>
         </div>
@@ -271,70 +271,79 @@
         else { trades = data || []; refreshApp(); }
     }
 
-    // --- SMART IMPORT LOGIC ---
     async function processBulkImport() {
         const raw = document.getElementById('importArea').value.trim();
         if(!raw) return alert("Bitte Daten einfügen!");
 
         const lines = raw.split('\n');
         const newTrades = [];
+        const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
 
         lines.forEach(line => {
+            // Verbesserter Split: Trenne bei mehrfachen Leerzeichen oder Tabs
             const parts = line.split(/\s{2,}/).map(p => p.trim()).filter(p => p !== "");
-            // Erwartet: [Instrument, Richtung, Datum/Zeit, Entry, Exit, Lots, Gewinn, Guthaben]
-            if (parts.length >= 7) {
-                const instrument = parts[0];
-                const directionText = parts[1].toUpperCase();
-                const direction = (directionText.includes("VERKAUFEN") || directionText.includes("SELL")) ? "SHORT" : "LONG";
-                
-                // Datum extrahieren (z.B. 15 Jan 2026)
-                const datePart = parts[2].split(' ');
-                const day = datePart[0];
-                const monthName = datePart[1];
-                const year = datePart[2];
-                const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-                const formattedDate = `${year}-${months[monthName] || '01'}-${day.padStart(2,'0')}`;
-                
-                // Zeit extrahieren
-                const timeStr = datePart[3] ? datePart[3].substring(0,5) : "00:00";
+            
+            // Suche Instrument (z.B. XAUUSD)
+            const instrument = parts[0];
+            
+            // Suche Richtung
+            const dirStr = line.toUpperCase();
+            const direction = (dirStr.includes("VERKAUFEN") || dirStr.includes("SELL")) ? "SHORT" : "LONG";
 
-                const entry = parts[3];
-                const exit = parts[4];
-                const pl = parseFloat(parts[6].replace(/[^0-9.-]/g, ''));
-                const result = pl > 0 ? "WIN" : (pl < 0 ? "LOSS" : "BE");
+            // Suche Datum mit Regex (Tag Monat Jahr Zeit)
+            const dateMatch = line.match(/(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})\s+(\d{2}:\d{2})/);
+            
+            if (dateMatch && parts.length >= 6) {
+                const day = dateMatch[1].padStart(2, '0');
+                const month = months[dateMatch[2]];
+                const year = dateMatch[3];
+                const time = dateMatch[4];
+                const formattedDate = `${year}-${month}-${day}`;
 
-                newTrades.push({
-                    date: formattedDate,
-                    time: timeStr,
-                    instrument: instrument,
-                    direction: direction,
-                    entry: entry,
-                    exit: exit,
-                    pl: pl,
-                    result: result,
-                    risk: "100", // Default Risk
-                    mistake: "PLAN",
-                    notes: "Imported from Broker List"
-                });
+                // Die letzten Werte in der Liste sind meist Entry, Exit, Lots, PL
+                // Da wir PL und Preise brauchen, nehmen wir die Zahlen aus den Parts
+                const numericParts = parts.filter(p => /^-?\d+\.?\d*$/.test(p.replace(',', '.')));
                 
-                // Instrument zur Liste hinzufügen falls neu
-                if(!customInstruments.includes(instrument)) {
-                    customInstruments.push(instrument);
-                    localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+                // Erwartetes Schema basierend auf deiner Liste: 
+                // Entry ist meist Index 2 oder 3 nach dem Text
+                // Wir suchen einfach gezielt nach den Positionen relativ zum Ende
+                const pl = parseFloat(parts[parts.length-2].replace(',', '.'));
+                const exit = parts[parts.length-4];
+                const entry = parts[parts.length-5];
+
+                if (!isNaN(pl)) {
+                    newTrades.push({
+                        date: formattedDate,
+                        time: time,
+                        instrument: instrument,
+                        direction: direction,
+                        entry: entry,
+                        exit: exit,
+                        pl: pl,
+                        result: pl > 0 ? "WIN" : (pl < 0 ? "LOSS" : "BE"),
+                        risk: "100",
+                        mistake: "PLAN",
+                        notes: "Bulk Import"
+                    });
+
+                    if(!customInstruments.includes(instrument)) {
+                        customInstruments.push(instrument);
+                        localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+                    }
                 }
             }
         });
 
         if(newTrades.length > 0) {
             const { error } = await _supabase.from('trades').insert(newTrades);
-            if(error) alert("Fehler beim Import: " + error.message);
+            if(error) alert("Fehler: " + error.message);
             else {
-                alert(`${newTrades.length} Trades erfolgreich importiert!`);
+                alert(`${newTrades.length} Trades importiert!`);
                 document.getElementById('importArea').value = "";
                 fetchTrades();
             }
         } else {
-            alert("Format nicht erkannt. Bitte kopiere die Zeilen direkt aus dem Terminal.");
+            alert("Format nicht erkannt. Stelle sicher, dass Instrument, Datum und Gewinnwerte in der Zeile stehen.");
         }
     }
 
@@ -432,6 +441,7 @@
         plElem.className = 'value ' + (totalPL >= 0 ? 'win' : 'loss');
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
+        
         let curStr = 0; let curType = null; let maxW = 0; let maxL = 0; let tw = 0; let tl = 0;
         const chrono = [...filtered].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         chrono.forEach(t => {
@@ -444,6 +454,7 @@
         const lossSum = Math.abs(filtered.filter(t=>t.result==='LOSS').reduce((sum, t) => sum + Number(t.pl), 0));
         const winSum = filtered.filter(t=>t.result==='WIN').reduce((sum, t) => sum + Number(t.pl), 0);
         document.getElementById('profitFactor').textContent = lossSum > 0 ? (winSum / lossSum).toFixed(2) : 'N/A';
+
         const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map((t) => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
