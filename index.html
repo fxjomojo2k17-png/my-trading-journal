@@ -13,7 +13,7 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: radial-gradient(circle at center, #1a1f26 0%, #0b0e11 100%);
             min-height: 100vh;
-            padding: 10px; /* Reduced for mobile */
+            padding: 10px;
             color: #e0e0e0;
         }
         
@@ -33,7 +33,7 @@
                               url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); 
             background-size: cover;
             background-position: center;
-            padding: 30px 15px; /* Smaller for mobile */
+            padding: 30px 15px;
             text-align: center;
             border-bottom: 3px solid #764ba2;
         }
@@ -61,15 +61,13 @@
 
         .form-section { padding: 15px; border-bottom: 1px solid #2d343c; }
         
-        /* MOBILE OPTIMIZED GRID */
         .form-grid { 
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             align-items: flex-end;
         }
         
-        /* Desktop override */
         @media (min-width: 1024px) {
             .form-grid { grid-template-columns: repeat(11, 1fr); }
             .header h1 { font-size: 2.2em; }
@@ -94,14 +92,22 @@
             border-radius: 6px;
             outline: none;
             width: 100%;
-            font-size: 16px; /* Prevents iOS zoom-in on focus */
-            height: 44px; /* Better for touch */
+            font-size: 16px;
+            height: 44px;
         }
 
-        .instrument-container { display: flex; gap: 4px; align-items: center; }
+        /* FIX FÜR INSTRUMENT CONTAINER */
+        .instrument-container { 
+            display: grid; 
+            grid-template-columns: 1fr 44px; 
+            gap: 4px; 
+            width: 100%;
+        }
+
         .btn-add-instrument { 
             background: #764ba2; color: white; width: 44px; height: 44px; 
-            border-radius: 6px; border: none; cursor: pointer; flex-shrink: 0;
+            border-radius: 6px; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
         }
 
         .button-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
@@ -118,7 +124,7 @@
         
         .filter-bar {
             display: flex;
-            flex-direction: column; /* Stacked on mobile */
+            flex-direction: column;
             gap: 10px;
             margin-bottom: 15px;
             background: #1c2229;
@@ -130,7 +136,7 @@
             .filter-bar { flex-direction: row; }
         }
 
-        table { width: 100%; border-collapse: collapse; min-width: 800px; } /* Ensures scroll on mobile */
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
 
@@ -146,7 +152,6 @@
         .full-width-notes { grid-column: span 2; margin-top: 5px; }
         @media (min-width: 1024px) { .full-width-notes { grid-column: span 11; } }
 
-        /* Tooltip hack for mobile: only on long press or Desktop hover */
         .tooltip-text { display: none; }
     </style>
 </head>
@@ -237,7 +242,7 @@
 
 <script>
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; // <--- INSERT ANON KEY
+    const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     
     const { createClient } = supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
