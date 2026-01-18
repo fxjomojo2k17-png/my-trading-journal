@@ -42,7 +42,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 10px;
             padding: 15px;
             background: #1c2229;
@@ -57,15 +57,15 @@
         }
 
         .stat-card h3 { color: #8892b0; font-size: 0.6em; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card .value { font-size: 1em; font-weight: bold; }
+        .stat-card .value { font-size: 1.1em; font-weight: bold; }
 
-        .form-section { padding: 15px; border-bottom: 1px solid #2d343c; }
+        .form-section { padding: 20px; border-bottom: 1px solid #2d343c; }
         
         .form-grid { 
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            align-items: flex-end;
+            gap: 15px;
+            align-items: end;
         }
         
         @media (min-width: 1024px) {
@@ -88,86 +88,66 @@
             background: #252d37 !important;
             border: 1px solid #3d4651 !important;
             color: white !important;
-            padding: 10px 8px;
+            padding: 10px;
             border-radius: 6px;
             outline: none;
             width: 100%;
-            font-size: 16px;
-            height: 44px;
+            font-size: 14px;
+            height: 42px;
         }
 
-        /* FIX: INSTRUMENT CONTAINER & BUTTON ALIGNMENT */
+        /* FIX FÜR DEN INSTRUMENT BEREICH IM SCREENSHOT */
         .instrument-container { 
             display: flex;
-            flex-direction: row;
-            gap: 5px; 
-            width: 100%;
+            gap: 5px;
+            height: 42px;
             align-items: center;
         }
 
-        .instrument-container select {
-            flex: 1; /* Nimm den verfügbaren Platz ein */
-        }
+        .instrument-container select { flex: 1; }
 
         .btn-add-instrument { 
-            background: #764ba2; 
-            color: white; 
-            width: 44px; 
-            height: 44px; 
-            border-radius: 6px; 
-            border: none; 
-            cursor: pointer;
-            flex-shrink: 0; /* Verhindert, dass der Button schrumpft */
-            font-size: 22px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #764ba2; color: white; width: 42px; height: 42px; 
+            border-radius: 6px; border: none; cursor: pointer;
+            font-size: 20px; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
         }
 
-        .button-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        button { padding: 12px 18px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.85em; flex: 1; min-width: 120px; }
+        .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        button { padding: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.85em; flex: 1; }
         
         .btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }
         .btn-secondary { background: #3d4651; color: white; }
         .btn-export { background: transparent; border: 1px solid #00f2ff; color: #00f2ff; }
 
-        .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; padding: 15px; }
-        .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 280px; }
+        .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+        .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 300px; }
 
-        .trades-table { padding: 15px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .trades-table { padding: 20px; overflow-x: auto; }
         
-        .filter-bar {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-            background: #1c2229;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        @media (min-width: 768px) {
-            .filter-bar { flex-direction: row; }
-        }
-
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
 
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 20px; }
-        .page-info { font-size: 0.8em; color: #8892b0; font-weight: bold; }
+        /* TOOLTIP STYLES */
+        .tooltip-trigger { position: relative; cursor: help; border-bottom: 1px dotted #8892b0; padding: 2px 0; }
+        .tooltip-text {
+            visibility: hidden; width: 220px; background-color: #2d343c; color: #fff;
+            text-align: left; border-radius: 6px; padding: 10px; position: absolute;
+            z-index: 100; bottom: 130%; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            font-size: 0.8em; pointer-events: none; border: 1px solid #764ba2;
+        }
+        .tooltip-trigger:hover .tooltip-text { visibility: visible; opacity: 1; }
 
         .win { color: #00ffaa !important; }
         .loss { color: #ff4a68 !important; }
-        .btn-sm { padding: 8px 10px; font-size: 0.75em; border-radius: 4px; border: 1px solid transparent; cursor: pointer; }
+        .btn-sm { padding: 6px 10px; font-size: 0.75em; border-radius: 4px; border: 1px solid transparent; cursor: pointer; margin-right: 5px; }
         .edit-btn { background: rgba(0, 242, 255, 0.1); border-color: #00f2ff; color: #00f2ff; }
         .del-btn { background: rgba(255, 74, 104, 0.1); border-color: #ff4a68; color: #ff4a68; }
         
         .full-width-notes { grid-column: span 2; margin-top: 5px; }
         @media (min-width: 1024px) { .full-width-notes { grid-column: span 11; } }
-
-        .tooltip-text { display: none; }
     </style>
 </head>
 <body>
@@ -175,7 +155,7 @@
 <div class="container">
     <div class="header"><h1>Asian Breakout Journal</h1></div>
 
-    <div class="stats-grid" id="statsGrid">
+    <div class="stats-grid">
         <div class="stat-card"><h3>Total Trades</h3><div class="value" id="totalTrades">0</div></div>
         <div class="stat-card"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
         <div class="stat-card"><h3>Total P/L</h3><div class="value" id="totalPL">$0.00</div></div>
@@ -223,7 +203,7 @@
             <div class="button-group">
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
-                <button type="button" class="btn-export" onclick="exportToCSV()">Export</button>
+                <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
             </div>
         </form>
     </div>
@@ -235,30 +215,17 @@
     </div>
 
     <div class="trades-table">
-        <div class="filter-bar">
-            <input type="text" id="searchNote" placeholder="Search notes..." oninput="currentPage=1; renderTrades()">
-            <select id="filterInstrument" onchange="currentPage=1; renderTrades()">
-                <option value="ALL">All Instruments</option>
-            </select>
-        </div>
-
         <table>
             <thead><tr><th>Date</th><th>Inst.</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>Res.</th><th>IMG</th><th>Action</th></tr></thead>
             <tbody id="tradesBody"></tbody>
         </table>
-        
-        <div class="pagination">
-            <button class="btn-secondary" id="prevPage" onclick="changePage(-1)">←</button>
-            <span class="page-info" id="pageDisplay">Page 1</span>
-            <button class="btn-secondary" id="nextPage" onclick="changePage(1)">→</button>
-        </div>
     </div>
 </div>
 
 <script>
+    // --- SUPABASE SETUP ---
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
-    
     const { createClient } = supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -266,24 +233,19 @@
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let lastInstrument = localStorage.getItem('lastInstrument') || customInstruments[0];
     let equityChart, distributionChart, weekdayChart;
-    let currentPage = 1;
-    const tradesPerPage = 20;
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
     async function fetchTrades() {
         const { data, error } = await _supabase.from('trades').select('*');
-        if (error) console.error('Supabase Error:', error);
+        if (error) console.error('Error:', error);
         else { trades = data || []; refreshApp(); }
     }
 
     function populateInstruments() {
         const select = document.getElementById('instrument');
-        const filterSelect = document.getElementById('filterInstrument');
-        const optionsHTML = customInstruments.map(inst => `<option value="${inst}">${inst}</option>`).join('');
-        select.innerHTML = optionsHTML;
+        select.innerHTML = customInstruments.map(inst => `<option value="${inst}">${inst}</option>`).join('');
         select.value = lastInstrument;
-        filterSelect.innerHTML = `<option value="ALL">All Instruments</option>` + optionsHTML;
     }
 
     function addNewInstrument() {
@@ -306,35 +268,55 @@
         resetForm();
     }
 
+    function renderTrades() {
+        const sorted = [...trades].sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        document.getElementById('tradesBody').innerHTML = sorted.map((t) => {
+            const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
+            return `
+            <tr>
+                <td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td>
+                <td>${t.entry}/${t.exit}</td>
+                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+                <td>${t.mistake}</td>
+                <td>
+                    <span class="tooltip-trigger ${t.result === 'WIN' ? 'win' : (t.result === 'LOSS' ? 'loss' : '')}">
+                        ${t.result}
+                        <span class="tooltip-text"><b>Notes:</b><br>${t.notes || 'No notes'}<br><br><b>Risk:</b> $${t.risk}</span>
+                    </span>
+                </td>
+                <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
+                <td>
+                    <button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button>
+                    <button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // --- Stats, Charts & Logik (Exakt wie zuvor) ---
     function updateStats() {
         const total = trades.length;
         const wins = trades.filter(t => t.result === 'WIN');
         const totalPL = trades.reduce((sum, t) => sum + Number(t.pl), 0);
-        const totalR = trades.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-
         document.getElementById('totalTrades').textContent = total;
         document.getElementById('winRate').textContent = total > 0 ? ((wins.length / total) * 100).toFixed(1) + '%' : '0%';
         const plElem = document.getElementById('totalPL');
         plElem.textContent = '$' + totalPL.toFixed(2);
         plElem.className = 'value ' + (totalPL >= 0 ? 'win' : 'loss');
+        const totalR = trades.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
-
-        let currentStreakCount = 0; let currentStreakType = null;
-        let maxWinStreak = 0; let maxLossStreak = 0;
-        let tempWin = 0; let tempLoss = 0;
-
+        
+        // Streak Logic
+        let curStr = 0; let curType = null; let maxW = 0; let maxL = 0; let tw = 0; let tl = 0;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         chrono.forEach(t => {
-            if (t.result === 'WIN') { tempWin++; tempLoss = 0; if (tempWin > maxWinStreak) maxWinStreak = tempWin; currentStreakCount = tempWin; currentStreakType = 'WIN'; }
-            else if (t.result === 'LOSS') { tempLoss++; tempWin = 0; if (tempLoss > maxLossStreak) maxLossStreak = tempLoss; currentStreakCount = tempLoss; currentStreakType = 'LOSS'; }
-            else { tempWin = 0; tempLoss = 0; }
+            if (t.result === 'WIN') { tw++; tl = 0; if (tw > maxW) maxW = tw; curStr = tw; curType = 'WIN'; }
+            else if (t.result === 'LOSS') { tl++; tw = 0; if (tl > maxL) maxL = tl; curStr = tl; curType = 'LOSS'; }
+            else { tw = 0; tl = 0; }
         });
-
-        const streakDisplay = document.getElementById('currentStreak');
-        streakDisplay.textContent = currentStreakCount > 0 ? `${currentStreakCount} ${currentStreakType === 'WIN' ? 'Wins' : 'Losses'}` : '-';
-        streakDisplay.className = 'value ' + (currentStreakType === 'WIN' ? 'win' : (currentStreakType === 'LOSS' ? 'loss' : ''));
-        document.getElementById('maxStreak').textContent = `W:${maxWinStreak}/L:${maxLossStreak}`;
-        
+        document.getElementById('currentStreak').textContent = curStr > 0 ? `${curStr} ${curType}` : '-';
+        document.getElementById('maxStreak').textContent = `W:${maxW}/L:${maxL}`;
         const lossSum = Math.abs(trades.filter(t=>t.result==='LOSS').reduce((sum, t) => sum + Number(t.pl), 0));
         const winSum = trades.filter(t=>t.result==='WIN').reduce((sum, t) => sum + Number(t.pl), 0);
         document.getElementById('profitFactor').textContent = lossSum > 0 ? (winSum / lossSum).toFixed(2) : 'N/A';
@@ -359,51 +341,21 @@
             data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
-        const dayData = [0,0,0,0,0,0,0];
-        trades.forEach(t => { dayData[new Date(t.date).getDay()] += Number(t.pl); });
+        const dD = [0,0,0,0,0,0,0];
+        trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(ctxW, {
             type: 'bar',
-            data: { labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], datasets: [{ data: dayData, backgroundColor: dayData.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] },
+            data: { labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
     }
-
-    function renderTrades() {
-        const searchTerm = document.getElementById('searchNote').value.toLowerCase();
-        const instFilter = document.getElementById('filterInstrument').value;
-        let filtered = trades.filter(t => (t.notes || "").toLowerCase().includes(searchTerm) && (instFilter === "ALL" || t.instrument === instFilter));
-        filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
-        const totalPages = Math.ceil(filtered.length / tradesPerPage) || 1;
-        const pageTrades = filtered.slice((currentPage - 1) * tradesPerPage, currentPage * tradesPerPage);
-        
-        document.getElementById('tradesBody').innerHTML = pageTrades.map((t) => {
-            const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            return `
-            <tr>
-                <td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td>
-                <td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td>${t.mistake}</td><td>${t.result}</td>
-                <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
-                <td>
-                    <button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button>
-                    <button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button>
-                </td>
-            </tr>`;
-        }).join('');
-        document.getElementById('pageDisplay').textContent = `Page ${currentPage} of ${totalPages}`;
-    }
-
-    function changePage(dir) { currentPage += dir; renderTrades(); }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const editId = document.getElementById('editId').value;
         let plVal = parseFloat(document.getElementById('pl').value);
         if (document.getElementById('result').value === 'LOSS' && plVal > 0) plVal *= -1;
-        
         const data = {
             date: document.getElementById('date').value, time: document.getElementById('time').value,
             instrument: document.getElementById('instrument').value, direction: document.getElementById('direction').value,
@@ -412,7 +364,6 @@
             risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value,
             screenshot: document.getElementById('screenshot').value, notes: document.getElementById('notes').value
         };
-
         if (editId) await _supabase.from('trades').update(data).eq('id', editId);
         else await _supabase.from('trades').insert([data]);
         fetchTrades();
@@ -433,12 +384,11 @@
         document.getElementById('screenshot').value = t.screenshot;
         document.getElementById('notes').value = t.notes;
         document.getElementById('editId').value = t.id;
-        document.getElementById('submitBtn').textContent = "Update";
+        document.getElementById('submitBtn').textContent = "Update Trade";
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
-    async function clearAllTrades() { if(confirm('Clear ALL?')) { await _supabase.from('trades').delete().neq('id', '0'); fetchTrades(); } }
 
     function resetForm() { 
         document.getElementById('tradeForm').reset(); 
@@ -457,7 +407,7 @@
     }
 
     resetForm();
-    fetchTrades(); 
+    fetchTrades();
 </script>
 </body>
 </html>
