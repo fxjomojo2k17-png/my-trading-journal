@@ -76,40 +76,20 @@
 
         .form-group { display: flex; flex-direction: column; width: 100%; }
 
-        label { 
-            font-size: 0.65em; 
-            color: #8892b0; 
-            margin-bottom: 6px; 
-            text-transform: uppercase; 
-            font-weight: bold;
-        }
+        label { font-size: 0.65em; color: #8892b0; margin-bottom: 6px; text-transform: uppercase; font-weight: bold; }
 
         input, select, textarea {
-            background: #252d37 !important;
-            border: 1px solid #3d4651 !important;
-            color: white !important;
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-            width: 100%;
-            font-size: 14px;
-            height: 42px;
+            background: #252d37 !important; border: 1px solid #3d4651 !important;
+            color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
-        .instrument-container { 
-            display: flex;
-            gap: 5px;
-            height: 42px;
-            align-items: center;
-        }
-
+        .instrument-container { display: flex; gap: 5px; height: 42px; align-items: center; }
         .instrument-container select { flex: 1; }
 
         .btn-add-instrument { 
             background: #764ba2; color: white; width: 42px; height: 42px; 
             border-radius: 6px; border: none; cursor: pointer;
-            font-size: 20px; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
@@ -127,7 +107,9 @@
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #1c2229; padding: 8px; border-radius: 8px; }
         .calendar-day-label { text-align: center; font-size: 0.55em; color: #5c6680; padding-bottom: 4px; }
-        .calendar-day { background: #252d37; aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid #2d343c; }
+        .calendar-day { background: #252d37; aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid #2d343c; cursor: pointer; transition: 0.2s; }
+        .calendar-day:hover { background: #2d343c; }
+        .calendar-day.selected { border-color: #764ba2; background: rgba(118, 75, 162, 0.2); }
         .calendar-day.today { border-color: #00f2ff; }
         .calendar-day .day-num { position: absolute; top: 2px; left: 3px; font-size: 0.6em; color: #5c6680; }
         .calendar-day .day-pl { font-weight: bold; font-size: 0.75em; margin-top: 4px; }
@@ -135,7 +117,6 @@
         .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
         .trades-table { padding: 20px; overflow-x: auto; }
-        
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
@@ -255,6 +236,7 @@
     let equityChart, distributionChart, weekdayChart;
     
     let currentViewDate = new Date();
+    let selectedDateFilter = null; // Für Filter auf einen einzelnen Tag
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
@@ -285,9 +267,9 @@
 
     function refreshApp() {
         updateStats();
-        renderTrades();
         updateCharts();
         renderCalendar();
+        renderTrades(); // Wird durch renderCalendar gesteuert
         resetForm();
     }
 
@@ -318,22 +300,48 @@
             else if (dayPL < 0) statusClass = 'day-loss';
 
             const isToday = today.toDateString() === new Date(year, month, d).toDateString();
+            const isSelected = selectedDateFilter === dateStr;
             
-            grid.innerHTML += `
-                <div class="calendar-day ${statusClass} ${isToday ? 'today' : ''}">
-                    <span class="day-num">${d}</span>
-                    <span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>
-                </div>`;
+            const dayEl = document.createElement('div');
+            dayEl.className = `calendar-day ${statusClass} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
+            dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>`;
+            dayEl.onclick = () => filterByDay(dateStr);
+            grid.appendChild(dayEl);
         }
+    }
+
+    function filterByDay(dateStr) {
+        if (selectedDateFilter === dateStr) {
+            selectedDateFilter = null; // Toggle aus
+        } else {
+            selectedDateFilter = dateStr;
+        }
+        renderCalendar();
+        renderTrades();
     }
 
     function changeMonth(val) {
         currentViewDate.setMonth(currentViewDate.getMonth() + val);
+        selectedDateFilter = null; // Filter bei Monatswechsel löschen
         renderCalendar();
+        renderTrades();
     }
 
     function renderTrades() {
-        const sorted = [...trades].sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        const year = currentViewDate.getFullYear();
+        const month = currentViewDate.getMonth();
+        
+        // Filter: Entweder ein spezieller Tag ODER der aktuelle Kalendermonat
+        let filtered = trades.filter(t => {
+            const tDate = new Date(t.date);
+            if (selectedDateFilter) {
+                return t.date === selectedDateFilter;
+            }
+            return tDate.getFullYear() === year && tDate.getMonth() === month;
+        });
+
+        const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        
         document.getElementById('tradesBody').innerHTML = sorted.map((t) => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `
