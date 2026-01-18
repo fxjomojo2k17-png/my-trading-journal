@@ -96,7 +96,6 @@
             height: 42px;
         }
 
-        /* FIX FÜR DEN INSTRUMENT BEREICH IM SCREENSHOT */
         .instrument-container { 
             display: flex;
             gap: 5px;
@@ -121,7 +120,7 @@
         .btn-export { background: transparent; border: 1px solid #00f2ff; color: #00f2ff; }
 
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 300px; }
+        .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
 
         .trades-table { padding: 20px; overflow-x: auto; }
         
@@ -223,7 +222,6 @@
 </div>
 
 <script>
-    // --- SUPABASE SETUP ---
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     const { createClient } = supabase;
@@ -294,7 +292,6 @@
         }).join('');
     }
 
-    // --- Stats, Charts & Logik (Exakt wie zuvor) ---
     function updateStats() {
         const total = trades.length;
         const wins = trades.filter(t => t.result === 'WIN');
@@ -307,7 +304,6 @@
         const totalR = trades.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
         
-        // Streak Logic
         let curStr = 0; let curType = null; let maxW = 0; let maxL = 0; let tw = 0; let tl = 0;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         chrono.forEach(t => {
@@ -323,31 +319,47 @@
     }
 
     function updateCharts() {
+        const chartOptions = (title) => ({
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: title, color: '#8892b0', font: { size: 14 } }
+            },
+            scales: {
+                y: { grid: { color: '#2d343c' }, ticks: { color: '#8892b0' } },
+                x: { grid: { display: false }, ticks: { color: '#8892b0' } }
+            }
+        });
+
         const ctxE = document.getElementById('equityChart').getContext('2d');
         const ctxD = document.getElementById('distributionChart').getContext('2d');
         const ctxW = document.getElementById('weekdayChart').getContext('2d');
+        
         let sum = 0;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         const equityData = chrono.map(t => { sum += Number(t.pl); return sum; });
+        
         if (equityChart) equityChart.destroy();
         equityChart = new Chart(ctxE, {
             type: 'line',
             data: { labels: chrono.map((_, i) => i + 1), datasets: [{ data: equityData, borderColor: '#00f2ff', tension: 0.3, fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', pointRadius: 0 }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: chartOptions('EQUITY CURVE ($)')
         });
+
         if (distributionChart) distributionChart.destroy();
         distributionChart = new Chart(ctxD, {
             type: 'bar',
             data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: chartOptions('TRADE TAGS')
         });
+
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(ctxW, {
             type: 'bar',
             data: { labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: chartOptions('PROFIT BY WEEKDAY')
         });
     }
 
