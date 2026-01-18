@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trading Journal - Asian Breakout Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -173,7 +174,7 @@
 
     <div class="form-section">
         <form id="tradeForm">
-            <input type="hidden" id="editIndex" value="-1">
+            <input type="hidden" id="editId" value="">
             <div class="form-grid">
                 <div class="form-group"><label>Date</label><input type="date" id="date" required></div>
                 <div class="form-group"><label>Time</label><input type="time" id="time" required></div>
@@ -248,7 +249,15 @@
 </div>
 
 <script>
-    let trades = JSON.parse(localStorage.getItem('asianBreakoutTrades')) || [];
+    // --- SUPABASE CONFIG ---
+    const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
+    
+    // Correct way to initialize Supabase in Browser
+    const { createClient } = supabase;
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let trades = [];
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let lastInstrument = localStorage.getItem('lastInstrument') || customInstruments[0];
     let equityChart, distributionChart, weekdayChart;
@@ -257,6 +266,18 @@
     const tradesPerPage = 20;
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
+
+    async function fetchTrades() {
+        const { data, error } = await _supabase
+            .from('trades')
+            .select('*');
+        if (error) {
+            console.error('Supabase Error:', error);
+        } else {
+            trades = data || [];
+            refreshApp();
+        }
+    }
 
     function populateInstruments() {
         const select = document.getElementById('instrument');
@@ -401,8 +422,8 @@
                 </td>
                 <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
                 <td class="action-btns">
-                    <button class="btn-sm edit-btn" onclick="editTrade(${originalIndex})">Edit</button>
-                    <button class="btn-sm del-btn" onclick="deleteTrade(${originalIndex})">Del</button>
+                    <button class="btn-sm edit-btn" onclick="prepareEdit(${originalIndex})">Edit</button>
+                    <button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button>
                 </td>
             </tr>`;
         }).join('');
@@ -414,13 +435,14 @@
 
     function changePage(direction) { currentPage += direction; renderTrades(); }
 
-    document.getElementById('tradeForm').addEventListener('submit', function(e) {
+    document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const editIndex = parseInt(document.getElementById('editIndex').value);
+        const editId = document.getElementById('editId').value;
         let plVal = parseFloat(document.getElementById('pl').value);
         const res = document.getElementById('result').value;
         if (res === 'LOSS' && plVal > 0) plVal *= -1;
-        const trade = {
+        
+        const tradeData = {
             date: document.getElementById('date').value,
             time: document.getElementById('time').value,
             instrument: document.getElementById('instrument').value,
@@ -428,19 +450,25 @@
             entry: document.getElementById('entry').value,
             exit: document.getElementById('exit').value,
             result: res,
-            pl: plVal.toString(),
+            pl: plVal,
             risk: document.getElementById('risk').value || "100",
             mistake: document.getElementById('mistake').value,
             screenshot: document.getElementById('screenshot').value,
             notes: document.getElementById('notes').value
         };
-        if (editIndex > -1) trades[editIndex] = trade;
-        else { trades.push(trade); currentPage = 1; }
-        localStorage.setItem('asianBreakoutTrades', JSON.stringify(trades));
-        refreshApp();
+
+        if (editId) {
+            const { error } = await _supabase.from('trades').update(tradeData).eq('id', editId);
+            if (error) alert('Error updating!');
+        } else {
+            const { error } = await _supabase.from('trades').insert([tradeData]);
+            if (error) alert('Error saving!');
+        }
+        
+        fetchTrades();
     });
 
-    function editTrade(i) {
+    function prepareEdit(i) {
         const t = trades[i];
         document.getElementById('date').value = t.date;
         document.getElementById('time').value = t.time;
@@ -454,17 +482,30 @@
         document.getElementById('mistake').value = t.mistake || "PLAN";
         document.getElementById('screenshot').value = t.screenshot || "";
         document.getElementById('notes').value = t.notes || "";
-        document.getElementById('editIndex').value = i;
+        document.getElementById('editId').value = t.id;
         document.getElementById('submitBtn').textContent = "Update Trade";
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function deleteTrade(i) { if(confirm('Delete trade?')) { trades.splice(i, 1); localStorage.setItem('asianBreakoutTrades', JSON.stringify(trades)); refreshApp(); } }
-    function clearAllTrades() { if(confirm('Delete ALL trades?')) { trades = []; localStorage.setItem('asianBreakoutTrades', JSON.stringify(trades)); refreshApp(); } }
+    async function deleteTradeDB(id) {
+        if(confirm('Delete trade?')) {
+            const { error } = await _supabase.from('trades').delete().eq('id', id);
+            if (error) alert('Error deleting!');
+            else fetchTrades();
+        }
+    }
+
+    async function clearAllTrades() {
+        if(confirm('Delete ALL trades from database?')) {
+            const { error } = await _supabase.from('trades').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (error) alert('Error clearing!');
+            else fetchTrades();
+        }
+    }
 
     function resetForm() { 
         document.getElementById('tradeForm').reset(); 
-        document.getElementById('editIndex').value = "-1";
+        document.getElementById('editId').value = "";
         document.getElementById('submitBtn').textContent = "Save Trade";
         const now = new Date();
         document.getElementById('date').valueAsDate = now;
@@ -481,7 +522,7 @@
     }
 
     resetForm();
-    refreshApp();
+    fetchTrades(); 
 </script>
 </body>
 </html>
