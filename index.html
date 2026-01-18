@@ -122,17 +122,17 @@
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
 
-        /* CALENDAR STYLES */
-        .calendar-section { padding: 0 20px 20px 20px; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: #8892b0; font-size: 0.8em; text-transform: uppercase; font-weight: bold; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #1c2229; padding: 10px; border-radius: 12px; }
-        .calendar-day-label { text-align: center; font-size: 0.6em; color: #8892b0; padding-bottom: 5px; }
-        .calendar-day { background: #252d37; aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.75em; border: 1px solid #2d343c; }
-        .calendar-day.today { border-color: #00f2ff; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
-        .calendar-day .day-num { position: absolute; top: 4px; left: 4px; font-size: 0.7em; color: #5c6680; }
-        .calendar-day .day-pl { font-weight: bold; font-size: 0.85em; }
-        .day-win { background: rgba(0, 255, 170, 0.1) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.3); }
-        .day-loss { background: rgba(255, 74, 104, 0.1) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.3); }
+        /* MINI CALENDAR STYLES */
+        .calendar-section { padding: 0 20px 20px 20px; max-width: 450px; margin: 0 auto; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #1c2229; padding: 8px; border-radius: 8px; }
+        .calendar-day-label { text-align: center; font-size: 0.55em; color: #5c6680; padding-bottom: 4px; }
+        .calendar-day { background: #252d37; aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid #2d343c; }
+        .calendar-day.today { border-color: #00f2ff; }
+        .calendar-day .day-num { position: absolute; top: 2px; left: 3px; font-size: 0.6em; color: #5c6680; }
+        .calendar-day .day-pl { font-weight: bold; font-size: 0.75em; margin-top: 4px; }
+        .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
+        .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
         .trades-table { padding: 20px; overflow-x: auto; }
         
@@ -227,9 +227,9 @@
     <div class="calendar-section">
         <div class="calendar-header">
             <span id="calendarMonth">Month</span>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-sm edit-btn" onclick="changeMonth(-1)">←</button>
-                <button class="btn-sm edit-btn" onclick="changeMonth(1)">→</button>
+            <div style="display:flex; gap:5px;">
+                <button class="btn-sm edit-btn" style="padding:2px 6px" onclick="changeMonth(-1)">←</button>
+                <button class="btn-sm edit-btn" style="padding:2px 6px" onclick="changeMonth(1)">→</button>
             </div>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
@@ -302,7 +302,7 @@
 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const firstDayIndex = new Date(year, month, 1).getDay();
-        const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+        const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
         dayLabels.forEach(label => grid.innerHTML += `<div class="calendar-day-label">${label}</div>`);
         for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
@@ -322,7 +322,7 @@
             grid.innerHTML += `
                 <div class="calendar-day ${statusClass} ${isToday ? 'today' : ''}">
                     <span class="day-num">${d}</span>
-                    <span class="day-pl">${dayPL !== 0 ? '$' + dayPL.toFixed(0) : ''}</span>
+                    <span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>
                 </div>`;
         }
     }
