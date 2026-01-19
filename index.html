@@ -191,6 +191,7 @@
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
                 <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
+				<button onclick="deleteAllTrades()" class="btn-danger" style="background: #ef5350;">Delete All Trades</button>
             </div>
         </form>
     </div>
@@ -552,6 +553,23 @@
         let csv = 'Date,Instrument,Direction,Entry,Exit,PL,Risk,Tag,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.direction},${t.entry},${t.exit},${t.pl},${t.risk},${t.mistake},${t.result}`).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
+    }
+	
+	// Füge diese Funktion zu deinen anderen Funktionen hinzu
+    async function deleteAllTrades() {
+        if (confirm('Bist du sicher, dass du ALLE Trades unwiderruflich löschen möchtest?')) {
+            const { error } = await _supabase
+                .from('trades')
+                .delete()
+                .neq('id', 0); // Löscht alle Zeilen, da jede ID ungleich 0 ist
+
+            if (error) {
+                alert('Fehler beim Löschen: ' + error.message);
+            } else {
+                alert('Alle Trades wurden gelöscht.');
+                fetchTrades(); // Aktualisiert die Anzeige
+            }
+        }
     }
 
     resetForm();
