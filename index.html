@@ -266,6 +266,7 @@
     window.addEventListener('load', () => {
         const savedBalance = localStorage.getItem('initialBalance');
         if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
+        fetchTrades();
     });
 
     function populateInstruments() {
@@ -294,7 +295,6 @@
     function refreshApp() {
         renderCalendar();
         updateStatsAndTable();
-        resetForm();
     }
 
     function renderCalendar() {
@@ -348,12 +348,11 @@
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            const notesText = t.notes || '';
             return `<tr>
                 <td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
                 <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td>${rMult}R</td><td>${t.mistake}</td>
-                <td title="${notesText.replace(/"/g, '&quot;')}" style="cursor:help">${t.result}</td>
+                <td title="${(t.notes || '').replace(/"/g, '&quot;')}" style="cursor:help">${t.result}</td>
                 <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
                 <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
@@ -372,15 +371,15 @@
         const equityData = [initialBalance, ...chrono.map(t => { runningEquity += Number(t.pl); return runningEquity; })];
 
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' } } } });
+        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' } } } });
 
         if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false } });
+        distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' } } } });
 
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
-        weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false } });
+        weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } });
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
@@ -397,6 +396,7 @@
         if (editId) await _supabase.from('trades').update(data).eq('id', editId);
         else await _supabase.from('trades').insert([data]);
         fetchTrades();
+        resetForm();
     });
 
     function prepareEdit(id) {
@@ -442,7 +442,7 @@
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
     }
 
-    fetchTrades();
+    resetForm();
 </script>
 </body>
 </html>
