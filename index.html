@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trading Journal</title>
+    <title>Trading Journal - Asian Breakout Pro</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
 
@@ -229,9 +229,9 @@
     <div class="import-section">
         <div class="import-container">
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
-            <p class="import-info"></p>
-            <textarea id="importArea" class="import-textarea" placeholder="XAUUSD	Verkaufen	15 Jan 2026..."></textarea>
-            <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades</button>
+            <p class="import-info">Copy broker list and paste here (recognizes tabs and spaces).</p>
+            <textarea id="importArea" class="import-textarea" placeholder="XAUUSD	Sell	15 Jan 2026..."></textarea>
+            <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades Now</button>
         </div>
     </div>
 </div>
@@ -257,7 +257,7 @@
         else { trades = data || []; refreshApp(); }
     }
 
-  async function processBulkImport() {
+    async function processBulkImport() {
         const raw = document.getElementById('importArea').value.trim();
         if(!raw) return alert("Please paste data!");
 
@@ -425,7 +425,11 @@
         });
         const total = filtered.length;
         const wins = filtered.filter(t => t.result === 'WIN');
+        const losses = filtered.filter(t => t.result === 'LOSS');
         const totalPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+        const totalWins = wins.reduce((sum, t) => sum + Number(t.pl), 0);
+        const totalLosses = Math.abs(losses.reduce((sum, t) => sum + Number(t.pl), 0));
+        
         document.getElementById('totalTrades').textContent = total;
         document.getElementById('winRate').textContent = total > 0 ? ((wins.length / total) * 100).toFixed(1) + '%' : '0%';
         const plElem = document.getElementById('totalPL');
@@ -434,10 +438,53 @@
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
         
+        // Calculate streaks
+        const chronoFiltered = [...filtered].sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+        let currentStreak = 0;
+        let maxWinStreak = 0;
+        let maxLossStreak = 0;
+        let tempWinStreak = 0;
+        let tempLossStreak = 0;
+        
+        chronoFiltered.forEach(t => {
+            if (t.result === 'WIN') {
+                tempWinStreak++;
+                tempLossStreak = 0;
+                currentStreak = tempWinStreak;
+                if (tempWinStreak > maxWinStreak) maxWinStreak = tempWinStreak;
+            } else if (t.result === 'LOSS') {
+                tempLossStreak++;
+                tempWinStreak = 0;
+                currentStreak = -tempLossStreak;
+                if (tempLossStreak > maxLossStreak) maxLossStreak = tempLossStreak;
+            } else {
+                tempWinStreak = 0;
+                tempLossStreak = 0;
+                currentStreak = 0;
+            }
+        });
+        
+        const streakElem = document.getElementById('currentStreak');
+        if (currentStreak > 0) {
+            streakElem.textContent = `${currentStreak}W`;
+            streakElem.className = 'value win';
+        } else if (currentStreak < 0) {
+            streakElem.textContent = `${Math.abs(currentStreak)}L`;
+            streakElem.className = 'value loss';
+        } else {
+            streakElem.textContent = '-';
+            streakElem.className = 'value';
+        }
+        
+        document.getElementById('maxStreak').textContent = maxWinStreak > 0 ? `${maxWinStreak}W` : '-';
+        document.getElementById('profitFactor').textContent = totalLosses > 0 ? (totalWins / totalLosses).toFixed(2) : totalWins > 0 ? '∞' : '0.00';
+        
         const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map((t) => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            return `<tr><td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td><td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td><td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td><td>${t.mistake}</td><td>${t.result}</td><td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td><td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td></tr>`;
+            const notesText = t.notes || '';
+            const notesTooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
+            return `<tr><td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td><td class="${Number(t.pl) >= 0 ? 'win' :'loss'}">$${Number(t.pl).toFixed(2)}</td><td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td><td>${t.mistake}</td><td ${notesTooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td><td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td><td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td></tr>`;
         }).join('');
     }
 
@@ -489,7 +536,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
+    async function deleteTradeDB(id) { if(confirm('Delete this trade?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
 
     function resetForm() { 
         document.getElementById('tradeForm').reset(); 
