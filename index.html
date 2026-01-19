@@ -72,7 +72,9 @@
         }
         
         @media (min-width: 1024px) {
-            .form-grid { grid-template-columns: repeat(11, 1fr); }
+            .form-grid { 
+                grid-template-columns: 1.5fr 1fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr 1.2fr; 
+            }
             .header h1 { font-size: 2.2em; }
             body { padding: 20px; }
         }
@@ -85,8 +87,6 @@
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
-        textarea#notes { height: 62px; width:550px; resize: none; }
-
         .instrument-container { display: flex; gap: 5px; height: 42px; align-items: center; }
         .instrument-container select { flex: 1; }
 
@@ -97,11 +97,11 @@
         }
 
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
+        button { padding: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.85em; flex: 1; }
         
         .btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }
         .btn-secondary { background: #3d4651; color: white; }
-        .btn-export { background: transparent !important; border: 1px solid #00f2ff !important; color: #00f2ff !important; }
+        .btn-export { background: transparent; border: 1px solid #00f2ff; color: #00f2ff; }
 
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
@@ -119,10 +119,9 @@
         .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
         .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
-        .history-controls { padding: 20px 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .history-controls label { margin-bottom: 0; font-size: 0.75em; }
-        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; background: #252d37; color: white; border: 1px solid #3d4651; border-radius: 4px; }
-        .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
+        .history-controls { padding: 20px 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+        .history-controls label { margin-bottom: 0; }
+        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; }
 
         .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
@@ -139,10 +138,16 @@
         .import-container { max-width: 800px; margin: 0 auto; }
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
         .import-info { font-size: 0.75em; color: #8892b0; margin-bottom: 10px; line-height: 1.4; }
+        
+        /* Fix für Date Input Breite */
+        #date { max-width: 100%; }
+        .full-width-notes { grid-column: span 1; }
+        @media (min-width: 1024px) {
+            .full-width-notes { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header"><h1>Journal</h1></div>
 
@@ -150,7 +155,7 @@
         <div class="stat-card" style="border-left-color: #764ba2;">
             <h3>Initial Balance</h3>
             <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
-                   style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
+                   style="background: transparent !important; border: none !important; color: #00ffaa !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
         </div>
         <div class="stat-card"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
         <div class="stat-card"><h3>Trades (View)</h3><div class="value" id="totalTrades">0</div></div>
@@ -188,16 +193,16 @@
                         <option value="LATE_ENTRY">🐢 Late Entry</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link..."></div>
                 <div class="form-group full-width-notes">
                     <label>Notes</label>
-                    <textarea id="notes" rows="1" placeholder="Trade details..."></textarea>
+                    <textarea id="notes" rows="1" placeholder="Trade details..." style="background: #252d37 !important; border: 1px solid #3d4651 !important; color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px; resize: none;"></textarea>
                 </div>
             </div>
             <div class="button-group">
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
                 <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
+                <button type="button" onclick="deleteAllTrades()" class="btn-danger" style="background: #ef5350; color: white;">Delete All Trades</button>
             </div>
         </form>
     </div>
@@ -224,7 +229,6 @@
         <select id="historyInstrumentFilter" onchange="updateStatsAndTable()">
             <option value="ALL">All Instruments</option>
         </select>
-        <button type="button" onclick="deleteAllTrades()" class="btn-delete-all">Delete All Trades</button>
     </div>
 
     <div class="trades-table">
@@ -237,14 +241,15 @@
     <div class="import-section">
         <div class="import-container">
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
-            <p class="import-info">Copy broker list and paste here.</p>
-            <textarea id="importArea" class="import-textarea" placeholder="XAUUSD Sell 15 Jan..."></textarea>
+            <p class="import-info">Copy broker list and paste here (recognizes tabs and spaces).</p>
+            <textarea id="importArea" class="import-textarea" placeholder="XAUUSD	Sell	15 Jan 2026..."></textarea>
             <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades Now</button>
         </div>
     </div>
 </div>
 
 <script>
+    /* ... Dein gesamter JavaScript Code bleibt hier 1:1 erhalten ... */
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     const { createClient } = supabase;
@@ -267,8 +272,79 @@
 
     window.addEventListener('load', () => {
         const savedBalance = localStorage.getItem('initialBalance');
-        if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
+        if (savedBalance) {
+            document.getElementById('initialBalanceInput').value = savedBalance;
+        }
     });
+
+    async function processBulkImport() {
+        const raw = document.getElementById('importArea').value.trim();
+        if(!raw) return alert("Please paste data!");
+
+        const lines = raw.split('\n');
+        const newTrades = [];
+        const months = {Jan:'01',Feb:'02',Mär:'03',Mar:'03',Apr:'04',Mai:'05',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Okt:'10',Oct:'10',Nov:'11',Dez:'12',Dec:'12'};
+
+        for(let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if(!line || line.includes('Symbol') || line.includes('Eröffnungsrichtung') || line.includes('Opening')) continue;
+
+            const parts = line.split('\t').map(p => p.trim());
+            
+            if (parts.length >= 7) {
+                const instrument = parts[0];
+                const directionText = parts[1].toLowerCase();
+                const direction = (directionText.includes("kaufen") || directionText.includes("buy")) ? "LONG" : "SHORT";
+                
+                const dateTimeParts = parts[2].split(' ');
+                if (dateTimeParts.length >= 4) {
+                    const day = dateTimeParts[0].padStart(2, '0');
+                    const monthKey = dateTimeParts[1];
+                    const month = months[monthKey];
+                    const year = dateTimeParts[2];
+                    const timeFull = dateTimeParts[3];
+                    const time = timeFull.substring(0, 5);
+                    
+                    const formattedDate = `${year}-${month}-${day}`;
+                    const entry = parseFloat(parts[3]);
+                    const exit = parseFloat(parts[4]);
+                    const pl = parseFloat(parts[6]);
+                    
+                    if (!isNaN(entry) && !isNaN(exit) && !isNaN(pl)) {
+                        newTrades.push({
+                            date: formattedDate,
+                            time: time,
+                            instrument: instrument,
+                            direction: direction,
+                            entry: entry.toString(),
+                            exit: exit.toString(),
+                            pl: pl,
+                            result: pl > 0 ? "WIN" : (pl < 0 ? "LOSS" : "BE"),
+                            risk: "100",
+                            mistake: "PLAN",
+                            screenshot: "",
+                            notes: "Broker import on " + new Date().toLocaleDateString()
+                        });
+
+                        if(!customInstruments.includes(instrument)) {
+                            customInstruments.push(instrument);
+                            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+                        }
+                    }
+                }
+            }
+        }
+
+        if(newTrades.length > 0) {
+            const { error } = await _supabase.from('trades').insert(newTrades);
+            if(error) alert("Import error: " + error.message);
+            else {
+                alert(`✅ ${newTrades.length} trades successfully imported!`);
+                document.getElementById('importArea').value = "";
+                fetchTrades();
+            }
+        }
+    }
 
     function populateInstruments() {
         const select = document.getElementById('instrument');
@@ -276,9 +352,9 @@
         const optionsHTML = customInstruments.map(inst => `<option value="${inst}">${inst}</option>`).join('');
         select.innerHTML = optionsHTML;
         select.value = lastInstrument;
-        const currentFilter = filterSelect.value;
+        const currentFilterValue = filterSelect.value;
         filterSelect.innerHTML = `<option value="ALL">All Instruments</option>` + optionsHTML;
-        filterSelect.value = currentFilter;
+        filterSelect.value = currentFilterValue;
     }
 
     function addNewInstrument() {
@@ -289,6 +365,7 @@
                 customInstruments.push(formatted);
                 localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
                 populateInstruments();
+                document.getElementById('instrument').value = formatted;
             }
         }
     }
@@ -311,167 +388,113 @@
         const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         dayLabels.forEach(label => grid.innerHTML += `<div class="calendar-day-label">${label}</div>`);
         for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
+        const today = new Date();
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const dayTrades = trades.filter(t => t.date === dateStr);
             const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-            let statusClass = dayPL > 0 ? 'day-win' : (dayPL < 0 ? 'day-loss' : '');
+            let statusClass = '';
+            if (dayPL > 0) statusClass = 'day-win';
+            else if (dayPL < 0) statusClass = 'day-loss';
+            const isToday = today.toDateString() === new Date(year, month, d).toDateString();
+            const isSelected = selectedDateFilter === dateStr;
             const dayEl = document.createElement('div');
-            dayEl.className = `calendar-day ${statusClass} ${selectedDateFilter === dateStr ? 'selected' : ''}`;
+            dayEl.className = `calendar-day ${statusClass} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
             dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>`;
-            dayEl.onclick = () => { selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr; renderCalendar(); updateStatsAndTable(); };
+            dayEl.onclick = () => filterByDay(dateStr);
             grid.appendChild(dayEl);
         }
     }
 
-    function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
+    function filterByDay(dateStr) {
+        selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr;
+        renderCalendar();
+        updateStatsAndTable();
+    }
+
+    function changeMonth(val) {
+        currentViewDate.setMonth(currentViewDate.getMonth() + val);
+        selectedDateFilter = null;
+        renderCalendar();
+        updateStatsAndTable();
+    }
 
     function updateStatsAndTable() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         localStorage.setItem('initialBalance', initialBalance);
+
+        const year = currentViewDate.getFullYear();
+        const month = currentViewDate.getMonth();
         const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
         
         let filtered = trades.filter(t => {
-            const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
+            const tDate = new Date(t.date);
+            const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (tDate.getFullYear() === year && tDate.getMonth() === month);
             const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
             return matchesTime && matchesInstrument;
         });
 
         const totalNetPL = trades.reduce((sum, t) => sum + Number(t.pl), 0);
-        document.getElementById('currentEquity').textContent = '$' + (initialBalance + totalNetPL).toLocaleString(undefined, {minimumFractionDigits: 2});
-        
+        const currentEquityValue = initialBalance + totalNetPL;
+        document.getElementById('currentEquity').textContent = '$' + currentEquityValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('currentEquity').className = 'value ' + (currentEquityValue >= initialBalance ? 'win' : 'loss');
+
+        const total = filtered.length;
         const wins = filtered.filter(t => t.result === 'WIN');
         const losses = filtered.filter(t => t.result === 'LOSS');
         const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
-        const totalWinsVal = wins.reduce((sum, t) => sum + Number(t.pl), 0);
-        const totalLossesVal = Math.abs(losses.reduce((sum, t) => sum + Number(t.pl), 0));
-
-        document.getElementById('totalTrades').textContent = filtered.length;
-        document.getElementById('winRate').textContent = filtered.length > 0 ? ((wins.length / filtered.length) * 100).toFixed(1) + '%' : '0%';
-        document.getElementById('totalPL').textContent = '$' + viewPL.toFixed(2);
-        document.getElementById('totalPL').className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
+        const totalWins = wins.reduce((sum, t) => sum + Number(t.pl), 0);
+        const totalLosses = Math.abs(losses.reduce((sum, t) => sum + Number(t.pl), 0));
         
+        document.getElementById('totalTrades').textContent = total;
+        document.getElementById('winRate').textContent = total > 0 ? ((wins.length / total) * 100).toFixed(1) + '%' : '0%';
+        const plElem = document.getElementById('totalPL');
+        plElem.textContent = '$' + viewPL.toFixed(2);
+        plElem.className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-        document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
-        document.getElementById('profitFactor').textContent = totalLossesVal > 0 ? (totalWinsVal / totalLossesVal).toFixed(2) : (totalWinsVal > 0 ? '∞' : '0.00');
-
-        const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
-        document.getElementById('tradesBody').innerHTML = sorted.map(t => {
+        document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
+        document.getElementById('profitFactor').textContent = totalLosses > 0 ? (totalWins / totalLosses).toFixed(2) : totalWins > 0 ? '∞' : '0.00';
+        
+        const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        document.getElementById('tradesBody').innerHTML = sorted.map((t) => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             const notesText = t.notes || '';
-            const tooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
-            return `<tr>
-                <td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td>${t.mistake}</td>
-                <td ${tooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td>
-                <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
-            </tr>`;
+            const notesTooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
+            return `<tr><td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td><td class="${Number(t.pl) >= 0 ? 'win' :'loss'}">$${Number(t.pl).toFixed(2)}</td><td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td><td>${t.mistake}</td><td ${notesTooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td><td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td><td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td></tr>`;
         }).join('');
+
         updateCharts();
     }
 
     function updateCharts() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+        const chartOptions = (title) => ({ maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: title, color: '#8892b0', font: { size: 14 } } }, scales: { y: { grid: { color: '#2d343c' }, ticks: { color: '#8892b0' } }, x: { grid: { display: false }, ticks: { color: '#8892b0' } } } });
         const ctxE = document.getElementById('equityChart').getContext('2d');
         const ctxD = document.getElementById('distributionChart').getContext('2d');
         const ctxW = document.getElementById('weekdayChart').getContext('2d');
-
-        // Equity Curve berechnen
+        
         let runningEquity = initialBalance;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         const equityData = [initialBalance, ...chrono.map(t => { runningEquity += Number(t.pl); return runningEquity; })];
-
+        
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(ctxE, { 
-            type: 'line', 
-            data: { 
-                labels: [0, ...chrono.map((_,i)=>i+1)], 
-                datasets: [{ 
-                    label: 'Equity',
-                    data: equityData, 
-                    borderColor: '#00f2ff', 
-                    fill: true, 
-                    backgroundColor: 'rgba(0, 242, 255, 0.1)', 
-                    tension: 0.3,
-                    pointRadius: 2
-                }] 
-            }, 
-            options: { 
-                maintainAspectRatio: false, 
-                plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'ACCOUNT EQUITY CURVE', color: '#8892b0' } 
-                },
-                scales: {
-                    y: { grid: { color: '#2d343c' }, ticks: { color: '#8892b0' } },
-                    x: { grid: { display: false }, ticks: { color: '#8892b0' } }
-                }
-            } 
-        });
-
-        // Distribution
+        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_, i) => i + 1)], datasets: [{ data: equityData, borderColor: '#00f2ff', tension: 0.3, fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', pointRadius: 2 }] }, options: chartOptions('ACCOUNT EQUITY CURVE ($)') });
+        
         if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(ctxD, { 
-            type: 'bar', 
-            data: { 
-                labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], 
-                datasets: [{ 
-                    data: [
-                        trades.filter(t=>t.mistake==='PLAN').length, 
-                        trades.filter(t=>t.mistake==='FOMO').length, 
-                        trades.filter(t=>t.mistake==='EARLY_EXIT').length, 
-                        trades.filter(t=>t.mistake==='REVENGE').length, 
-                        trades.filter(t=>t.mistake==='LATE_ENTRY').length
-                    ], 
-                    backgroundColor: '#764ba2' 
-                }] 
-            }, 
-            options: { 
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'TAG DISTRIBUTION', color: '#8892b0' } 
-                }
-            } 
-        });
-
-        // Weekday
+        distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] }, options: chartOptions('ALL TIME TAGS') });
+        
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
-        weekdayChart = new Chart(ctxW, { 
-            type: 'bar', 
-            data: { 
-                labels: ['S','M','T','W','T','F','S'], 
-                datasets: [{ 
-                    data: dD, 
-                    backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') 
-                }] 
-            }, 
-            options: { 
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } 
-                }
-            } 
-        });
+        weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: chartOptions('ALL TIME WEEKDAY PROFIT') });
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const editId = document.getElementById('editId').value;
-        const data = { 
-            date: document.getElementById('date').value, time: document.getElementById('time').value, 
-            instrument: document.getElementById('instrument').value, direction: document.getElementById('direction').value, 
-            entry: document.getElementById('entry').value, exit: document.getElementById('exit').value, 
-            result: document.getElementById('result').value, pl: parseFloat(document.getElementById('pl').value), 
-            risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, 
-            screenshot: document.getElementById('screenshot').value, notes: document.getElementById('notes').value 
-        };
+        let plVal = parseFloat(document.getElementById('pl').value);
+        if (document.getElementById('result').value === 'LOSS' && plVal > 0) plVal *= -1;
+        const data = { date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, exit: document.getElementById('exit').value, result: document.getElementById('result').value, pl: plVal, risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, notes: document.getElementById('notes').value };
         if (editId) await _supabase.from('trades').update(data).eq('id', editId);
         else await _supabase.from('trades').insert([data]);
         fetchTrades();
@@ -489,14 +512,13 @@
         document.getElementById('pl').value = t.pl;
         document.getElementById('risk').value = t.risk;
         document.getElementById('mistake').value = t.mistake;
-        document.getElementById('screenshot').value = t.screenshot;
         document.getElementById('notes').value = t.notes;
         document.getElementById('editId').value = t.id;
         document.getElementById('submitBtn').textContent = "Update Trade";
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
+    async function deleteTradeDB(id) { if(confirm('Delete this trade?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
 
     function resetForm() { 
         document.getElementById('tradeForm').reset(); 
@@ -508,41 +530,21 @@
         populateInstruments();
     }
 
-    async function deleteAllTrades() {
-        if (confirm('Wirklich ALLE Trades löschen?')) {
-            await _supabase.from('trades').delete().not('id', 'is', null);
-            fetchTrades();
-        }
-    }
-
     function exportToCSV() {
         let csv = 'Date,Instrument,Direction,Entry,Exit,PL,Risk,Tag,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.direction},${t.entry},${t.exit},${t.pl},${t.risk},${t.mistake},${t.result}`).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
     }
-
-    async function processBulkImport() {
-        const raw = document.getElementById('importArea').value.trim();
-        if(!raw) return alert("Please paste data!");
-        const lines = raw.split('\n');
-        const newTrades = [];
-        const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-        for(let line of lines) {
-            const parts = line.split('\t').map(p => p.trim());
-            if(parts.length >= 7) {
-                const dateParts = parts[2].split(' ');
-                const formattedDate = `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`;
-                newTrades.push({
-                    date: formattedDate, time: dateParts[3].substring(0, 5), instrument: parts[0],
-                    direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT',
-                    entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]),
-                    result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', risk: "100", mistake: "PLAN"
-                });
-            }
+	
+    async function deleteAllTrades() {
+        if (confirm('Bist du sicher, dass du ALLE Trades unwiderruflich löschen möchtest?')) {
+            const { error } = await _supabase.from('trades').delete().not('id', 'is', null); 
+            if (error) alert('Fehler beim Löschen: ' + error.message);
+            else { alert('Alle Trades wurden erfolgreich gelöscht.'); fetchTrades(); }
         }
-        if(newTrades.length > 0) { await _supabase.from('trades').insert(newTrades); fetchTrades(); }
     }
 
+    resetForm();
     fetchTrades();
 </script>
 </body>
