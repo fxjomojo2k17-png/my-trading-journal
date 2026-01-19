@@ -556,21 +556,24 @@
     }
 	
 	// Füge diese Funktion zu deinen anderen Funktionen hinzu
-    async function deleteAllTrades() {
-        if (confirm('Bist du sicher, dass du ALLE Trades unwiderruflich löschen möchtest?')) {
-            const { error } = await _supabase
-                .from('trades')
-                .delete()
-                .neq('id', 0); // Löscht alle Zeilen, da jede ID ungleich 0 ist
+  async function deleteAllTrades() {
+    if (confirm('Bist du sicher, dass du ALLE Trades unwiderruflich löschen möchtest?')) {
+        // Wir nutzen eine Bedingung, die bei UUIDs funktioniert, 
+        // um alle Zeilen zu erfassen (z.B. id ist nicht null)
+        const { error } = await _supabase
+            .from('trades')
+            .delete()
+            .not('id', 'is', null); 
 
-            if (error) {
-                alert('Fehler beim Löschen: ' + error.message);
-            } else {
-                alert('Alle Trades wurden gelöscht.');
-                fetchTrades(); // Aktualisiert die Anzeige
-            }
+        if (error) {
+            console.error('Delete Error:', error);
+            alert('Fehler beim Löschen: ' + error.message);
+        } else {
+            alert('Alle Trades wurden erfolgreich gelöscht.');
+            fetchTrades(); // Aktualisiert die Tabelle in deinem Journal
         }
     }
+}
 
     resetForm();
     fetchTrades();
