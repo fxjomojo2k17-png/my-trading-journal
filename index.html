@@ -144,12 +144,16 @@
     <div class="header"><h1>Asian Breakout Journal</h1></div>
 
     <div class="stats-grid">
+        <div class="stat-card" style="border-left-color: #00ffd5;">
+            <h3>Initial Balance</h3>
+            <input type="number" id="initialBalanceInput" onchange="updateStatsAndTable()" value="10000" 
+                   style="background: transparent !important; border: none !important; color: #00ffd5 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
+        </div>
+        <div class="stat-card"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
         <div class="stat-card"><h3>Trades (View)</h3><div class="value" id="totalTrades">0</div></div>
         <div class="stat-card"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
         <div class="stat-card"><h3>P/L (View)</h3><div class="value" id="totalPL">$0.00</div></div>
         <div class="stat-card"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
-        <div class="stat-card"><h3>Streak</h3><div class="value" id="currentStreak">-</div></div>
-        <div class="stat-card"><h3>Record</h3><div class="value" id="maxStreak">-</div></div>
         <div class="stat-card"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
     </div>
 
@@ -191,7 +195,7 @@
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
                 <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
-				<button onclick="deleteAllTrades()" class="btn-danger" style="background: #ef5350;">Delete All Trades</button>
+                <button type="button" onclick="deleteAllTrades()" class="btn-danger" style="background: #ef5350; color: white;">Delete All Trades</button>
             </div>
         </form>
     </div>
@@ -258,6 +262,14 @@
         else { trades = data || []; refreshApp(); }
     }
 
+    // Beim Laden Startkapital aus localStorage holen
+    window.addEventListener('load', () => {
+        const savedBalance = localStorage.getItem('initialBalance');
+        if (savedBalance) {
+            document.getElementById('initialBalanceInput').value = savedBalance;
+        }
+    });
+
     async function processBulkImport() {
         const raw = document.getElementById('importArea').value.trim();
         if(!raw) return alert("Please paste data!");
@@ -270,32 +282,26 @@
             const line = lines[i].trim();
             if(!line || line.includes('Symbol') || line.includes('Eröffnungsrichtung') || line.includes('Opening')) continue;
 
-            // Split by TAB (broker format uses tabs)
             const parts = line.split('\t').map(p => p.trim());
             
-            console.log(`Line ${i+1}:`, parts); // Debug output
-
-            // Expect at least 7 columns: Symbol, Direction, Date+Time, Entry, Exit, Volume, Net
             if (parts.length >= 7) {
-                const instrument = parts[0]; // XAUUSD
-                const directionText = parts[1].toLowerCase(); // Sell/Buy or Verkaufen/Kaufen
+                const instrument = parts[0];
+                const directionText = parts[1].toLowerCase();
                 const direction = (directionText.includes("kaufen") || directionText.includes("buy")) ? "LONG" : "SHORT";
                 
-                // Date-Time: "15 Jan 2026 03:50:34.934"
                 const dateTimeParts = parts[2].split(' ');
                 if (dateTimeParts.length >= 4) {
                     const day = dateTimeParts[0].padStart(2, '0');
                     const monthKey = dateTimeParts[1];
                     const month = months[monthKey];
                     const year = dateTimeParts[2];
-                    const timeFull = dateTimeParts[3]; // 03:50:34.934
-                    const time = timeFull.substring(0, 5); // 03:50
+                    const timeFull = dateTimeParts[3];
+                    const time = timeFull.substring(0, 5);
                     
                     const formattedDate = `${year}-${month}-${day}`;
-                    
-                    const entry = parseFloat(parts[3]); // Entry price
-                    const exit = parseFloat(parts[4]); // Exit price
-                    const pl = parseFloat(parts[6]); // Net USD
+                    const entry = parseFloat(parts[3]);
+                    const exit = parseFloat(parts[4]);
+                    const pl = parseFloat(parts[6]);
                     
                     if (!isNaN(entry) && !isNaN(exit) && !isNaN(pl)) {
                         newTrades.push({
@@ -323,20 +329,13 @@
         }
 
         if(newTrades.length > 0) {
-            console.log('Importing trades:', newTrades);
             const { error } = await _supabase.from('trades').insert(newTrades);
-            if(error) {
-                console.error('Supabase Error:', error);
-                alert("Import error: " + error.message);
-            } else {
+            if(error) alert("Import error: " + error.message);
+            else {
                 alert(`✅ ${newTrades.length} trades successfully imported!`);
                 document.getElementById('importArea').value = "";
                 fetchTrades();
             }
-        } else {
-            alert("❌ No valid trades found. Please check the format:\n\n" +
-                  "Expected: Symbol [TAB] Direction [TAB] Date Time [TAB] Entry [TAB] Exit [TAB] Volume [TAB] Net\n\n" +
-                  "Open browser console (F12) for details.");
         }
     }
 
@@ -365,9 +364,8 @@
     }
 
     function refreshApp() {
-        updateCharts();
         renderCalendar();
-        updateStatsAndTable();
+        updateStatsAndTable(); // Charts werden jetzt von hier aus getriggert
         resetForm();
     }
 
@@ -415,69 +413,40 @@
     }
 
     function updateStatsAndTable() {
+        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+        localStorage.setItem('initialBalance', initialBalance);
+
         const year = currentViewDate.getFullYear();
         const month = currentViewDate.getMonth();
         const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+        
         let filtered = trades.filter(t => {
             const tDate = new Date(t.date);
             const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (tDate.getFullYear() === year && tDate.getMonth() === month);
             const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
             return matchesTime && matchesInstrument;
         });
+
+        // Gesamtkapital über ALLE Trades berechnen
+        const totalNetPL = trades.reduce((sum, t) => sum + Number(t.pl), 0);
+        const currentEquityValue = initialBalance + totalNetPL;
+        document.getElementById('currentEquity').textContent = '$' + currentEquityValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('currentEquity').className = 'value ' + (currentEquityValue >= initialBalance ? 'win' : 'loss');
+
         const total = filtered.length;
         const wins = filtered.filter(t => t.result === 'WIN');
         const losses = filtered.filter(t => t.result === 'LOSS');
-        const totalPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
         const totalWins = wins.reduce((sum, t) => sum + Number(t.pl), 0);
         const totalLosses = Math.abs(losses.reduce((sum, t) => sum + Number(t.pl), 0));
         
         document.getElementById('totalTrades').textContent = total;
         document.getElementById('winRate').textContent = total > 0 ? ((wins.length / total) * 100).toFixed(1) + '%' : '0%';
         const plElem = document.getElementById('totalPL');
-        plElem.textContent = '$' + totalPL.toFixed(2);
-        plElem.className = 'value ' + (totalPL >= 0 ? 'win' : 'loss');
+        plElem.textContent = '$' + viewPL.toFixed(2);
+        plElem.className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (total > 0 ? (totalR / total).toFixed(2) : '0.0') + 'R';
-        
-        // Calculate streaks
-        const chronoFiltered = [...filtered].sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        let currentStreak = 0;
-        let maxWinStreak = 0;
-        let maxLossStreak = 0;
-        let tempWinStreak = 0;
-        let tempLossStreak = 0;
-        
-        chronoFiltered.forEach(t => {
-            if (t.result === 'WIN') {
-                tempWinStreak++;
-                tempLossStreak = 0;
-                currentStreak = tempWinStreak;
-                if (tempWinStreak > maxWinStreak) maxWinStreak = tempWinStreak;
-            } else if (t.result === 'LOSS') {
-                tempLossStreak++;
-                tempWinStreak = 0;
-                currentStreak = -tempLossStreak;
-                if (tempLossStreak > maxLossStreak) maxLossStreak = tempLossStreak;
-            } else {
-                tempWinStreak = 0;
-                tempLossStreak = 0;
-                currentStreak = 0;
-            }
-        });
-        
-        const streakElem = document.getElementById('currentStreak');
-        if (currentStreak > 0) {
-            streakElem.textContent = `${currentStreak}W`;
-            streakElem.className = 'value win';
-        } else if (currentStreak < 0) {
-            streakElem.textContent = `${Math.abs(currentStreak)}L`;
-            streakElem.className = 'value loss';
-        } else {
-            streakElem.textContent = '-';
-            streakElem.className = 'value';
-        }
-        
-        document.getElementById('maxStreak').textContent = maxWinStreak > 0 ? `${maxWinStreak}W` : '-';
         document.getElementById('profitFactor').textContent = totalLosses > 0 ? (totalWins / totalLosses).toFixed(2) : totalWins > 0 ? '∞' : '0.00';
         
         const sorted = filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
@@ -487,20 +456,28 @@
             const notesTooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
             return `<tr><td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td><td class="${Number(t.pl) >= 0 ? 'win' :'loss'}">$${Number(t.pl).toFixed(2)}</td><td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td><td>${t.mistake}</td><td ${notesTooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td><td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td><td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td></tr>`;
         }).join('');
+
+        updateCharts();
     }
 
     function updateCharts() {
+        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         const chartOptions = (title) => ({ maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: title, color: '#8892b0', font: { size: 14 } } }, scales: { y: { grid: { color: '#2d343c' }, ticks: { color: '#8892b0' } }, x: { grid: { display: false }, ticks: { color: '#8892b0' } } } });
         const ctxE = document.getElementById('equityChart').getContext('2d');
         const ctxD = document.getElementById('distributionChart').getContext('2d');
         const ctxW = document.getElementById('weekdayChart').getContext('2d');
-        let sum = 0;
+        
+        // Equity Kurve basierend auf Startkapital
+        let runningEquity = initialBalance;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        const equityData = chrono.map(t => { sum += Number(t.pl); return sum; });
+        const equityData = [initialBalance, ...chrono.map(t => { runningEquity += Number(t.pl); return runningEquity; })];
+        
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(ctxE, { type: 'line', data: { labels: chrono.map((_, i) => i + 1), datasets: [{ data: equityData, borderColor: '#00f2ff', tension: 0.3, fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', pointRadius: 0 }] }, options: chartOptions('TOTAL EQUITY CURVE ($)') });
+        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_, i) => i + 1)], datasets: [{ data: equityData, borderColor: '#00f2ff', tension: 0.3, fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', pointRadius: 2 }] }, options: chartOptions('ACCOUNT EQUITY CURVE ($)') });
+        
         if (distributionChart) distributionChart.destroy();
         distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] }, options: chartOptions('ALL TIME TAGS') });
+        
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
@@ -555,25 +532,22 @@
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
     }
 	
-	// Füge diese Funktion zu deinen anderen Funktionen hinzu
-  async function deleteAllTrades() {
-    if (confirm('Bist du sicher, dass du ALLE Trades unwiderruflich löschen möchtest?')) {
-        // Wir nutzen eine Bedingung, die bei UUIDs funktioniert, 
-        // um alle Zeilen zu erfassen (z.B. id ist nicht null)
-        const { error } = await _supabase
-            .from('trades')
-            .delete()
-            .not('id', 'is', null); 
+    async function deleteAllTrades() {
+        if (confirm('Bist du sicher, dass du ALLE Trades unwiderruflich löschen möchtest?')) {
+            const { error } = await _supabase
+                .from('trades')
+                .delete()
+                .not('id', 'is', null); 
 
-        if (error) {
-            console.error('Delete Error:', error);
-            alert('Fehler beim Löschen: ' + error.message);
-        } else {
-            alert('Alle Trades wurden erfolgreich gelöscht.');
-            fetchTrades(); // Aktualisiert die Tabelle in deinem Journal
+            if (error) {
+                console.error('Delete Error:', error);
+                alert('Fehler beim Löschen: ' + error.message);
+            } else {
+                alert('Alle Trades wurden erfolgreich gelöscht.');
+                fetchTrades();
+            }
         }
     }
-}
 
     resetForm();
     fetchTrades();
