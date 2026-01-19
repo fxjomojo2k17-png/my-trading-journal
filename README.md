@@ -1,0 +1,1 @@
+my personal trading journal
