@@ -121,7 +121,7 @@
 
         .history-controls { padding: 20px 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
         .history-controls label { margin-bottom: 0; font-size: 0.75em; }
-        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; }
+        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; background: #252d37; color: white; border: 1px solid #3d4651; border-radius: 4px; }
         .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
 
         .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
@@ -341,11 +341,19 @@
         document.getElementById('currentEquity').textContent = '$' + (initialBalance + totalNetPL).toLocaleString(undefined, {minimumFractionDigits: 2});
         
         const wins = filtered.filter(t => t.result === 'WIN');
+        const losses = filtered.filter(t => t.result === 'LOSS');
         const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+        const totalWinsVal = wins.reduce((sum, t) => sum + Number(t.pl), 0);
+        const totalLossesVal = Math.abs(losses.reduce((sum, t) => sum + Number(t.pl), 0));
+
         document.getElementById('totalTrades').textContent = filtered.length;
         document.getElementById('winRate').textContent = filtered.length > 0 ? ((wins.length / filtered.length) * 100).toFixed(1) + '%' : '0%';
         document.getElementById('totalPL').textContent = '$' + viewPL.toFixed(2);
         document.getElementById('totalPL').className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
+        
+        const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
+        document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
+        document.getElementById('profitFactor').textContent = totalLossesVal > 0 ? (totalWinsVal / totalLossesVal).toFixed(2) : (totalWinsVal > 0 ? '∞' : '0.00');
 
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
@@ -371,20 +379,86 @@
         const ctxD = document.getElementById('distributionChart').getContext('2d');
         const ctxW = document.getElementById('weekdayChart').getContext('2d');
 
+        // Equity Curve berechnen
         let runningEquity = initialBalance;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         const equityData = [initialBalance, ...chrono.map(t => { runningEquity += Number(t.pl); return runningEquity; })];
 
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'ACCOUNT EQUITY', color: '#8892b0' } } } });
+        equityChart = new Chart(ctxE, { 
+            type: 'line', 
+            data: { 
+                labels: [0, ...chrono.map((_,i)=>i+1)], 
+                datasets: [{ 
+                    label: 'Equity',
+                    data: equityData, 
+                    borderColor: '#00f2ff', 
+                    fill: true, 
+                    backgroundColor: 'rgba(0, 242, 255, 0.1)', 
+                    tension: 0.3,
+                    pointRadius: 2
+                }] 
+            }, 
+            options: { 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false },
+                    title: { display: true, text: 'ACCOUNT EQUITY CURVE', color: '#8892b0' } 
+                },
+                scales: {
+                    y: { grid: { color: '#2d343c' }, ticks: { color: '#8892b0' } },
+                    x: { grid: { display: false }, ticks: { color: '#8892b0' } }
+                }
+            } 
+        });
 
+        // Distribution
         if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false } });
+        distributionChart = new Chart(ctxD, { 
+            type: 'bar', 
+            data: { 
+                labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], 
+                datasets: [{ 
+                    data: [
+                        trades.filter(t=>t.mistake==='PLAN').length, 
+                        trades.filter(t=>t.mistake==='FOMO').length, 
+                        trades.filter(t=>t.mistake==='EARLY_EXIT').length, 
+                        trades.filter(t=>t.mistake==='REVENGE').length, 
+                        trades.filter(t=>t.mistake==='LATE_ENTRY').length
+                    ], 
+                    backgroundColor: '#764ba2' 
+                }] 
+            }, 
+            options: { 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    title: { display: true, text: 'TAG DISTRIBUTION', color: '#8892b0' } 
+                }
+            } 
+        });
 
+        // Weekday
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
-        weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false } });
+        weekdayChart = new Chart(ctxW, { 
+            type: 'bar', 
+            data: { 
+                labels: ['S','M','T','W','T','F','S'], 
+                datasets: [{ 
+                    data: dD, 
+                    backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') 
+                }] 
+            }, 
+            options: { 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } 
+                }
+            } 
+        });
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
@@ -435,7 +509,7 @@
     }
 
     async function deleteAllTrades() {
-        if (confirm('Really delete ALL trades?')) {
+        if (confirm('Wirklich ALLE Trades löschen?')) {
             await _supabase.from('trades').delete().not('id', 'is', null);
             fetchTrades();
         }
@@ -445,6 +519,28 @@
         let csv = 'Date,Instrument,Direction,Entry,Exit,PL,Risk,Tag,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.direction},${t.entry},${t.exit},${t.pl},${t.risk},${t.mistake},${t.result}`).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
+    }
+
+    async function processBulkImport() {
+        const raw = document.getElementById('importArea').value.trim();
+        if(!raw) return alert("Please paste data!");
+        const lines = raw.split('\n');
+        const newTrades = [];
+        const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+        for(let line of lines) {
+            const parts = line.split('\t').map(p => p.trim());
+            if(parts.length >= 7) {
+                const dateParts = parts[2].split(' ');
+                const formattedDate = `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`;
+                newTrades.push({
+                    date: formattedDate, time: dateParts[3].substring(0, 5), instrument: parts[0],
+                    direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT',
+                    entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]),
+                    result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', risk: "100", mistake: "PLAN"
+                });
+            }
+        }
+        if(newTrades.length > 0) { await _supabase.from('trades').insert(newTrades); fetchTrades(); }
     }
 
     fetchTrades();
