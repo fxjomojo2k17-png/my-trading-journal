@@ -85,11 +85,7 @@
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
-        /* Notizfeld: Feste Größe */
-        textarea#notes {
-            height: 42px;
-            resize: none;
-        }
+        textarea#notes { height: 42px; resize: none; }
 
         .instrument-container { display: flex; gap: 5px; height: 42px; align-items: center; }
         .instrument-container select { flex: 1; }
@@ -100,23 +96,12 @@
             font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
-        /* Button Gruppe oben */
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .button-group button { 
-            padding: 8px 16px; 
-            border-radius: 6px; 
-            border: none; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.3s; 
-            font-size: 0.75em; 
-            min-height: 38px;
-        }
+        .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
         
         .btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }
         .btn-secondary { background: #3d4651; color: white; }
         .btn-export { background: transparent !important; border: 1px solid #00f2ff !important; color: #00f2ff !important; }
-        .btn-danger { background: #ef5350; color: white; }
 
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
@@ -134,23 +119,10 @@
         .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
         .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
-        /* History Controls & Delete Button unten */
         .history-controls { padding: 20px 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
         .history-controls label { margin-bottom: 0; font-size: 0.75em; }
-        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; background: #252d37; }
-        .history-controls .btn-delete-all { 
-            background: #ef5350; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            padding: 0 12px; 
-            height: 32px; 
-            font-size: 0.7em; 
-            font-weight: bold; 
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .history-controls .btn-delete-all:hover { background: #d32f2f; }
+        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; }
+        .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
 
         .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
@@ -265,15 +237,14 @@
     <div class="import-section">
         <div class="import-container">
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
-            <p class="import-info">Copy broker list and paste here (recognizes tabs and spaces).</p>
-            <textarea id="importArea" class="import-textarea" placeholder="XAUUSD	Sell	15 Jan 2026..."></textarea>
+            <p class="import-info">Copy broker list and paste here.</p>
+            <textarea id="importArea" class="import-textarea" placeholder="XAUUSD Sell 15 Jan..."></textarea>
             <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades Now</button>
         </div>
     </div>
 </div>
 
 <script>
-    // DEINE SUPABASE CONFIG (BITTE SO LASSEN)
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     const { createClient } = supabase;
@@ -296,44 +267,8 @@
 
     window.addEventListener('load', () => {
         const savedBalance = localStorage.getItem('initialBalance');
-        if (savedBalance) {
-            document.getElementById('initialBalanceInput').value = savedBalance;
-        }
+        if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
     });
-
-    // ... (restliche Logik wie Import, Kalender, Charts bleibt unverändert) ...
-
-    async function processBulkImport() {
-        const raw = document.getElementById('importArea').value.trim();
-        if(!raw) return alert("Please paste data!");
-        const lines = raw.split('\n');
-        const newTrades = [];
-        const months = {Jan:'01',Feb:'02',Mär:'03',Mar:'03',Apr:'04',Mai:'05',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Okt:'10',Oct:'10',Nov:'11',Dez:'12',Dec:'12'};
-        for(let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if(!line || line.includes('Symbol')) continue;
-            const parts = line.split('\t').map(p => p.trim());
-            if (parts.length >= 7) {
-                const instrument = parts[0];
-                const directionText = parts[1].toLowerCase();
-                const direction = (directionText.includes("kaufen") || directionText.includes("buy")) ? "LONG" : "SHORT";
-                const dateTimeParts = parts[2].split(' ');
-                if (dateTimeParts.length >= 4) {
-                    const formattedDate = `${dateTimeParts[2]}-${months[dateTimeParts[1]]}-${dateTimeParts[0].padStart(2, '0')}`;
-                    const time = dateTimeParts[3].substring(0, 5);
-                    newTrades.push({
-                        date: formattedDate, time: time, instrument: instrument, direction: direction,
-                        entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]),
-                        result: parseFloat(parts[6]) > 0 ? "WIN" : "LOSS", risk: "100", mistake: "PLAN"
-                    });
-                }
-            }
-        }
-        if(newTrades.length > 0) {
-            await _supabase.from('trades').insert(newTrades);
-            fetchTrades();
-        }
-    }
 
     function populateInstruments() {
         const select = document.getElementById('instrument');
@@ -341,9 +276,9 @@
         const optionsHTML = customInstruments.map(inst => `<option value="${inst}">${inst}</option>`).join('');
         select.innerHTML = optionsHTML;
         select.value = lastInstrument;
-        const currentFilterValue = filterSelect.value;
+        const currentFilter = filterSelect.value;
         filterSelect.innerHTML = `<option value="ALL">All Instruments</option>` + optionsHTML;
-        filterSelect.value = currentFilterValue;
+        filterSelect.value = currentFilter;
     }
 
     function addNewInstrument() {
@@ -395,61 +330,121 @@
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         localStorage.setItem('initialBalance', initialBalance);
         const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+        
         let filtered = trades.filter(t => {
-            const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth());
+            const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
             const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
             return matchesTime && matchesInstrument;
         });
+
         const totalNetPL = trades.reduce((sum, t) => sum + Number(t.pl), 0);
-        document.getElementById('currentEquity').textContent = '$' + (initialBalance + totalNetPL).toLocaleString();
-        document.getElementById('totalTrades').textContent = filtered.length;
+        document.getElementById('currentEquity').textContent = '$' + (initialBalance + totalNetPL).toLocaleString(undefined, {minimumFractionDigits: 2});
+        
+        const wins = filtered.filter(t => t.result === 'WIN');
         const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+        document.getElementById('totalTrades').textContent = filtered.length;
+        document.getElementById('winRate').textContent = filtered.length > 0 ? ((wins.length / filtered.length) * 100).toFixed(1) + '%' : '0%';
         document.getElementById('totalPL').textContent = '$' + viewPL.toFixed(2);
         document.getElementById('totalPL').className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
 
-        document.getElementById('tradesBody').innerHTML = filtered.map(t => `<tr><td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td><td class="${t.pl >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td><td>-</td><td>${t.mistake}</td><td>${t.result}</td><td>-</td><td><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td></tr>`).join('');
+        const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+        document.getElementById('tradesBody').innerHTML = sorted.map(t => {
+            const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
+            const notesText = t.notes || '';
+            const tooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
+            return `<tr>
+                <td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+                <td>${t.mistake}</td>
+                <td ${tooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td>
+                <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
+                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+            </tr>`;
+        }).join('');
         updateCharts();
     }
 
     function updateCharts() {
+        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         const ctxE = document.getElementById('equityChart').getContext('2d');
+        const ctxD = document.getElementById('distributionChart').getContext('2d');
+        const ctxW = document.getElementById('weekdayChart').getContext('2d');
+
+        let runningEquity = initialBalance;
+        const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+        const equityData = [initialBalance, ...chrono.map(t => { runningEquity += Number(t.pl); return runningEquity; })];
+
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(ctxE, { type: 'line', data: { labels: trades.map((_,i)=>i), datasets: [{ data: trades.map(t=>t.pl), borderColor: '#00f2ff' }] }, options: { maintainAspectRatio: false } });
+        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'ACCOUNT EQUITY', color: '#8892b0' } } } });
+
+        if (distributionChart) distributionChart.destroy();
+        distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: [trades.filter(t=>t.mistake==='PLAN').length, trades.filter(t=>t.mistake==='FOMO').length, trades.filter(t=>t.mistake==='EARLY_EXIT').length, trades.filter(t=>t.mistake==='REVENGE').length, trades.filter(t=>t.mistake==='LATE_ENTRY').length], backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false } });
+
+        const dD = [0,0,0,0,0,0,0];
+        trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
+        if (weekdayChart) weekdayChart.destroy();
+        weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false } });
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        const editId = document.getElementById('editId').value;
         const data = { 
             date: document.getElementById('date').value, time: document.getElementById('time').value, 
             instrument: document.getElementById('instrument').value, direction: document.getElementById('direction').value, 
             entry: document.getElementById('entry').value, exit: document.getElementById('exit').value, 
             result: document.getElementById('result').value, pl: parseFloat(document.getElementById('pl').value), 
-            risk: document.getElementById('risk').value, mistake: document.getElementById('mistake').value, 
-            notes: document.getElementById('notes').value 
+            risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, 
+            screenshot: document.getElementById('screenshot').value, notes: document.getElementById('notes').value 
         };
-        await _supabase.from('trades').insert([data]);
+        if (editId) await _supabase.from('trades').update(data).eq('id', editId);
+        else await _supabase.from('trades').insert([data]);
         fetchTrades();
     });
+
+    function prepareEdit(id) {
+        const t = trades.find(tr => tr.id === id);
+        document.getElementById('date').value = t.date;
+        document.getElementById('time').value = t.time;
+        document.getElementById('instrument').value = t.instrument;
+        document.getElementById('direction').value = t.direction;
+        document.getElementById('entry').value = t.entry;
+        document.getElementById('exit').value = t.exit;
+        document.getElementById('result').value = t.result;
+        document.getElementById('pl').value = t.pl;
+        document.getElementById('risk').value = t.risk;
+        document.getElementById('mistake').value = t.mistake;
+        document.getElementById('screenshot').value = t.screenshot;
+        document.getElementById('notes').value = t.notes;
+        document.getElementById('editId').value = t.id;
+        document.getElementById('submitBtn').textContent = "Update Trade";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
 
     function resetForm() { 
         document.getElementById('tradeForm').reset(); 
-        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('editId').value = "";
+        document.getElementById('submitBtn').textContent = "Save Trade";
+        const now = new Date();
+        document.getElementById('date').valueAsDate = now;
+        document.getElementById('time').value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         populateInstruments();
     }
 
-    function exportToCSV() {
-        let csv = 'Date,Instrument,PL\n' + trades.map(t => `${t.date},${t.instrument},${t.pl}`).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
-    }
-
     async function deleteAllTrades() {
-        if (confirm('Wirklich ALLE Trades löschen?')) {
+        if (confirm('Really delete ALL trades?')) {
             await _supabase.from('trades').delete().not('id', 'is', null);
             fetchTrades();
         }
+    }
+
+    function exportToCSV() {
+        let csv = 'Date,Instrument,Direction,Entry,Exit,PL,Risk,Tag,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.direction},${t.entry},${t.exit},${t.pl},${t.risk},${t.mistake},${t.result}`).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Journal.csv'; a.click();
     }
 
     fetchTrades();
