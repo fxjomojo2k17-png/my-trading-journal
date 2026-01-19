@@ -85,7 +85,7 @@
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
-        textarea#notes { height: 42px; width:150px; resize: none; }
+        textarea#notes { height: 62px; width:250px; resize: none; }
 
         .instrument-container { display: flex; gap: 5px; height: 42px; align-items: center; }
         .instrument-container select { flex: 1; }
@@ -149,7 +149,7 @@
     <div class="stats-grid">
         <div class="stat-card" style="border-left-color: #764ba2;">
             <h3>Initial Balance</h3>
-            <input type="number" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
+            <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
                    style="background: transparent !important; border: none !important; color: #00ffd5 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
         </div>
         <div class="stat-card"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
