@@ -257,9 +257,9 @@
         else { trades = data || []; refreshApp(); }
     }
 
-    async function processBulkImport() {
+  async function processBulkImport() {
         const raw = document.getElementById('importArea').value.trim();
-        if(!raw) return alert("Bitte Daten einfügen!");
+        if(!raw) return alert("Please paste data!");
 
         const lines = raw.split('\n');
         const newTrades = [];
@@ -267,20 +267,20 @@
 
         for(let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
-            if(!line || line.includes('Symbol') || line.includes('Eröffnungsrichtung')) continue;
+            if(!line || line.includes('Symbol') || line.includes('Eröffnungsrichtung') || line.includes('Opening')) continue;
 
-            // Split by TAB (dein Broker-Format nutzt Tabs)
+            // Split by TAB (broker format uses tabs)
             const parts = line.split('\t').map(p => p.trim());
             
-            console.log(`Zeile ${i+1}:`, parts); // Debug-Ausgabe
+            console.log(`Line ${i+1}:`, parts); // Debug output
 
-            // Erwarte mindestens 7 Spalten: Symbol, Richtung, Datum+Zeit, Entry, Exit, Menge, Netto
+            // Expect at least 7 columns: Symbol, Direction, Date+Time, Entry, Exit, Volume, Net
             if (parts.length >= 7) {
                 const instrument = parts[0]; // XAUUSD
-                const directionText = parts[1].toLowerCase(); // Verkaufen/Kaufen
+                const directionText = parts[1].toLowerCase(); // Sell/Buy or Verkaufen/Kaufen
                 const direction = (directionText.includes("kaufen") || directionText.includes("buy")) ? "LONG" : "SHORT";
                 
-                // Datum-Zeit: "15 Jan 2026 03:50:34.934"
+                // Date-Time: "15 Jan 2026 03:50:34.934"
                 const dateTimeParts = parts[2].split(' ');
                 if (dateTimeParts.length >= 4) {
                     const day = dateTimeParts[0].padStart(2, '0');
@@ -292,9 +292,9 @@
                     
                     const formattedDate = `${year}-${month}-${day}`;
                     
-                    const entry = parseFloat(parts[3]); // Einstiegskurs
-                    const exit = parseFloat(parts[4]); // Schlusskurs
-                    const pl = parseFloat(parts[6]); // Netto USD
+                    const entry = parseFloat(parts[3]); // Entry price
+                    const exit = parseFloat(parts[4]); // Exit price
+                    const pl = parseFloat(parts[6]); // Net USD
                     
                     if (!isNaN(entry) && !isNaN(exit) && !isNaN(pl)) {
                         newTrades.push({
@@ -309,7 +309,7 @@
                             risk: "100",
                             mistake: "PLAN",
                             screenshot: "",
-                            notes: "Broker-Import am " + new Date().toLocaleDateString()
+                            notes: "Broker import on " + new Date().toLocaleDateString()
                         });
 
                         if(!customInstruments.includes(instrument)) {
@@ -322,20 +322,20 @@
         }
 
         if(newTrades.length > 0) {
-            console.log('Importiere Trades:', newTrades);
+            console.log('Importing trades:', newTrades);
             const { error } = await _supabase.from('trades').insert(newTrades);
             if(error) {
                 console.error('Supabase Error:', error);
-                alert("Fehler beim Import: " + error.message);
+                alert("Import error: " + error.message);
             } else {
-                alert(`✅ ${newTrades.length} Trades erfolgreich importiert!`);
+                alert(`✅ ${newTrades.length} trades successfully imported!`);
                 document.getElementById('importArea').value = "";
                 fetchTrades();
             }
         } else {
-            alert("❌ Keine gültigen Trades gefunden. Bitte überprüfe das Format:\n\n" +
-                  "Erwartet: Symbol [TAB] Richtung [TAB] Datum Zeit [TAB] Entry [TAB] Exit [TAB] Menge [TAB] Netto\n\n" +
-                  "Öffne die Browser-Konsole (F12) für Details.");
+            alert("❌ No valid trades found. Please check the format:\n\n" +
+                  "Expected: Symbol [TAB] Direction [TAB] Date Time [TAB] Entry [TAB] Exit [TAB] Volume [TAB] Net\n\n" +
+                  "Open browser console (F12) for details.");
         }
     }
 
