@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trading Journal - Asian Breakout Pro</title>
+    <title>Trading Journal</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
 
@@ -85,7 +85,7 @@
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
-        textarea#notes { height: 42px; resize: none; }
+        textarea#notes { height: 42px; width:150px; resize: none; }
 
         .instrument-container { display: flex; gap: 5px; height: 42px; align-items: center; }
         .instrument-container select { flex: 1; }
@@ -144,12 +144,12 @@
 <body>
 
 <div class="container">
-    <div class="header"><h1>Asian Breakout Journal</h1></div>
+    <div class="header"><h1>Journal</h1></div>
 
     <div class="stats-grid">
-        <div class="stat-card" style="border-left-color: #00ffd5;">
+        <div class="stat-card" style="border-left-color: #764ba2;">
             <h3>Initial Balance</h3>
-            <input type="number" id="initialBalanceInput" onchange="updateStatsAndTable()" value="10000" 
+            <input type="number" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
                    style="background: transparent !important; border: none !important; color: #00ffd5 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
         </div>
         <div class="stat-card"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
