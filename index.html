@@ -43,6 +43,19 @@
 
         .header h1 { font-size: 1.5em; letter-spacing: 1px; text-transform: uppercase; color: #00f2ff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
 
+        /* Bereichs-Trenner */
+        .section-divider {
+            background: #1c2229;
+            padding: 15px 20px;
+            border-top: 1px solid #2d343c;
+            border-bottom: 1px solid #2d343c;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section-divider h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 2px; color: #764ba2; font-weight: 800; }
+        .section-divider .line { flex: 1; height: 1px; background: #2d343c; }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -111,7 +124,13 @@
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
 
-        .calendar-section { padding: 0 20px 20px 20px; max-width: 450px; margin: 0 auto; }
+        /* Unterer Bereich (Historie & Kalender) */
+        .lower-section {
+            background: #0e1217; /* Leicht dunklerer Hintergrund zur Absetzung */
+            padding-top: 30px;
+        }
+
+        .calendar-section { padding: 0 20px 30px 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #1c2229; padding: 8px; border-radius: 8px; }
         .calendar-day-label { text-align: center; font-size: 0.55em; color: #5c6680; padding-bottom: 4px; }
@@ -124,12 +143,12 @@
         .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
         .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
-        .history-controls { padding: 20px 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .history-controls { padding: 0 20px 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
         .history-controls label { margin-bottom: 0; font-size: 0.75em; }
         .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; background: #252d37; color: white; border: 1px solid #3d4651; border-radius: 4px; }
         .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
 
-        .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
+        .trades-table { padding: 10px 20px 40px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
@@ -140,7 +159,7 @@
         .edit-btn { background: rgba(0, 242, 255, 0.1); border-color: #00f2ff; color: #00f2ff; }
         .del-btn { background: rgba(255, 74, 104, 0.1); border-color: #ff4a68; color: #ff4a68; }
 
-        .import-section { background: #1c2229; padding: 30px 20px; border-top: 2px solid #2d343c; }
+        .import-section { background: #1c2229; padding: 40px 20px; border-top: 2px solid #2d343c; }
         .import-container { max-width: 800px; margin: 0 auto; }
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
         .import-info { font-size: 0.75em; color: #8892b0; margin-bottom: 10px; line-height: 1.4; }
@@ -237,30 +256,37 @@
         <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
     </div>
 
-    <div class="calendar-section">
-        <div class="calendar-header">
-            <span id="calendarMonth">Month</span>
-            <div style="display:flex; gap:5px;">
-                <button class="btn-sm edit-btn" style="padding:2px 6px" onclick="changeMonth(-1)">←</button>
-                <button class="btn-sm edit-btn" style="padding:2px 6px" onclick="changeMonth(1)">→</button>
+    <div class="section-divider">
+        <h2>Performance & Trade History</h2>
+        <div class="line"></div>
+    </div>
+
+    <div class="lower-section">
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <span id="calendarMonth">Month</span>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-sm edit-btn" style="padding:2px 6px" onclick="changeMonth(-1)">←</button>
+                    <button class="btn-sm edit-btn" style="padding:2px 6px" onclick="changeMonth(1)">→</button>
+                </div>
             </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-    </div>
 
-    <div class="history-controls">
-        <label>Filter Instrument:</label>
-        <select id="historyInstrumentFilter" onchange="updateStatsAndTable()">
-            <option value="ALL">All Instruments</option>
-        </select>
-        <button type="button" onclick="deleteAllTrades()" class="btn-delete-all">Delete All Trades</button>
-    </div>
+        <div class="history-controls">
+            <label>Filter Instrument:</label>
+            <select id="historyInstrumentFilter" onchange="updateStatsAndTable()">
+                <option value="ALL">All Instruments</option>
+            </select>
+            <button type="button" onclick="deleteAllTrades()" class="btn-delete-all">Delete All Trades</button>
+        </div>
 
-    <div class="trades-table">
-        <table>
-            <thead><tr><th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>Res.</th><th>IMG</th><th>Action</th></tr></thead>
-            <tbody id="tradesBody"></tbody>
-        </table>
+        <div class="trades-table">
+            <table>
+                <thead><tr><th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>Res.</th><th>IMG</th><th>Action</th></tr></thead>
+                <tbody id="tradesBody"></tbody>
+            </table>
+        </div>
     </div>
 
     <div class="import-section">
