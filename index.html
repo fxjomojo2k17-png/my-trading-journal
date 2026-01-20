@@ -139,23 +139,48 @@
         .import-container { max-width: 800px; margin: 0 auto; }
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
         .import-info { font-size: 0.75em; color: #8892b0; margin-bottom: 10px; line-height: 1.4; }
-        
-        /* Updated Import Button to match design */
-        .btn-import-submit {
-            width: 100%;
-            background: linear-gradient(135deg, #764ba2, #667eea);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.85em;
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+
+        /* Mobile Optimization for Table */
+        @media (max-width: 768px) {
+            .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr {
+                display: block;
+            }
+            .trades-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            .trades-table tr {
+                border: 1px solid #2d343c;
+                margin-bottom: 15px;
+                border-radius: 10px;
+                background: #252d37;
+                padding: 10px;
+            }
+            .trades-table td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                font-size: 0.85em;
+                padding-bottom: 8px;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+            .trades-table td:last-child { border-bottom: none; }
+            .trades-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #8892b0;
+                text-transform: uppercase;
+                font-size: 0.75em;
+            }
         }
-        .btn-import-submit:hover { opacity: 0.9; transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -221,6 +246,7 @@
 
     <div class="charts-container">
         <div class="chart-box"><canvas id="equityChart"></canvas></div>
+        <div class="chart-box"><canvas id="drawdownChart"></canvas></div>
         <div class="chart-box"><canvas id="distributionChart"></canvas></div>
         <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
     </div>
@@ -256,7 +282,7 @@
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
             <p class="import-info">Copy broker list and paste here.</p>
             <textarea id="importArea" class="import-textarea" placeholder="XAUUSD Sell 15 Jan..."></textarea>
-            <button onclick="processBulkImport()" class="btn-import-submit">Import Trades Now</button>
+            <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades Now</button>
         </div>
     </div>
 </div>
@@ -270,7 +296,7 @@
     let trades = [];
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let lastInstrument = localStorage.getItem('lastInstrument') || customInstruments[0];
-    let equityChart, distributionChart, weekdayChart;
+    let equityChart, drawdownChart, distributionChart, weekdayChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
 
@@ -378,13 +404,16 @@
             const notesText = t.notes || '';
             const tooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
             return `<tr>
-                <td>${t.date}</td><td>${t.instrument}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td>${t.mistake}</td>
-                <td ${tooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td>
-                <td>${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+                <td data-label="Date">${t.date}</td>
+                <td data-label="Inst.">${t.instrument}</td>
+                <td data-label="Dir">${t.direction}</td>
+                <td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
+                <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+                <td data-label="R" class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+                <td data-label="Tag">${t.mistake}</td>
+                <td data-label="Res." ${tooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td>
+                <td data-label="IMG">${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
+                <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
         updateCharts();
@@ -393,13 +422,23 @@
     function updateCharts() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         const ctxE = document.getElementById('equityChart').getContext('2d');
+        const ctxDD = document.getElementById('drawdownChart').getContext('2d');
         const ctxD = document.getElementById('distributionChart').getContext('2d');
         const ctxW = document.getElementById('weekdayChart').getContext('2d');
 
-        // Equity Curve berechnen
-        let runningEquity = initialBalance;
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        const equityData = [initialBalance, ...chrono.map(t => { runningEquity += Number(t.pl); return runningEquity; })];
+        
+        let runningEquity = initialBalance;
+        let peak = initialBalance;
+        const equityData = [initialBalance];
+        const drawdownData = [0];
+
+        chrono.forEach(t => {
+            runningEquity += Number(t.pl);
+            equityData.push(runningEquity);
+            if (runningEquity > peak) peak = runningEquity;
+            drawdownData.push(runningEquity - peak);
+        });
 
         if (equityChart) equityChart.destroy();
         equityChart = new Chart(ctxE, { 
@@ -407,74 +446,41 @@
             data: { 
                 labels: [0, ...chrono.map((_,i)=>i+1)], 
                 datasets: [{ 
-                    label: 'Equity',
-                    data: equityData, 
-                    borderColor: '#00f2ff', 
-                    fill: true, 
-                    backgroundColor: 'rgba(0, 242, 255, 0.1)', 
-                    tension: 0.3,
-                    pointRadius: 2
+                    label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2
                 }] 
             }, 
-            options: { 
-                maintainAspectRatio: false, 
-                plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'ACCOUNT EQUITY CURVE', color: '#8892b0' } 
-                },
-                scales: {
-                    y: { grid: { color: '#2d343c' }, ticks: { color: '#8892b0' } },
-                    x: { grid: { display: false }, ticks: { color: '#8892b0' } }
-                }
-            } 
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'ACCOUNT EQUITY CURVE', color: '#8892b0' } } } 
         });
 
-        // Distribution
+        if (drawdownChart) drawdownChart.destroy();
+        drawdownChart = new Chart(ctxDD, {
+            type: 'line',
+            data: {
+                labels: [0, ...chrono.map((_,i)=>i+1)],
+                datasets: [{
+                    label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.1)', tension: 0.3, pointRadius: 0
+                }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'ABSOLUTE DRAWDOWN ($)', color: '#8892b0' } } }
+        });
+
         if (distributionChart) distributionChart.destroy();
         distributionChart = new Chart(ctxD, { 
             type: 'bar', 
             data: { 
                 labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], 
-                datasets: [{ 
-                    data: [
-                        trades.filter(t=>t.mistake==='PLAN').length, 
-                        trades.filter(t=>t.mistake==='FOMO').length, 
-                        trades.filter(t=>t.mistake==='EARLY_EXIT').length, 
-                        trades.filter(t=>t.mistake==='REVENGE').length, 
-                        trades.filter(t=>t.mistake==='LATE_ENTRY').length
-                    ], 
-                    backgroundColor: '#764ba2' 
-                }] 
+                datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => trades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] 
             }, 
-            options: { 
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'TAG DISTRIBUTION', color: '#8892b0' } 
-                }
-            } 
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'TAG DISTRIBUTION', color: '#8892b0' } } } 
         });
 
-        // Weekday
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(ctxW, { 
             type: 'bar', 
-            data: { 
-                labels: ['S','M','T','W','T','F','S'], 
-                datasets: [{ 
-                    data: dD, 
-                    backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') 
-                }] 
-            }, 
-            options: { 
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } 
-                }
-            } 
+            data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, 
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } 
         });
     }
 
@@ -539,8 +545,8 @@
     }
 
     async function processBulkImport() {
-        const importArea = document.getElementById('importArea');
-        const raw = importArea.value.trim();
+        const area = document.getElementById('importArea');
+        const raw = area.value.trim();
         if(!raw) return alert("Please paste data!");
         const lines = raw.split('\n');
         const newTrades = [];
@@ -560,7 +566,7 @@
         }
         if(newTrades.length > 0) { 
             await _supabase.from('trades').insert(newTrades); 
-            importArea.value = ""; // Clear the field after successful import
+            area.value = ""; // Feld leeren
             fetchTrades(); 
         }
     }
