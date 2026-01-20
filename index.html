@@ -72,9 +72,10 @@
         }
         
         @media (min-width: 1024px) {
-            .form-grid { grid-template-columns: repeat(11, 1fr); }
+            .form-grid { grid-template-columns: repeat(12, 1fr); } /* Erhöht auf 12 für besseres Spanning */
             .header h1 { font-size: 2.2em; }
             body { padding: 20px; }
+            .full-width-notes { grid-column: span 2; } /* Notes nutzt 2 Spalten */
         }
 
         .form-group { display: flex; flex-direction: column; width: 100%; }
@@ -85,16 +86,20 @@
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
-        textarea#notes { height: 62px; width:250px; resize: none; }
+        textarea#notes { height: 42px; width: 100%; resize: none; }
 
-        .instrument-container { display: flex; gap: 5px; height: 42px; align-items: center; }
-        .instrument-container select { flex: 1; }
+        .instrument-container { display: flex; gap: 4px; height: 42px; align-items: center; width: 100%; }
+        .instrument-container select { flex: 1; min-width: 0; }
 
-        .btn-add-instrument { 
-            background: #764ba2; color: white; width: 42px; height: 42px; 
+        .btn-instrument-action { 
+            background: #3d4651; color: white; width: 32px; height: 42px; 
             border-radius: 6px; border: none; cursor: pointer;
-            font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: 0.2s;
         }
+        .btn-add-instrument { background: #764ba2; }
+        .btn-del-instrument { background: #4a5568; font-size: 22px; }
+        .btn-instrument-action:hover { opacity: 0.8; }
 
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
@@ -140,46 +145,13 @@
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
         .import-info { font-size: 0.75em; color: #8892b0; margin-bottom: 10px; line-height: 1.4; }
 
-        /* Mobile Optimization for Table */
         @media (max-width: 768px) {
-            .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr {
-                display: block;
-            }
-            .trades-table thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            .trades-table tr {
-                border: 1px solid #2d343c;
-                margin-bottom: 15px;
-                border-radius: 10px;
-                background: #252d37;
-                padding: 10px;
-            }
-            .trades-table td {
-                border: none;
-                position: relative;
-                padding-left: 50%;
-                text-align: right;
-                font-size: 0.85em;
-                padding-bottom: 8px;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-            }
+            .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr { display: block; }
+            .trades-table thead tr { position: absolute; top: -9999px; left: -9999px; }
+            .trades-table tr { border: 1px solid #2d343c; margin-bottom: 15px; border-radius: 10px; background: #252d37; padding: 10px; }
+            .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; font-size: 0.85em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
             .trades-table td:last-child { border-bottom: none; }
-            .trades-table td:before {
-                content: attr(data-label);
-                position: absolute;
-                left: 10px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                text-align: left;
-                font-weight: bold;
-                color: #8892b0;
-                text-transform: uppercase;
-                font-size: 0.75em;
-            }
+            .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
     </style>
 </head>
@@ -212,7 +184,8 @@
                     <label>Instrument</label>
                     <div class="instrument-container">
                         <select id="instrument" required></select>
-                        <button type="button" class="btn-add-instrument" onclick="addNewInstrument()">+</button>
+                        <button type="button" class="btn-instrument-action btn-add-instrument" onclick="addNewInstrument()" title="Add">+</button>
+                        <button type="button" class="btn-instrument-action btn-del-instrument" onclick="removeInstrument()" title="Remove">–</button>
                     </div>
                 </div>
                 <div class="form-group"><label>Dir</label><select id="direction" required><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
@@ -328,11 +301,23 @@
         const newInst = prompt("New Instrument:");
         if (newInst) {
             const formatted = newInst.toUpperCase().trim();
-            if (!customInstruments.includes(formatted)) {
+            if (formatted && !customInstruments.includes(formatted)) {
                 customInstruments.push(formatted);
                 localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
                 populateInstruments();
+                document.getElementById('instrument').value = formatted;
             }
+        }
+    }
+
+    function removeInstrument() {
+        const select = document.getElementById('instrument');
+        const toRemove = select.value;
+        if (customInstruments.length <= 1) return alert("At least one instrument must remain.");
+        if (confirm(`Remove ${toRemove} from list?`)) {
+            customInstruments = customInstruments.filter(i => i !== toRemove);
+            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+            populateInstruments();
         }
     }
 
@@ -404,14 +389,10 @@
             const notesText = t.notes || '';
             const tooltip = notesText ? `title="${notesText.replace(/"/g, '&quot;')}"` : '';
             return `<tr>
-                <td data-label="Date">${t.date}</td>
-                <td data-label="Inst.">${t.instrument}</td>
-                <td data-label="Dir">${t.direction}</td>
-                <td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
+                <td data-label="Date">${t.date}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
                 <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td data-label="R" class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td data-label="Tag">${t.mistake}</td>
-                <td data-label="Res." ${tooltip} style="cursor: ${notesText ? 'help' : 'default'};">${t.result}</td>
+                <td data-label="Tag">${t.mistake}</td><td data-label="Res." ${tooltip}>${t.result}</td>
                 <td data-label="IMG">${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
                 <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
@@ -427,11 +408,8 @@
         const ctxW = document.getElementById('weekdayChart').getContext('2d');
 
         const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        
-        let runningEquity = initialBalance;
-        let peak = initialBalance;
-        const equityData = [initialBalance];
-        const drawdownData = [0];
+        let runningEquity = initialBalance, peak = initialBalance;
+        const equityData = [initialBalance], drawdownData = [0];
 
         chrono.forEach(t => {
             runningEquity += Number(t.pl);
@@ -441,47 +419,18 @@
         });
 
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(ctxE, { 
-            type: 'line', 
-            data: { 
-                labels: [0, ...chrono.map((_,i)=>i+1)], 
-                datasets: [{ 
-                    label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2
-                }] 
-            }, 
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'ACCOUNT EQUITY CURVE', color: '#8892b0' } } } 
-        });
+        equityChart = new Chart(ctxE, { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'ACCOUNT EQUITY CURVE', color: '#8892b0' } } } });
 
         if (drawdownChart) drawdownChart.destroy();
-        drawdownChart = new Chart(ctxDD, {
-            type: 'line',
-            data: {
-                labels: [0, ...chrono.map((_,i)=>i+1)],
-                datasets: [{
-                    label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.1)', tension: 0.3, pointRadius: 0
-                }]
-            },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'ABSOLUTE DRAWDOWN ($)', color: '#8892b0' } } }
-        });
+        drawdownChart = new Chart(ctxDD, { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.1)', tension: 0.3, pointRadius: 0 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'ABSOLUTE DRAWDOWN ($)', color: '#8892b0' } } } });
 
         if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(ctxD, { 
-            type: 'bar', 
-            data: { 
-                labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], 
-                datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => trades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] 
-            }, 
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'TAG DISTRIBUTION', color: '#8892b0' } } } 
-        });
+        distributionChart = new Chart(ctxD, { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => trades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'TAG DISTRIBUTION', color: '#8892b0' } } } });
 
         const dD = [0,0,0,0,0,0,0];
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
-        weekdayChart = new Chart(ctxW, { 
-            type: 'bar', 
-            data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, 
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } 
-        });
+        weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } });
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
@@ -531,12 +480,7 @@
         populateInstruments();
     }
 
-    async function deleteAllTrades() {
-        if (confirm('Wirklich ALLE Trades löschen?')) {
-            await _supabase.from('trades').delete().not('id', 'is', null);
-            fetchTrades();
-        }
-    }
+    async function deleteAllTrades() { if (confirm('Wirklich ALLE Trades löschen?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
 
     function exportToCSV() {
         let csv = 'Date,Instrument,Direction,Entry,Exit,PL,Risk,Tag,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.direction},${t.entry},${t.exit},${t.pl},${t.risk},${t.mistake},${t.result}`).join('\n');
@@ -548,27 +492,17 @@
         const area = document.getElementById('importArea');
         const raw = area.value.trim();
         if(!raw) return alert("Please paste data!");
-        const lines = raw.split('\n');
-        const newTrades = [];
+        const lines = raw.split('\n'), newTrades = [];
         const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
         for(let line of lines) {
             const parts = line.split('\t').map(p => p.trim());
             if(parts.length >= 7) {
                 const dateParts = parts[2].split(' ');
                 const formattedDate = `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`;
-                newTrades.push({
-                    date: formattedDate, time: dateParts[3].substring(0, 5), instrument: parts[0],
-                    direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT',
-                    entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]),
-                    result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', risk: "100", mistake: "PLAN"
-                });
+                newTrades.push({ date: formattedDate, time: dateParts[3].substring(0, 5), instrument: parts[0], direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT', entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]), result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', risk: "100", mistake: "PLAN" });
             }
         }
-        if(newTrades.length > 0) { 
-            await _supabase.from('trades').insert(newTrades); 
-            area.value = ""; // Feld leeren
-            fetchTrades(); 
-        }
+        if(newTrades.length > 0) { await _supabase.from('trades').insert(newTrades); area.value = ""; fetchTrades(); }
     }
 
     fetchTrades();
