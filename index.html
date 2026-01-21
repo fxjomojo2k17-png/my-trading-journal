@@ -32,10 +32,25 @@
             position: relative;
         }
 
-        /* DIVIDER STYLE */
+        /* STYLED DIVIDER */
         .section-divider {
-            border-top: 1px solid #2d343c;
-            margin: 0 20px;
+            height: 1px;
+            margin: 40px 10%;
+            background: linear-gradient(90deg, transparent 0%, #3d4651 50%, transparent 100%);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.6;
+        }
+        .section-divider::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #764ba2;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #764ba2, 0 0 20px rgba(118, 75, 162, 0.5);
+            position: absolute;
         }
 
         .user-switcher {
