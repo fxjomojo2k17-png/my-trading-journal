@@ -154,19 +154,28 @@
             .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
 
-        /* SCREENSHOT PREVIEW STYLES */
+        /* ZENTRIERTE GROSSE VORSCHAU */
         #screenshot-preview-popup {
             position: fixed;
             display: none;
             z-index: 10000;
-            max-width: 400px;
-            max-height: 300px;
-            border: 2px solid #764ba2;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90vw;
+            max-height: 85vh;
+            border: 3px solid #764ba2;
+            border-radius: 12px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
             pointer-events: none;
             object-fit: contain;
-            background: #1c2229;
+            background: #0b0e11;
+        }
+
+        /* Highlight für Drag and Drop */
+        #screenshot.drag-over {
+            border: 2px dashed #00f2ff !important;
+            background: rgba(0, 242, 255, 0.1) !important;
         }
     </style>
 </head>
@@ -232,7 +241,8 @@
                         <option value="LATE_ENTRY">🐢 Late Entry</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link..."></div>
+                <div class="form-group"><label>Screenshot (Link or Drop Image)</label><input type="text" id="screenshot" placeholder="Paste link or drop file here..."></div>
+                
                 <div class="form-group span-2">
                     <label>Notes</label>
                     <textarea id="notes" rows="1" placeholder="Trade details..."></textarea>
@@ -315,7 +325,40 @@
     window.addEventListener('load', () => {
         const savedBalance = localStorage.getItem('initialBalance');
         if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
+        setupDragAndDrop();
     });
+
+    // NEU: DRAG AND DROP SETUP
+    function setupDragAndDrop() {
+        const dropArea = document.getElementById('screenshot');
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropArea.classList.add('drag-over');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropArea.classList.remove('drag-over');
+            }, false);
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    dropArea.value = event.target.result; // Setzt den Base64 String ins Feld
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
     function populateLists() {
         const instSelect = document.getElementById('instrument');
@@ -420,13 +463,12 @@
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            // Updated Link with Preview Events
             return `<tr>
                 <td data-label="Date">${t.date}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Strategy">${t.strategy || '-'}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
                 <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td data-label="R" class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
                 <td data-label="Tag">${t.mistake}</td><td data-label="Res." title="${(t.notes||'').replace(/"/g, '&quot;')}">${t.result}</td>
-                <td data-label="IMG">${t.screenshot ? `<a href="${t.screenshot}" target="_blank" onmouseover="showPreview(event, '${t.screenshot}')" onmousemove="updatePreviewPos(event)" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
+                <td data-label="IMG">${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()" onclick="window.open('${t.screenshot.startsWith('data') ? '#' : t.screenshot}', '_blank'); return false;">🖼️</a>` : '-'}</td>
                 <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
@@ -462,19 +504,12 @@
         weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } });
     }
 
-    /* PREVIEW FUNCTIONS */
-    function showPreview(e, url) {
+    /* VORSCHAU LOGIK - JETZT ZENTRIERT */
+    function showPreview(url) {
         const preview = document.getElementById('screenshot-preview-popup');
         if (!url || url === 'undefined') return;
         preview.src = url;
         preview.style.display = 'block';
-        updatePreviewPos(e);
-    }
-
-    function updatePreviewPos(e) {
-        const preview = document.getElementById('screenshot-preview-popup');
-        preview.style.left = (e.clientX + 15) + 'px';
-        preview.style.top = (e.clientY + 15) + 'px';
     }
 
     function hidePreview() {
