@@ -154,12 +154,12 @@
             .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
 
-        /* Screenshot Preview Popup (Neu hinzugefügt) */
+        /* SCREENSHOT PREVIEW STYLES */
         #screenshot-preview-popup {
             position: fixed;
             display: none;
-            z-index: 9999;
-            max-width: 450px;
+            z-index: 10000;
+            max-width: 400px;
             max-height: 300px;
             border: 2px solid #764ba2;
             border-radius: 8px;
@@ -172,7 +172,7 @@
 </head>
 <body>
 
-<img id="screenshot-preview-popup" src="" alt="Preview">
+<img id="screenshot-preview-popup" src="" alt="Vorschau">
 
 <div class="container">
     <div class="header"><h1>Journal</h1></div>
@@ -420,6 +420,7 @@
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
+            // Updated Link with Preview Events
             return `<tr>
                 <td data-label="Date">${t.date}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Strategy">${t.strategy || '-'}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
                 <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
@@ -461,9 +462,10 @@
         weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } });
     }
 
-    /* Screenshot Preview Logik (Neu hinzugefügt) */
+    /* PREVIEW FUNCTIONS */
     function showPreview(e, url) {
         const preview = document.getElementById('screenshot-preview-popup');
+        if (!url || url === 'undefined') return;
         preview.src = url;
         preview.style.display = 'block';
         updatePreviewPos(e);
