@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* EXAKT DEIN DESIGN AUS DER DATEI */
+        /* BASE DESIGN BEIBEHALTEN */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
@@ -32,7 +32,6 @@
             position: relative;
         }
 
-        /* USER SWITCHER NAVIGATION */
         .user-switcher {
             position: absolute;
             top: 15px;
@@ -47,7 +46,7 @@
             border: 1px solid #764ba2;
             backdrop-filter: blur(5px);
         }
-        .user-switcher label { margin: 0; font-size: 0.7em; color: #00f2ff; font-weight: bold; text-transform: uppercase; }
+        .user-switcher label { margin: 0; font-size: 0.7em; color: #00f2ff; font-weight: bold; }
         .user-switcher select { 
             background: transparent !important; border: none !important; color: white !important;
             font-weight: bold; cursor: pointer; height: auto; width: auto; font-size: 14px;
@@ -166,7 +165,7 @@
         .import-section { background: #1c2229; padding: 30px 20px; border-top: 2px solid #2d343c; }
         .import-container { max-width: 800px; margin: 0 auto; }
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
-        
+
         #screenshot-preview-popup {
             position: fixed; display: none; z-index: 10000; top: 50%; left: 50%; transform: translate(-50%, -50%);
             max-width: 90vw; max-height: 85vh; border: 3px solid #764ba2; border-radius: 12px; box-shadow: 0 0 100px rgba(0,0,0,0.9);
@@ -190,7 +189,7 @@
 
 <div class="container">
     <div class="user-switcher">
-        <label>Trader:</label>
+        <label>TRADER:</label>
         <select id="activeTraderSelect" onchange="refreshApp()">
             <option value="Trader 1">Trader 1</option>
             <option value="Trader 2">Trader 2</option>
@@ -239,7 +238,7 @@
                 <div class="form-group"><label>Exit</label><input type="text" id="exit" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
                 <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" value="" oninput="validateNumber(this)"></div>
+                <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" value="100" oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Tag</label>
                     <select id="mistake">
                         <option value="PLAN">✅ Per Plan</option>
@@ -293,7 +292,7 @@
         <div class="import-container">
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Import</h3>
             <textarea id="importArea" class="import-textarea" placeholder="Paste broker history here..."></textarea>
-            <button onclick="processBulkImport()" class="btn-primary btn-import-bulk" style="display:block; width:100%; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Import Trades Now</button>
+            <button onclick="processBulkImport()" class="btn-primary" style="width:100%; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Import Trades Now</button>
         </div>
     </div>
 </div>
@@ -311,11 +310,7 @@
     let currentViewDate = new Date();
     let selectedDateFilter = null;
 
-    // NUMMERNVALIDIERUNG FIX
-    function validateNumber(input) { 
-        let val = input.value.replace(/[^0-9.\-]/g, ''); 
-        if (val !== input.value) input.value = val;
-    }
+    function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
     async function fetchTrades() {
         const { data, error } = await _supabase.from('trades').select('*');
@@ -363,7 +358,6 @@
     function updateStatsAndTable() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         localStorage.setItem('initialBalance', initialBalance);
-        
         const activeTrader = document.getElementById('activeTraderSelect').value;
         const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
@@ -385,7 +379,6 @@
         document.getElementById('winRate').textContent = filtered.length > 0 ? ((wins.length / filtered.length) * 100).toFixed(1) + '%' : '0%';
         document.getElementById('totalPL').textContent = '$' + viewPL.toFixed(2);
         document.getElementById('totalPL').className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
-        
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
         
@@ -393,7 +386,7 @@
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
-                <td>${t.date}</td><td style="font-size:0.75em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+                <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
                 <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
                 <td>${t.mistake}</td>
@@ -433,12 +426,17 @@
         e.preventDefault();
         const editId = document.getElementById('editId').value;
         const activeTrader = document.getElementById('activeTraderSelect').value;
-        if (activeTrader === 'TEAM') return alert("Please select a specific Trader!");
+        if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
+
+        // FEHLER-FIX: P/L WIRD AUTOMATISCH NEGATIV WENN 'LOSS' GEWÄHLT IST
+        let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
+        const result = document.getElementById('result').value;
+        const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
 
         const data = { 
             date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
             strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
-            exit: document.getElementById('exit').value, result: document.getElementById('result').value, pl: parseFloat(document.getElementById('pl').value), 
+            exit: document.getElementById('exit').value, result: result, pl: plValue, 
             risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, 
             notes: document.getElementById('notes').value, trader_name: activeTrader
         };
@@ -451,12 +449,9 @@
         document.getElementById('tradeForm').reset(); 
         document.getElementById('editId').value = ""; 
         document.getElementById('submitBtn').textContent = "Save Trade";
-        
-        // DATUM UND ZEIT AUTO-BEFÜLLUNG
         const now = new Date();
         document.getElementById('date').value = now.toISOString().split('T')[0];
         document.getElementById('time').value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        
         populateLists(); 
     }
 
@@ -487,7 +482,7 @@
         document.getElementById('instrument').value = t.instrument; document.getElementById('strategy').value = t.strategy;
         document.getElementById('direction').value = t.direction; document.getElementById('entry').value = t.entry; 
         document.getElementById('exit').value = t.exit; document.getElementById('result').value = t.result; 
-        document.getElementById('pl').value = t.pl; document.getElementById('risk').value = t.risk; 
+        document.getElementById('pl').value = Math.abs(t.pl); document.getElementById('risk').value = t.risk; 
         document.getElementById('mistake').value = t.mistake; document.getElementById('screenshot').value = t.screenshot; 
         document.getElementById('notes').value = t.notes; document.getElementById('editId').value = t.id; 
         document.getElementById('submitBtn').textContent = "Update Trade";
@@ -496,7 +491,7 @@
 
     async function processBulkImport() {
         const activeTrader = document.getElementById('activeTraderSelect').value;
-        if (activeTrader === 'TEAM') return alert("Please select a specific Trader for Import!");
+        if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
         const area = document.getElementById('importArea'), raw = area.value.trim();
         if(!raw) return alert("Please paste data!");
         const lines = raw.split('\n'), newTrades = [], months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
