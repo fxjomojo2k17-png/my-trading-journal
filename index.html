@@ -32,6 +32,12 @@
             position: relative;
         }
 
+        /* DIVIDER STYLE */
+        .section-divider {
+            border-top: 1px solid #2d343c;
+            margin: 0 20px;
+        }
+
         .user-switcher {
             position: absolute;
             top: 15px;
@@ -84,7 +90,7 @@
         .stat-card h3 { color: #8892b0; font-size: 0.6em; text-transform: uppercase; margin-bottom: 5px; }
         .stat-card .value { font-size: 1.1em; font-weight: bold; }
 
-        .form-section { padding: 20px; border-bottom: 1px solid #2d343c; }
+        .form-section { padding: 20px; }
         
         .form-grid { 
             display: grid;
@@ -133,7 +139,7 @@
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
 
-        .calendar-section { padding: 0 20px 20px 20px; max-width: 450px; margin: 0 auto; }
+        .calendar-section { padding: 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #1c2229; padding: 8px; border-radius: 8px; }
         .calendar-day-label { text-align: center; font-size: 0.55em; color: #5c6680; padding-bottom: 4px; }
@@ -146,7 +152,7 @@
         .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
         .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
 
-        .history-controls { padding: 20px 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .history-controls { padding: 0 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
         .history-controls label { margin-bottom: 0; font-size: 0.75em; }
         .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; background: #252d37; color: white; border: 1px solid #3d4651; border-radius: 4px; }
         .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
@@ -259,6 +265,8 @@
         </form>
     </div>
 
+    <div class="section-divider"></div>
+
     <div class="charts-container">
         <div class="chart-box"><canvas id="equityChart"></canvas></div>
         <div class="chart-box"><canvas id="drawdownChart"></canvas></div>
@@ -266,6 +274,8 @@
         <div class="chart-box"><canvas id="distributionChart"></canvas></div>
         <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
     </div>
+
+    <div class="section-divider"></div>
 
     <div class="calendar-section">
         <div class="calendar-header">
@@ -349,11 +359,7 @@
         filter.value = currentVal;
     }
 
-    function refreshApp() { 
-        renderCalendar(); 
-        updateStatsAndTable(); 
-        resetForm(); 
-    }
+    function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
     function updateStatsAndTable() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
@@ -385,7 +391,6 @@
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            // TOOLTIP BEI 'TAG' EINGEBAUT (TITLE=NOTES)
             return `<tr>
                 <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
                 <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
@@ -407,17 +412,13 @@
 
         if (equityChart) equityChart.destroy();
         equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
-        
         if (drawdownChart) drawdownChart.destroy();
         drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.1)', tension: 0.3, pointRadius: 0 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
-        
         const stratMap = {}; chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
         if (strategyPLChart) strategyPLChart.destroy();
         strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} } } });
-        
         if (distributionChart) distributionChart.destroy();
         distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' }, legend: {display:false} } } });
-        
         const dD = [0,0,0,0,0,0,0]; chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' }, legend: {display:false} } } });
@@ -428,11 +429,9 @@
         const editId = document.getElementById('editId').value;
         const activeTrader = document.getElementById('activeTraderSelect').value;
         if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
-
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
         const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
-
         const data = { 
             date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
             strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
@@ -446,20 +445,16 @@
     });
 
     function resetForm() { 
-        document.getElementById('tradeForm').reset(); 
-        document.getElementById('editId').value = ""; 
+        document.getElementById('tradeForm').reset(); document.getElementById('editId').value = ""; 
         document.getElementById('submitBtn').textContent = "Save Trade";
-        const now = new Date();
-        document.getElementById('date').value = now.toISOString().split('T')[0];
+        const now = new Date(); document.getElementById('date').value = now.toISOString().split('T')[0];
         document.getElementById('time').value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         populateLists(); 
     }
 
     function renderCalendar() {
-        const grid = document.getElementById('calendarGrid');
-        const activeTrader = document.getElementById('activeTraderSelect').value;
-        grid.innerHTML = '';
-        const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
+        const grid = document.getElementById('calendarGrid'); const activeTrader = document.getElementById('activeTraderSelect').value;
+        grid.innerHTML = ''; const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
         document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
         const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
         ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
@@ -490,10 +485,8 @@
     }
 
     async function processBulkImport() {
-        const activeTrader = document.getElementById('activeTraderSelect').value;
-        if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
-        const area = document.getElementById('importArea'), raw = area.value.trim();
-        if(!raw) return alert("Please paste data!");
+        const activeTrader = document.getElementById('activeTraderSelect').value; if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
+        const area = document.getElementById('importArea'), raw = area.value.trim(); if(!raw) return alert("Please paste data!");
         const lines = raw.split('\n'), newTrades = [], months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
         for(let line of lines) {
             const parts = line.split('\t').map(p => p.trim());
