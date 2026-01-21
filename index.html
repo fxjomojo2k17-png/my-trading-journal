@@ -153,9 +153,26 @@
             .trades-table td:last-child { border-bottom: none; }
             .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
+
+        /* Screenshot Preview Popup (Neu hinzugefügt) */
+        #screenshot-preview-popup {
+            position: fixed;
+            display: none;
+            z-index: 9999;
+            max-width: 450px;
+            max-height: 300px;
+            border: 2px solid #764ba2;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            pointer-events: none;
+            object-fit: contain;
+            background: #1c2229;
+        }
     </style>
 </head>
 <body>
+
+<img id="screenshot-preview-popup" src="" alt="Preview">
 
 <div class="container">
     <div class="header"><h1>Journal</h1></div>
@@ -408,7 +425,7 @@
                 <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td data-label="R" class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
                 <td data-label="Tag">${t.mistake}</td><td data-label="Res." title="${(t.notes||'').replace(/"/g, '&quot;')}">${t.result}</td>
-                <td data-label="IMG">${t.screenshot ? `<a href="${t.screenshot}" target="_blank">🖼️</a>` : '-'}</td>
+                <td data-label="IMG">${t.screenshot ? `<a href="${t.screenshot}" target="_blank" onmouseover="showPreview(event, '${t.screenshot}')" onmousemove="updatePreviewPos(event)" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
                 <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
@@ -442,6 +459,26 @@
         trades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } });
+    }
+
+    /* Screenshot Preview Logik (Neu hinzugefügt) */
+    function showPreview(e, url) {
+        const preview = document.getElementById('screenshot-preview-popup');
+        preview.src = url;
+        preview.style.display = 'block';
+        updatePreviewPos(e);
+    }
+
+    function updatePreviewPos(e) {
+        const preview = document.getElementById('screenshot-preview-popup');
+        preview.style.left = (e.clientX + 15) + 'px';
+        preview.style.top = (e.clientY + 15) + 'px';
+    }
+
+    function hidePreview() {
+        const preview = document.getElementById('screenshot-preview-popup');
+        preview.style.display = 'none';
+        preview.src = '';
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
