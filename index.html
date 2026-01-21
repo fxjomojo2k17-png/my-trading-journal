@@ -145,14 +145,20 @@
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
         .import-info { font-size: 0.75em; color: #8892b0; margin-bottom: 10px; line-height: 1.4; }
 
-        @media (max-width: 768px) {
-            .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr { display: block; }
-            .trades-table thead tr { position: absolute; top: -9999px; left: -9999px; }
-            .trades-table tr { border: 1px solid #2d343c; margin-bottom: 15px; border-radius: 10px; background: #252d37; padding: 10px; }
-            .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; font-size: 0.85em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            .trades-table td:last-child { border-bottom: none; }
-            .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
+        /* NEU: Bulk Import Button Fix */
+        .btn-import-bulk {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.2);
         }
+        .btn-import-bulk:hover { transform: translateY(-1px); opacity: 0.9; }
 
         /* ZENTRIERTE GROSSE VORSCHAU */
         #screenshot-preview-popup {
@@ -172,10 +178,18 @@
             background: #0b0e11;
         }
 
-        /* Highlight für Drag and Drop */
         #screenshot.drag-over {
             border: 2px dashed #00f2ff !important;
             background: rgba(0, 242, 255, 0.1) !important;
+        }
+
+        @media (max-width: 768px) {
+            .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr { display: block; }
+            .trades-table thead tr { position: absolute; top: -9999px; left: -9999px; }
+            .trades-table tr { border: 1px solid #2d343c; margin-bottom: 15px; border-radius: 10px; background: #252d37; padding: 10px; }
+            .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; font-size: 0.85em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .trades-table td:last-child { border-bottom: none; }
+            .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
     </style>
 </head>
@@ -242,7 +256,6 @@
                     </select>
                 </div>
                 <div class="form-group"><label>Screenshot (Link or Drop Image)</label><input type="text" id="screenshot" placeholder="Paste link or drop file here..."></div>
-                
                 <div class="form-group span-2">
                     <label>Notes</label>
                     <textarea id="notes" rows="1" placeholder="Trade details..."></textarea>
@@ -295,7 +308,7 @@
             <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
             <p class="import-info">Copy broker list and paste here.</p>
             <textarea id="importArea" class="import-textarea" placeholder="XAUUSD Sell 15 Jan..."></textarea>
-            <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades Now</button>
+            <button onclick="processBulkImport()" class="btn-primary btn-import-bulk">Import Trades Now</button>
         </div>
     </div>
 </div>
@@ -328,33 +341,19 @@
         setupDragAndDrop();
     });
 
-    // NEU: DRAG AND DROP SETUP
     function setupDragAndDrop() {
         const dropArea = document.getElementById('screenshot');
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropArea.classList.add('drag-over');
-            }, false);
+        ['dragenter', 'dragover'].forEach(name => {
+            dropArea.addEventListener(name, (e) => { e.preventDefault(); dropArea.classList.add('drag-over'); }, false);
         });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropArea.classList.remove('drag-over');
-            }, false);
+        ['dragleave', 'drop'].forEach(name => {
+            dropArea.addEventListener(name, (e) => { e.preventDefault(); dropArea.classList.remove('drag-over'); }, false);
         });
-
         dropArea.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-
+            const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    dropArea.value = event.target.result; // Setzt den Base64 String ins Feld
-                };
+                reader.onload = (ev) => { dropArea.value = ev.target.result; };
                 reader.readAsDataURL(file);
             }
         });
@@ -478,7 +477,7 @@
     function updateCharts() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         const ctxE = document.getElementById('equityChart').getContext('2d'), ctxDD = document.getElementById('drawdownChart').getContext('2d'), ctxD = document.getElementById('distributionChart').getContext('2d'), ctxW = document.getElementById('weekdayChart').getContext('2d'), ctxS = document.getElementById('strategyPLChart').getContext('2d');
-        const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+        const chrono = [...trades].sort((a,b) => new Date(a.date + ' ' + b.time) - new Date(b.date + ' ' + b.time));
         
         let runningEquity = initialBalance, peak = initialBalance;
         const equityData = [initialBalance], drawdownData = [0];
@@ -504,18 +503,15 @@
         weekdayChart = new Chart(ctxW, { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' } } } });
     }
 
-    /* VORSCHAU LOGIK - JETZT ZENTRIERT */
     function showPreview(url) {
         const preview = document.getElementById('screenshot-preview-popup');
         if (!url || url === 'undefined') return;
-        preview.src = url;
-        preview.style.display = 'block';
+        preview.src = url; preview.style.display = 'block';
     }
 
     function hidePreview() {
         const preview = document.getElementById('screenshot-preview-popup');
-        preview.style.display = 'none';
-        preview.src = '';
+        preview.style.display = 'none'; preview.src = '';
     }
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
