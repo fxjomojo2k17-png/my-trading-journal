@@ -283,7 +283,7 @@
 
     <div class="trades-table">
         <table>
-            <thead><tr><th>Date</th><th>Trader</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
+            <thead><tr><th>Date</th><th>Trader</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>Res.</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
             <tbody id="tradesBody"></tbody>
         </table>
     </div>
@@ -385,8 +385,10 @@
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
+            // HIER WURDE DIE SPALTE MIT DEM TOOLTIP EINGEBAUT
             return `<tr>
                 <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+                <td data-label="Res." title="${t.notes || ''}" class="${t.result === 'WIN' ? 'win' : (t.result === 'LOSS' ? 'loss' : '')}" style="cursor:help; font-weight:bold;">${t.result || '-'}</td>
                 <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
                 <td>${t.mistake}</td>
@@ -428,7 +430,6 @@
         const activeTrader = document.getElementById('activeTraderSelect').value;
         if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
 
-        // FEHLER-FIX: P/L WIRD AUTOMATISCH NEGATIV WENN 'LOSS' GEWÄHLT IST
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
         const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
