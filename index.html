@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trading Journal PRO - Duo Edition</title>
+    <title>Trading Journal PRO</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* BASE DESIGN AUS DEINER DATEI BEIBEHALTEN */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
@@ -28,10 +29,10 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             overflow: hidden;
             border: 1px solid #2d343c;
-            position: relative;
+            position: relative; /* Wichtig für User-Switcher Positioning */
         }
 
-        /* User Switcher oben links */
+        /* NEU: USER SWITCHER OBEN LINKS */
         .user-switcher {
             position: absolute;
             top: 15px;
@@ -40,15 +41,16 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(37, 45, 55, 0.8);
-            padding: 8px 15px;
+            background: rgba(37, 45, 55, 0.9);
+            padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid #3d4651;
+            border: 1px solid #764ba2;
             backdrop-filter: blur(5px);
         }
-        .user-switcher label { margin: 0; font-size: 0.7em; color: #00f2ff; }
+        .user-switcher label { margin: 0; font-size: 0.7em; color: #00f2ff; font-weight: bold; }
         .user-switcher select { 
-            height: 30px; width: auto; font-weight: bold; border-color: #764ba2; cursor: pointer;
+            background: transparent !important; border: none !important; color: white !important;
+            font-weight: bold; cursor: pointer; height: auto; width: auto; font-size: 14px;
         }
         
         .header {
@@ -166,6 +168,8 @@
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
         .import-info { font-size: 0.75em; color: #8892b0; margin-bottom: 10px; line-height: 1.4; }
 
+        .btn-import-bulk { display: block; width: 100%; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9em; transition: 0.2s; }
+
         #screenshot-preview-popup {
             position: fixed; display: none; z-index: 10000; top: 50%; left: 50%; transform: translate(-50%, -50%);
             max-width: 90vw; max-height: 85vh; border: 3px solid #764ba2; border-radius: 12px; box-shadow: 0 0 100px rgba(0,0,0,0.9);
@@ -189,15 +193,15 @@
 
 <div class="container">
     <div class="user-switcher">
-        <label>Active Trader:</label>
-        <select id="activeTraderSelect" onchange="switchTrader()">
+        <label>TRADER:</label>
+        <select id="activeTraderSelect" onchange="refreshApp()">
             <option value="Trader 1">Trader 1</option>
             <option value="Trader 2">Trader 2</option>
             <option value="TEAM">Team View</option>
         </select>
     </div>
 
-    <div class="header"><h1>Trading Journal PRO</h1></div>
+    <div class="header"><h1>Trading Journal</h1></div>
 
     <div class="stats-grid">
         <div class="stat-card">
@@ -233,7 +237,7 @@
                         <button type="button" class="btn-action btn-del" onclick="removeStrategy()">–</button>
                     </div>
                 </div>
-                <div class="form-group"><label>Dir</label><select id="direction" required><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
+                <div class="form-group"><label>Direction</label><select id="direction" required><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
                 <div class="form-group"><label>Entry</label><input type="text" id="entry" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Exit</label><input type="text" id="exit" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
@@ -248,7 +252,7 @@
                         <option value="LATE_ENTRY">🐢 Late Entry</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Screenshot (Drop Image)</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
+                <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
                 <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
             <div class="button-group">
@@ -290,9 +294,9 @@
 
     <div class="import-section">
         <div class="import-container">
-            <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Trade Import</h3>
+            <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Import</h3>
             <textarea id="importArea" class="import-textarea" placeholder="Paste broker history here..."></textarea>
-            <button onclick="processBulkImport()" class="btn-primary" style="width: 100%;">Import Trades</button>
+            <button onclick="processBulkImport()" class="btn-primary btn-import-bulk">Import Trades Now</button>
         </div>
     </div>
 </div>
@@ -318,14 +322,11 @@
         else { trades = data || []; refreshApp(); }
     }
 
-    function switchTrader() { refreshApp(); }
-
-    function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
-
     window.addEventListener('load', () => {
         const savedBalance = localStorage.getItem('initialBalance');
         if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
-        setupDragAndDrop(); fetchTrades();
+        setupDragAndDrop();
+        fetchTrades(); // Initial laden
     });
 
     function setupDragAndDrop() {
@@ -352,27 +353,34 @@
         filter.value = currentVal;
     }
 
+    function refreshApp() { 
+        renderCalendar(); 
+        updateStatsAndTable(); 
+        resetForm(); 
+    }
+
     function updateStatsAndTable() {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         localStorage.setItem('initialBalance', initialBalance);
+        
         const activeTrader = document.getElementById('activeTraderSelect').value;
         const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
-        // Filter nach Trader + Zeit + Instrument
+        // FILTERLOGIK FÜR DIE ANZEIGE
         let filtered = trades.filter(t => {
-            const matchesTrader = (activeTrader === 'TEAM' || t.trader_name === activeTrader);
+            const matchesTrader = (activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
             const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
             const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
             return matchesTrader && matchesTime && matchesInstrument;
         });
 
-        // Alle Trades des Traders für Gesamt-Equity (nicht nur aktueller View)
-        let traderAllTrades = trades.filter(t => activeTrader === 'TEAM' || t.trader_name === activeTrader);
+        // Alle Trades des Traders für Equity-Berechnung
+        let traderAllTrades = trades.filter(t => activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
         const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
         document.getElementById('currentEquity').textContent = '$' + (initialBalance + totalNetPL).toLocaleString(undefined, {minimumFractionDigits: 2});
 
-        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
         const wins = filtered.filter(t => t.result === 'WIN'), losses = filtered.filter(t => t.result === 'LOSS');
+        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
         const totalWinsVal = wins.reduce((sum, t) => sum + Number(t.pl), 0), totalLossesVal = Math.abs(losses.reduce((sum, t) => sum + Number(t.pl), 0));
 
         document.getElementById('totalTrades').textContent = filtered.length;
@@ -382,41 +390,43 @@
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
         document.getElementById('profitFactor').textContent = totalLossesVal > 0 ? (totalWinsVal / totalLossesVal).toFixed(2) : (totalWinsVal > 0 ? '∞' : '0.00');
-
+        
         const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
-                <td>${t.date}</td><td style="color:#8892b0; font-size:0.75em">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td><td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td><td>${t.mistake}</td>
-                <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+                <td data-label="Date">${t.date}</td><td data-label="Trader" style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Strategy">${t.strategy || '-'}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
+                <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+                <td data-label="R" class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+                <td data-label="Tag">${t.mistake}</td>
+                <td data-label="IMG">${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
+                <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
         updateCharts(traderAllTrades);
     }
 
-    function updateCharts(chronoTrades) {
+    function updateCharts(chartTrades) {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-        const chrono = [...chronoTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+        const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
         let runningEquity = initialBalance, peak = initialBalance;
         const equityData = [initialBalance], drawdownData = [0];
         chrono.forEach(t => { runningEquity += Number(t.pl); equityData.push(runningEquity); if (runningEquity > peak) peak = runningEquity; drawdownData.push(runningEquity - peak); });
 
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'ACCOUNT EQUITY', color: '#8892b0' }, legend: {display:false} } } });
+        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
         
         if (drawdownChart) drawdownChart.destroy();
         drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.1)', tension: 0.3, pointRadius: 0 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
         
-        const stratMap = {}; chrono.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
+        const stratMap = {}; chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
         if (strategyPLChart) strategyPLChart.destroy();
-        strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'STRATEGY P/L', color: '#8892b0' }, legend: {display:false} } } });
+        strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} } } });
         
         if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chrono.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' }, legend: {display:false} } } });
+        distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' }, legend: {display:false} } } });
         
-        const dD = [0,0,0,0,0,0,0]; chrono.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
+        const dD = [0,0,0,0,0,0,0]; chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' }, legend: {display:false} } } });
     }
@@ -425,21 +435,68 @@
         e.preventDefault();
         const editId = document.getElementById('editId').value;
         const activeTrader = document.getElementById('activeTraderSelect').value;
-        if (activeTrader === 'TEAM') return alert("Please select a specific Trader to save a trade!");
         
+        if (activeTrader === 'TEAM') return alert("Select a specific Trader to save!");
+
         const data = { 
             date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
             strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
             exit: document.getElementById('exit').value, result: document.getElementById('result').value, pl: parseFloat(document.getElementById('pl').value), 
             risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, 
-            notes: document.getElementById('notes').value, trader_name: activeTrader 
+            notes: document.getElementById('notes').value,
+            trader_name: activeTrader // TRADER NAME SPEICHERN
         };
         if (editId) await _supabase.from('trades').update(data).eq('id', editId);
         else await _supabase.from('trades').insert([data]);
         fetchTrades();
     });
 
-    async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
+    // ORIGINAL FUNKTIONEN BEIBEHALTEN
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        const activeTrader = document.getElementById('activeTraderSelect').value;
+        grid.innerHTML = '';
+        const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
+        document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
+        const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
+        ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
+        for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dayTrades = trades.filter(t => t.date === dateStr && (activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader));
+            const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+            const dayEl = document.createElement('div');
+            dayEl.className = `calendar-day ${dayPL > 0 ? 'day-win' : (dayPL < 0 ? 'day-loss' : '')} ${selectedDateFilter === dateStr ? 'selected' : ''}`;
+            dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>`;
+            dayEl.onclick = () => { selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr; renderCalendar(); updateStatsAndTable(); };
+            grid.appendChild(dayEl);
+        }
+    }
+
+    async function processBulkImport() {
+        const activeTrader = document.getElementById('activeTraderSelect').value;
+        if (activeTrader === 'TEAM') return alert("Select a specific Trader for Import!");
+        
+        const area = document.getElementById('importArea'), raw = area.value.trim();
+        if(!raw) return alert("Please paste data!");
+        const lines = raw.split('\n'), newTrades = [], months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+        for(let line of lines) {
+            const parts = line.split('\t').map(p => p.trim());
+            if(parts.length >= 7) {
+                const dateParts = parts[2].split(' ');
+                newTrades.push({ 
+                    date: `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`, 
+                    time: dateParts[3].substring(0, 5), instrument: parts[0], strategy: 'Imported', 
+                    direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT', 
+                    entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]), 
+                    result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', risk: "100", mistake: "PLAN",
+                    trader_name: activeTrader 
+                });
+            }
+        }
+        if(newTrades.length > 0) { await _supabase.from('trades').insert(newTrades); area.value = ""; fetchTrades(); }
+    }
+
     function prepareEdit(id) {
         const t = trades.find(tr => tr.id === id);
         document.getElementById('date').value = t.date; document.getElementById('time').value = t.time; 
@@ -453,27 +510,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function renderCalendar() {
-        const grid = document.getElementById('calendarGrid');
-        const activeTrader = document.getElementById('activeTraderSelect').value;
-        grid.innerHTML = '';
-        const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
-        document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
-        const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
-        ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
-        for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
-        for (let d = 1; d <= daysInMonth; d++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const dayTrades = trades.filter(t => t.date === dateStr && (activeTrader === 'TEAM' || t.trader_name === activeTrader));
-            const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-            const dayEl = document.createElement('div');
-            dayEl.className = `calendar-day ${dayPL > 0 ? 'day-win' : (dayPL < 0 ? 'day-loss' : '')} ${selectedDateFilter === dateStr ? 'selected' : ''}`;
-            dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>`;
-            dayEl.onclick = () => { selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr; renderCalendar(); updateStatsAndTable(); };
-            grid.appendChild(dayEl);
-        }
-    }
-
+    // Hilfsfunktionen
     function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
     function resetForm() { document.getElementById('tradeForm').reset(); document.getElementById('editId').value = ""; document.getElementById('submitBtn').textContent = "Save Trade"; populateLists(); }
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
@@ -482,9 +519,9 @@
     function removeInstrument() { const v = document.getElementById('instrument').value; customInstruments = customInstruments.filter(i => i !== v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); }
     function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
     function removeStrategy() { const v = document.getElementById('strategy').value; customStrategies = customStrategies.filter(s => s !== v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); }
+    async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
     async function deleteAllTrades() { if(confirm('Delete ALL?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
     function exportToCSV() { let csv = 'Date,Trader,Instrument,PL\n' + trades.map(t => `${t.date},${t.trader_name},${t.instrument},${t.pl}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
-    async function processBulkImport() { alert("Bulk import uses active trader selected above."); /* Logic similar to before but with trader_name */ }
 </script>
 </body>
 </html>
