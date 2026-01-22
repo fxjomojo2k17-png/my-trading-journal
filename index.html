@@ -15,22 +15,33 @@
         
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(circle at center, #1a1f26 0%, #0b0e11 100%);
-            background-attachment: fixed;
+            background: #0b0e11; /* Grundfarbe für den Canvas-Hintergrund */
             min-height: 100vh;
             padding: 10px;
             color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        /* NEU: ANIMIERTER HINTERGRUND CANVAS */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Hinter allem anderen */
+            pointer-events: none;
         }
         
         .container {
             max-width: 1600px;
             margin: 0 auto;
-            background: rgba(22, 26, 30, 0.8) !important;
-            backdrop-filter: blur(12px);
+            background: rgba(22, 26, 30, 0.85) !important;
+            backdrop-filter: blur(15px);
             border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
 
@@ -62,10 +73,10 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(37, 45, 55, 0.7);
+            background: rgba(37, 45, 55, 0.8);
             padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid rgba(118, 75, 162, 0.3);
+            border: 1px solid rgba(118, 75, 162, 0.4);
             backdrop-filter: blur(5px);
         }
         .user-switcher select { 
@@ -75,7 +86,7 @@
         
         .header {
             background-color: #0b0e11;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), 
                               url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); 
             background-size: cover;
             background-position: center;
@@ -91,11 +102,11 @@
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 10px;
             padding: 15px;
-            background: rgba(28, 34, 41, 0.5);
+            background: rgba(28, 34, 41, 0.6);
         }
         
         .stat-card {
-            background: rgba(37, 45, 55, 0.6);
+            background: rgba(37, 45, 55, 0.7);
             padding: 12px;
             border-radius: 10px;
             text-align: center;
@@ -104,8 +115,8 @@
             transition: all 0.4s ease;
         }
 
-        .glow-win { box-shadow: 0 0 15px rgba(0, 255, 170, 0.15); border-color: rgba(0, 255, 170, 0.3); }
-        .glow-loss { box-shadow: 0 0 15px rgba(255, 74, 104, 0.15); border-color: rgba(255, 74, 104, 0.3); }
+        .glow-win { box-shadow: 0 0 15px rgba(0, 255, 170, 0.2); border-color: rgba(0, 255, 170, 0.4); }
+        .glow-loss { box-shadow: 0 0 15px rgba(255, 74, 104, 0.2); border-color: rgba(255, 74, 104, 0.4); }
 
         .stat-card h3 { color: #8892b0; font-size: 0.6em; text-transform: uppercase; margin-bottom: 5px; }
         .stat-card .value { font-size: 1.1em; font-weight: bold; }
@@ -154,11 +165,11 @@
         .btn-export { background: transparent !important; border: 1px solid #00f2ff !important; color: #00f2ff !important; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; border-radius: 4px; cursor: pointer; }
 
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        .chart-box { background: rgba(37, 45, 55, 0.5); padding: 15px; border-radius: 12px; height: 320px; border: 1px solid rgba(255,255,255,0.03); }
+        .chart-box { background: rgba(37, 45, 55, 0.6); padding: 15px; border-radius: 12px; height: 320px; border: 1px solid rgba(255,255,255,0.05); }
 
         .calendar-section { padding: 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: rgba(28, 34, 41, 0.5); padding: 8px; border-radius: 8px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: rgba(28, 34, 41, 0.6); padding: 8px; border-radius: 8px; }
         
         .calendar-day { background: rgba(37, 45, 55, 0.8); aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s; }
         .calendar-day:hover { background: #2d343c; transform: translateY(-2px); }
@@ -167,22 +178,20 @@
         .calendar-day .day-num { position: absolute; top: 2px; left: 3px; font-size: 0.6em; color: #5c6680; }
         .calendar-day .day-pl { font-weight: bold; font-size: 0.75em; margin-top: 4px; }
 
-        .day-win { background: rgba(0, 255, 170, 0.15) !important; color: #00ffaa !important; border-color: rgba(0, 255, 170, 0.3) !important; }
-        .day-loss { background: rgba(255, 74, 104, 0.15) !important; color: #ff4a68 !important; border-color: rgba(255, 74, 104, 0.3) !important; }
+        .day-win { background: rgba(0, 255, 170, 0.2) !important; color: #00ffaa !important; border-color: rgba(0, 255, 170, 0.4) !important; box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.1); }
+        .day-loss { background: rgba(255, 74, 104, 0.2) !important; color: #ff4a68 !important; border-color: rgba(255, 74, 104, 0.4) !important; box-shadow: inset 0 0 10px rgba(255, 74, 104, 0.1); }
 
         .history-controls { padding: 0 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
-        
-        /* FIX FÜR RIESIGES DROPDOWN */
         #historyInstrumentFilter { width: 160px !important; }
 
         .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
 
         .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { background: rgba(28, 34, 41, 0.8); color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
+        th { background: rgba(28, 34, 41, 0.85); color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         
         tr { transition: all 0.2s ease; }
-        tbody tr:hover { background: rgba(255, 255, 255, 0.03) !important; transform: scale(1.002); box-shadow: inset 4px 0 0 #764ba2; }
+        tbody tr:hover { background: rgba(255, 255, 255, 0.05) !important; transform: scale(1.002); box-shadow: inset 4px 0 0 #764ba2; }
         
         td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85em; }
 
@@ -192,7 +201,7 @@
         .edit-btn { background: rgba(0, 242, 255, 0.1); border-color: #00f2ff; color: #00f2ff; }
         .del-btn { background: rgba(255, 74, 104, 0.1); border-color: #ff4a68; color: #ff4a68; }
 
-        .import-section { background: rgba(28, 34, 41, 0.5); padding: 30px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .import-section { background: rgba(28, 34, 41, 0.6); padding: 30px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
 
         #screenshot-preview-popup {
@@ -210,6 +219,8 @@
     </style>
 </head>
 <body>
+
+<canvas id="bgCanvas"></canvas>
 
 <img id="screenshot-preview-popup" src="" alt="Preview">
 
@@ -328,6 +339,64 @@
 </div>
 
 <script>
+    /* ANIMIERTER HINTERGRUND LOGIK */
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let candles = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class FallingCandle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * -canvas.height;
+            this.speed = 1 + Math.random() * 2;
+            this.width = 4 + Math.random() * 6;
+            this.height = 15 + Math.random() * 25;
+            this.isBullish = Math.random() > 0.5;
+            this.opacity = 0.1 + Math.random() * 0.3;
+        }
+        update() {
+            this.y += this.speed;
+            if (this.y > canvas.height) this.reset();
+        }
+        draw() {
+            ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
+            ctx.fillStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity * 0.5})` : `rgba(255, 74, 104, ${this.opacity * 0.5})`;
+            
+            // Wick
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.width / 2, this.y - 5);
+            ctx.lineTo(this.x + this.width / 2, this.y + this.height + 5);
+            ctx.stroke();
+            
+            // Body
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    function setupBG() {
+        candles = Array.from({ length: 40 }, () => new FallingCandle());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            candles.forEach(c => { c.update(); c.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    }
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    setupBG();
+
+
+    /* BESTEHENDER CODE START */
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     const { createClient } = supabase;
