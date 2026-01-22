@@ -22,7 +22,6 @@
             color: #e0e0e0;
         }
         
-        /* GLASSMORPHISM EFFEKT */
         .container {
             max-width: 1600px;
             margin: 0 auto;
@@ -105,7 +104,6 @@
             transition: all 0.4s ease;
         }
 
-        /* DYNAMISCHE GLOW EFFEKTE */
         .glow-win { box-shadow: 0 0 15px rgba(0, 255, 170, 0.15); border-color: rgba(0, 255, 170, 0.3); }
         .glow-loss { box-shadow: 0 0 15px rgba(255, 74, 104, 0.15); border-color: rgba(255, 74, 104, 0.3); }
 
@@ -161,8 +159,17 @@
         .calendar-section { padding: 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: rgba(28, 34, 41, 0.5); padding: 8px; border-radius: 8px; }
+        
         .calendar-day { background: rgba(37, 45, 55, 0.8); aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s; }
         .calendar-day:hover { background: #2d343c; transform: translateY(-2px); }
+        .calendar-day.selected { border-color: #764ba2; background: rgba(118, 75, 162, 0.2); }
+        .calendar-day.today { border-color: #00f2ff; }
+        .calendar-day .day-num { position: absolute; top: 2px; left: 3px; font-size: 0.6em; color: #5c6680; }
+        .calendar-day .day-pl { font-weight: bold; font-size: 0.75em; margin-top: 4px; }
+
+        /* FIX FÜR KALENDER FARBEN */
+        .day-win { background: rgba(0, 255, 170, 0.15) !important; color: #00ffaa !important; border-color: rgba(0, 255, 170, 0.3) !important; }
+        .day-loss { background: rgba(255, 74, 104, 0.15) !important; color: #ff4a68 !important; border-color: rgba(255, 74, 104, 0.3) !important; }
 
         .history-controls { padding: 0 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
         .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
@@ -171,7 +178,6 @@
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: rgba(28, 34, 41, 0.8); color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
         
-        /* HOVER EFFEKT TABELLE */
         tr { transition: all 0.2s ease; }
         tbody tr:hover { background: rgba(255, 255, 255, 0.03) !important; transform: scale(1.002); box-shadow: inset 4px 0 0 #764ba2; }
         
@@ -333,7 +339,6 @@
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
-    // COUNT-UP ANIMATION FUNKTION
     function animateValue(id, start, end, duration, isCurrency = false, isPercent = false, suffix = "") {
         const obj = document.getElementById(id);
         if (!obj) return;
@@ -405,7 +410,6 @@
         let traderAllTrades = trades.filter(t => activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
         const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
         
-        // ANIMATED STATS
         animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
         
         const wins = filtered.filter(t => t.result === 'WIN');
@@ -416,7 +420,6 @@
         animateValue('winRate', 0, winRateVal, 800, false, true);
         animateValue('totalPL', 0, viewPL, 800, true);
         
-        // GLOW LOGIC
         const plCard = document.getElementById('card-pl');
         plCard.classList.remove('glow-win', 'glow-loss');
         if (viewPL > 0) plCard.classList.add('glow-win');
