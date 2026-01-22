@@ -20,7 +20,29 @@
             padding: 10px;
             color: #e0e0e0;
             overflow-x: hidden;
-            transition: transform 0.1s ease-out; /* Für Glitch-Effekt */
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+
+        /* HOLOGRAFISCHE SCAN-LINE */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -100px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(0, 242, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            z-index: 9999;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes scanline {
+            0% { top: -100px; }
+            100% { top: 100vh; }
         }
 
         /* ANIMIERTER HINTERGRUND CANVAS */
@@ -355,7 +377,7 @@
 </div>
 
 <script>
-    /* ANIMIERTER CYBER-HINTERGRUND (UPDATE: NEURAL LINES & MOUSE TRAIL) */
+    /* ANIMIERTER CYBER-HINTERGRUND */
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
     let elements = [];
@@ -419,7 +441,6 @@
             this.x = x; this.y = y;
             this.opacity = 0.6;
             this.isBullish = Math.random() > 0.5;
-            this.width = 4; this.height = 15;
         }
         update() { this.opacity -= 0.02; }
         draw() {
@@ -452,12 +473,10 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawNeuralLines();
             elements.forEach(e => { e.update(); e.draw(); });
-            
             mouseTrail.forEach((mc, i) => {
                 mc.update(); mc.draw();
                 if (mc.opacity <= 0) mouseTrail.splice(i, 1);
             });
-
             requestAnimationFrame(animate);
         }
         animate();
@@ -472,8 +491,7 @@
     initCanvas();
     setupBG();
 
-
-    /* BESTEHENDER CODE START (UNVERÄNDERT) */
+    /* LOGIK BEIBEHALTEN */
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     const { createClient } = supabase;
@@ -536,9 +554,7 @@
         document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
         document.getElementById('strategy').innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
         const filter = document.getElementById('historyInstrumentFilter');
-        const currentVal = filter.value;
         filter.innerHTML = `<option value="ALL">All Instruments</option>` + customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
-        filter.value = currentVal;
     }
 
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
@@ -565,7 +581,7 @@
         const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
         const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
         
-        animateValue('totalTrades', 0, filtered.length, 800, false, false, "");
+        animateValue('totalTrades', 0, filtered.length, 800);
         animateValue('winRate', 0, winRateVal, 800, false, true);
         animateValue('totalPL', 0, viewPL, 800, true);
         
@@ -581,12 +597,12 @@
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
-                <td data-label="Date">${t.date}</td><td style="font-size:0.7em; color:#8892b0" data-label="Trader">${t.trader_name || 'Trader 1'}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Strategy">${t.strategy || '-'}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}" data-label="P/L ($)">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}" data-label="R">${rMult}R</td>
-                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;" data-label="Tag">${t.mistake}</td>
-                <td data-label="IMG">${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-                <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+                <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
+                <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
+                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
         updateCharts(traderAllTrades);
@@ -621,7 +637,6 @@
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
         
-        // GLITCH EFFEKT BEI WIN
         if (result === 'WIN') {
             document.body.classList.add('glitch-active');
             setTimeout(() => document.body.classList.remove('glitch-active'), 150);
