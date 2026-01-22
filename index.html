@@ -20,8 +20,23 @@
             padding: 10px;
             color: #e0e0e0;
             overflow-x: hidden;
-            transition: transform 0.1s ease-out;
+            transition: transform 0.1s ease-out, background 1s ease;
             position: relative;
+        }
+
+        /* DYNAMISCHES AMBIENT LIGHT */
+        #ambient-light {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 80vw;
+            height: 80vh;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(118, 75, 162, 0.15) 0%, transparent 70%);
+            z-index: -2;
+            pointer-events: none;
+            transition: background 1.5s ease;
+            filter: blur(100px);
         }
 
         /* HOLOGRAFISCHE SCAN-LINE */
@@ -258,6 +273,7 @@
 </head>
 <body>
 
+<div id="ambient-light"></div>
 <canvas id="bgCanvas"></canvas>
 
 <img id="screenshot-preview-popup" src="" alt="Preview">
@@ -377,9 +393,10 @@
 </div>
 
 <script>
-    /* ANIMIERTER CYBER-HINTERGRUND */
+    /* ANIMIERTER CYBER-HINTERGRUND & AMBIENT LOGIC */
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
+    const ambientLight = document.getElementById('ambient-light');
     let elements = [];
     let mouseTrail = [];
     let mouse = { x: -100, y: -100 };
@@ -464,6 +481,16 @@
         }
     }
 
+    function updateAmbientLight(totalPL) {
+        if (totalPL > 0) {
+            ambientLight.style.background = `radial-gradient(circle, rgba(0, 255, 170, 0.1) 0%, transparent 70%)`;
+        } else if (totalPL < 0) {
+            ambientLight.style.background = `radial-gradient(circle, rgba(255, 74, 104, 0.1) 0%, transparent 70%)`;
+        } else {
+            ambientLight.style.background = `radial-gradient(circle, rgba(118, 75, 162, 0.1) 0%, transparent 70%)`;
+        }
+    }
+
     function setupBG() {
         elements = [
             ...Array.from({ length: 70 }, () => new FallingElement('candle')),
@@ -491,7 +518,7 @@
     initCanvas();
     setupBG();
 
-    /* LOGIK BEIBEHALTEN */
+    /* LOGIK START */
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
     const { createClient } = supabase;
@@ -585,6 +612,8 @@
         animateValue('winRate', 0, winRateVal, 800, false, true);
         animateValue('totalPL', 0, viewPL, 800, true);
         
+        updateAmbientLight(viewPL);
+
         const plCard = document.getElementById('card-pl');
         plCard.classList.remove('glow-win', 'glow-loss');
         if (viewPL > 0) plCard.classList.add('glow-win');
