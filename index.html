@@ -339,16 +339,17 @@
 </div>
 
 <script>
-    /* ANIMIERTER CYBER-HINTERGRUND */
+    /* ANIMIERTER CYBER-HINTERGRUND (UPDATE: HELLERE FORMELN) */
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
     let elements = [];
 
     const formulas = [
         "RR = (Exit - Entry) / (Entry - SL)", "P/L = Lot × (pips × value)", 
-        "1.618", "0.618", "EV = (W% × AvgW) - (L% × AvgL)", "Liquidity Void", 
-        "FVG Detect", "Smart Money", "Order Block", "∑(x - μ)²", "E = mc²",
-        "Fib: 0, 1, 1, 2, 3, 5, 8, 13, 21...", "Margin Call: NULL", "Volatility: HIGH"
+        "1.618 (Golden Ratio)", "0.618 Retracement", "EV = (W% × AvgW) - (L% × AvgL)", "Liquidity Void", 
+        "FVG Detect", "Smart Money Concepts", "Order Block Level", "∑(x - μ)²",
+        "Fib: 0, 1, 1, 2, 3, 5, 8, 13, 21...", "Margin Call: NULL", "Volatility: CRITICAL",
+        "Market Structure Shift", "Break of Structure", "Inducement"
     ];
 
     function initCanvas() {
@@ -358,22 +359,24 @@
 
     class FallingElement {
         constructor(type) {
-            this.type = type; // 'candle' oder 'formula'
+            this.type = type; 
             this.reset();
         }
         reset() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * -canvas.height;
-            this.speed = 0.5 + Math.random() * 1.5;
-            this.opacity = 0.05 + Math.random() * 0.2;
+            this.speed = 0.4 + Math.random() * 1.2;
             
             if (this.type === 'candle') {
+                this.opacity = 0.05 + Math.random() * 0.15;
                 this.width = 3 + Math.random() * 5;
                 this.height = 10 + Math.random() * 30;
                 this.isBullish = Math.random() > 0.5;
             } else {
+                // HELLER: Formeln sind jetzt deutlicher sichtbar
+                this.opacity = 0.3 + Math.random() * 0.4;
                 this.text = formulas[Math.floor(Math.random() * formulas.length)];
-                this.fontSize = 10 + Math.random() * 8;
+                this.fontSize = 11 + Math.random() * 7;
             }
         }
         update() {
@@ -392,17 +395,21 @@
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
             } else {
-                ctx.fillStyle = `rgba(118, 75, 162, ${this.opacity})`;
-                ctx.font = `${this.fontSize}px 'Courier New', monospace`;
+                // FARBE: Ein leuchtendes Cyan-Blau für bessere Lesbarkeit
+                ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
+                ctx.font = `bold ${this.fontSize}px 'Courier New', monospace`;
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = "rgba(0, 242, 255, 0.5)";
                 ctx.fillText(this.text, this.x, this.y);
+                ctx.shadowBlur = 0; // Reset für andere Elemente
             }
         }
     }
 
     function setupBG() {
         elements = [
-            ...Array.from({ length: 70 }, () => new FallingElement('candle')),
-            ...Array.from({ length: 25 }, () => new FallingElement('formula'))
+            ...Array.from({ length: 80 }, () => new FallingElement('candle')),
+            ...Array.from({ length: 30 }, () => new FallingElement('formula'))
         ];
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
