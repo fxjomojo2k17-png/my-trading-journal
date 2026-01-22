@@ -181,6 +181,13 @@
         input, select, textarea {
             background: rgba(37, 45, 55, 0.8) !important; border: 1px solid #3d4651 !important;
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
+            transition: all 0.2s ease;
+        }
+
+        /* CYAN FOCUS GLOW EFFECT */
+        input:focus, select:focus, textarea:focus {
+            border-color: #00f2ff !important;
+            box-shadow: 0 0 12px rgba(0, 242, 255, 0.5) !important;
         }
 
         textarea#notes { height: 42px; width: 100%; resize: none; }
