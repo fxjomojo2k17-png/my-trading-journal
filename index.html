@@ -10,12 +10,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* BASE DESIGN BEIBEHALTEN */
+        /* BASE DESIGN & HINTERGRUND (CANDLESTICKS + FORMELN) */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(circle at center, #1a1f26 0%, #0b0e11 100%);
+            background-color: #0b0e11;
+            /* Hintergrund mit Candlesticks und technischen Elementen */
+            background-image: linear-gradient(rgba(11, 14, 17, 0.92), rgba(11, 14, 17, 0.92)), 
+                              url('https://images.unsplash.com/photo-1639734384857-04709c063ccb?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
             min-height: 100vh;
             padding: 10px;
             color: #e0e0e0;
@@ -24,12 +30,13 @@
         .container {
             max-width: 1600px;
             margin: 0 auto;
-            background: #161a1e;
+            background: rgba(22, 26, 30, 0.95);
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             overflow: hidden;
             border: 1px solid #2d343c;
             position: relative;
+            backdrop-filter: blur(10px);
         }
 
         .section-divider {
@@ -74,7 +81,7 @@
         .header {
             background-color: #0b0e11;
             background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), 
-                              url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); 
+                              url('https://images.unsplash.com/photo-1611974717482-108212176495?auto=format&fit=crop&q=80&w=1200'); 
             background-size: cover;
             background-position: center;
             padding: 40px 15px 30px 15px;
@@ -138,7 +145,7 @@
         .combo-container { display: flex; gap: 4px; height: 42px; align-items: center; width: 100%; }
         .combo-container select { flex: 1; min-width: 0; }
 
-        /* LIQUID BUTTONS & HOVER FIX */
+        /* LIQUID BUTTONS */
         button, .btn-action { 
             position: relative;
             overflow: hidden;
@@ -197,10 +204,12 @@
 
         .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
+        
+        /* TABELLE: URSPRÜNGLICHE KOMPAKTE GRÖSSE (8px) */
+        th { background: #1c2229; color: #8892b0; padding: 8px 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
+        td { padding: 8px 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
 
-        /* TABLE HOVER EFFEKT RESTORED */
+        /* TABLE HOVER EFFEKT */
         tbody tr { transition: background 0.2s ease; }
         tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 
@@ -362,9 +371,7 @@
     let currentViewDate = new Date();
     let selectedDateFilter = null;
 
-    /* --- MIKRO-INTERAKTIONEN LOGIK --- */
-    
-    // HOVER-PARALLAX FÜR CARDS
+    // --- MIKRO-INTERAKTIONEN (PARALLAX & RIPPLE) ---
     function initParallax() {
         document.querySelectorAll('.stat-card').forEach(card => {
             card.addEventListener('mousemove', e => {
@@ -383,7 +390,6 @@
         });
     }
 
-    // LIQUID BUTTON (RIPPLE) FIX
     function initRipples() {
         document.body.addEventListener('mousedown', function (e) {
             const target = e.target.closest('button, .btn-action');
@@ -475,12 +481,12 @@
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
-                <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
-                <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+                <td data-label="Date">${t.date}</td><td data-label="Trader" style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Strategy">${t.strategy || '-'}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
+                <td data-label="P/L ($)" class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+                <td data-label="R" class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+                <td data-label="Tag" title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
+                <td data-label="IMG">${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
+                <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
         updateCharts(traderAllTrades);
