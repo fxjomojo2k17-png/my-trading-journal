@@ -20,6 +20,7 @@
             padding: 10px;
             color: #e0e0e0;
             overflow-x: hidden;
+            transition: transform 0.1s ease-out; /* Für Glitch-Effekt */
         }
 
         /* ANIMIERTER HINTERGRUND CANVAS */
@@ -31,6 +32,21 @@
             height: 100%;
             z-index: -1; 
             pointer-events: none;
+        }
+
+        /* Glitch Klasse */
+        .glitch-active {
+            animation: glitch 0.15s ease-in-out;
+            filter: hue-rotate(90deg) brightness(1.2);
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(-3px, -3px); }
+            60% { transform: translate(3px, 3px); }
+            80% { transform: translate(3px, -3px); }
+            100% { transform: translate(0); }
         }
         
         .container {
@@ -339,17 +355,18 @@
 </div>
 
 <script>
-    /* ANIMIERTER CYBER-HINTERGRUND (UPDATE: HELLERE FORMELN) */
+    /* ANIMIERTER CYBER-HINTERGRUND (UPDATE: NEURAL LINES & MOUSE TRAIL) */
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
     let elements = [];
+    let mouseTrail = [];
+    let mouse = { x: -100, y: -100 };
 
     const formulas = [
         "RR = (Exit - Entry) / (Entry - SL)", "P/L = Lot × (pips × value)", 
         "1.618 (Golden Ratio)", "0.618 Retracement", "EV = (W% × AvgW) - (L% × AvgL)", "Liquidity Void", 
         "FVG Detect", "Smart Money Concepts", "Order Block Level", "∑(x - μ)²",
-        "Fib: 0, 1, 1, 2, 3, 5, 8, 13, 21...", "Margin Call: NULL", "Volatility: CRITICAL",
-        "Market Structure Shift", "Break of Structure", "Inducement"
+        "Fib: 0, 1, 1, 2, 3, 5, 8, 13, 21...", "Margin Call: NULL", "Volatility: CRITICAL"
     ];
 
     function initCanvas() {
@@ -373,7 +390,6 @@
                 this.height = 10 + Math.random() * 30;
                 this.isBullish = Math.random() > 0.5;
             } else {
-                // HELLER: Formeln sind jetzt deutlicher sichtbar
                 this.opacity = 0.3 + Math.random() * 0.4;
                 this.text = formulas[Math.floor(Math.random() * formulas.length)];
                 this.fontSize = 11 + Math.random() * 7;
@@ -388,36 +404,70 @@
                 ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
                 ctx.fillStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity * 0.3})` : `rgba(255, 74, 104, ${this.opacity * 0.3})`;
                 ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(this.x + this.width/2, this.y - 4);
-                ctx.lineTo(this.x + this.width/2, this.y + this.height + 4);
-                ctx.stroke();
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-                ctx.strokeRect(this.x, this.y, this.width, this.height);
+                ctx.beginPath(); ctx.moveTo(this.x + this.width/2, this.y - 4); ctx.lineTo(this.x + this.width/2, this.y + this.height + 4); ctx.stroke();
+                ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
             } else {
-                // FARBE: Ein leuchtendes Cyan-Blau für bessere Lesbarkeit
                 ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
                 ctx.font = `bold ${this.fontSize}px 'Courier New', monospace`;
-                ctx.shadowBlur = 5;
-                ctx.shadowColor = "rgba(0, 242, 255, 0.5)";
                 ctx.fillText(this.text, this.x, this.y);
-                ctx.shadowBlur = 0; // Reset für andere Elemente
+            }
+        }
+    }
+
+    class MouseCandle {
+        constructor(x, y) {
+            this.x = x; this.y = y;
+            this.opacity = 0.6;
+            this.isBullish = Math.random() > 0.5;
+            this.width = 4; this.height = 15;
+        }
+        update() { this.opacity -= 0.02; }
+        draw() {
+            ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
+            ctx.strokeRect(this.x - 2, this.y - 7.5, 4, 15);
+        }
+    }
+
+    function drawNeuralLines() {
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < elements.length; i++) {
+            for (let j = i + 1; j < elements.length; j++) {
+                let dx = elements[i].x - elements[j].x;
+                let dy = elements[i].y - elements[j].y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    ctx.strokeStyle = `rgba(118, 75, 162, ${0.1 * (1 - dist/100)})`;
+                    ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y); ctx.stroke();
+                }
             }
         }
     }
 
     function setupBG() {
         elements = [
-            ...Array.from({ length: 80 }, () => new FallingElement('candle')),
-            ...Array.from({ length: 30 }, () => new FallingElement('formula'))
+            ...Array.from({ length: 70 }, () => new FallingElement('candle')),
+            ...Array.from({ length: 25 }, () => new FallingElement('formula'))
         ];
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawNeuralLines();
             elements.forEach(e => { e.update(); e.draw(); });
+            
+            mouseTrail.forEach((mc, i) => {
+                mc.update(); mc.draw();
+                if (mc.opacity <= 0) mouseTrail.splice(i, 1);
+            });
+
             requestAnimationFrame(animate);
         }
         animate();
     }
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX; mouse.y = e.clientY;
+        if (Math.random() > 0.7) mouseTrail.push(new MouseCandle(mouse.x, mouse.y));
+    });
+
     window.addEventListener('resize', initCanvas);
     initCanvas();
     setupBG();
@@ -570,6 +620,13 @@
         if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
+        
+        // GLITCH EFFEKT BEI WIN
+        if (result === 'WIN') {
+            document.body.classList.add('glitch-active');
+            setTimeout(() => document.body.classList.remove('glitch-active'), 150);
+        }
+
         const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
         const data = { 
             date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
