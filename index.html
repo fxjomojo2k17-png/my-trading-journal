@@ -16,23 +16,25 @@
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: radial-gradient(circle at center, #1a1f26 0%, #0b0e11 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 10px;
             color: #e0e0e0;
         }
         
+        /* GLASSMORPHISM EFFEKT */
         .container {
             max-width: 1600px;
             margin: 0 auto;
-            background: #161a1e;
+            background: rgba(22, 26, 30, 0.8) !important;
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             overflow: hidden;
-            border: 1px solid #2d343c;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
         }
 
-        /* STYLED DIVIDER */
         .section-divider {
             height: 1px;
             margin: 40px 10%;
@@ -61,15 +63,14 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(37, 45, 55, 0.9);
+            background: rgba(37, 45, 55, 0.7);
             padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid #764ba2;
+            border: 1px solid rgba(118, 75, 162, 0.3);
             backdrop-filter: blur(5px);
         }
-        .user-switcher label { margin: 0; font-size: 0.7em; color: #fff0; font-weight: bold; }
         .user-switcher select { 
-            background: #fff0 !important; border: none !important; color: white !important;
+            background: transparent !important; border: none !important; color: white !important;
             font-weight: bold; cursor: pointer; height: auto; width: auto; font-size: 14px;
         }
         
@@ -91,16 +92,22 @@
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 10px;
             padding: 15px;
-            background: #1c2229;
+            background: rgba(28, 34, 41, 0.5);
         }
         
         .stat-card {
-            background: #252d37;
+            background: rgba(37, 45, 55, 0.6);
             padding: 12px;
             border-radius: 10px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-left: 3px solid #764ba2;
+            transition: all 0.4s ease;
         }
+
+        /* DYNAMISCHE GLOW EFFEKTE */
+        .glow-win { box-shadow: 0 0 15px rgba(0, 255, 170, 0.15); border-color: rgba(0, 255, 170, 0.3); }
+        .glow-loss { box-shadow: 0 0 15px rgba(255, 74, 104, 0.15); border-color: rgba(255, 74, 104, 0.3); }
 
         .stat-card h3 { color: #8892b0; font-size: 0.6em; text-transform: uppercase; margin-bottom: 5px; }
         .stat-card .value { font-size: 1.1em; font-weight: bold; }
@@ -125,15 +132,13 @@
         label { font-size: 0.65em; color: #8892b0; margin-bottom: 6px; text-transform: uppercase; font-weight: bold; }
 
         input, select, textarea {
-            background: #252d37 !important; border: 1px solid #3d4651 !important;
+            background: rgba(37, 45, 55, 0.8) !important; border: 1px solid #3d4651 !important;
             color: white !important; padding: 10px; border-radius: 6px; outline: none; width: 100%; font-size: 14px; height: 42px;
         }
 
         textarea#notes { height: 42px; width: 100%; resize: none; }
 
         .combo-container { display: flex; gap: 4px; height: 42px; align-items: center; width: 100%; }
-        .combo-container select { flex: 1; min-width: 0; }
-
         .btn-action { 
             background: #3d4651; color: white; width: 32px; height: 42px; 
             border-radius: 6px; border: none; cursor: pointer;
@@ -142,7 +147,6 @@
         }
         .btn-add { background: #764ba2; }
         .btn-del { background: #4a5568; font-size: 22px; }
-        .btn-action:hover { opacity: 0.8; }
 
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
@@ -152,30 +156,26 @@
         .btn-export { background: transparent !important; border: 1px solid #00f2ff !important; color: #00f2ff !important; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; border-radius: 4px; cursor: pointer; }
 
         .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        .chart-box { background: #252d37; padding: 15px; border-radius: 12px; height: 320px; }
+        .chart-box { background: rgba(37, 45, 55, 0.5); padding: 15px; border-radius: 12px; height: 320px; border: 1px solid rgba(255,255,255,0.03); }
 
         .calendar-section { padding: 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #1c2229; padding: 8px; border-radius: 8px; }
-        .calendar-day-label { text-align: center; font-size: 0.55em; color: #5c6680; padding-bottom: 4px; }
-        .calendar-day { background: #252d37; aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid #2d343c; cursor: pointer; transition: 0.2s; }
-        .calendar-day:hover { background: #2d343c; }
-        .calendar-day.selected { border-color: #764ba2; background: rgba(118, 75, 162, 0.2); }
-        .calendar-day.today { border-color: #00f2ff; }
-        .calendar-day .day-num { position: absolute; top: 2px; left: 3px; font-size: 0.6em; color: #5c6680; }
-        .calendar-day .day-pl { font-weight: bold; font-size: 0.75em; margin-top: 4px; }
-        .day-win { background: rgba(0, 255, 170, 0.08) !important; color: #00ffaa; border-color: rgba(0, 255, 170, 0.2); }
-        .day-loss { background: rgba(255, 74, 104, 0.08) !important; color: #ff4a68; border-color: rgba(255, 74, 104, 0.2); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: rgba(28, 34, 41, 0.5); padding: 8px; border-radius: 8px; }
+        .calendar-day { background: rgba(37, 45, 55, 0.8); aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.7em; border: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s; }
+        .calendar-day:hover { background: #2d343c; transform: translateY(-2px); }
 
         .history-controls { padding: 0 20px 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .history-controls label { margin-bottom: 0; font-size: 0.75em; }
-        .history-controls select { width: auto; height: 32px; padding: 0 10px; font-size: 0.75em; background: #252d37; color: white; border: 1px solid #3d4651; border-radius: 4px; }
         .btn-delete-all { background: #ef5350; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
 
         .trades-table { padding: 10px 20px 20px 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { background: #1c2229; color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #2d343c; font-size: 0.85em; }
+        th { background: rgba(28, 34, 41, 0.8); color: #8892b0; padding: 12px; text-align: left; font-size: 0.7em; text-transform: uppercase; }
+        
+        /* HOVER EFFEKT TABELLE */
+        tr { transition: all 0.2s ease; }
+        tbody tr:hover { background: rgba(255, 255, 255, 0.03) !important; transform: scale(1.002); box-shadow: inset 4px 0 0 #764ba2; }
+        
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85em; }
 
         .win { color: #00ffaa !important; }
         .loss { color: #ff4a68 !important; }
@@ -183,8 +183,7 @@
         .edit-btn { background: rgba(0, 242, 255, 0.1); border-color: #00f2ff; color: #00f2ff; }
         .del-btn { background: rgba(255, 74, 104, 0.1); border-color: #ff4a68; color: #ff4a68; }
 
-        .import-section { background: #1c2229; padding: 30px 20px; border-top: 2px solid #2d343c; }
-        .import-container { max-width: 800px; margin: 0 auto; }
+        .import-section { background: rgba(28, 34, 41, 0.5); padding: 30px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
 
         #screenshot-preview-popup {
@@ -193,14 +192,11 @@
             pointer-events: none; object-fit: contain; background: #0b0e11;
         }
 
-        #screenshot.drag-over { border: 2px dashed #00f2ff !important; background: rgba(0, 242, 255, 0.1) !important; }
-
         @media (max-width: 768px) {
             .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr { display: block; }
-            .trades-table thead tr { position: absolute; top: -9999px; left: -9999px; }
-            .trades-table tr { border: 1px solid #2d343c; margin-bottom: 15px; border-radius: 10px; background: #252d37; padding: 10px; }
-            .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; font-size: 0.85em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
+            .trades-table tr { border: 1px solid #2d343c; margin-bottom: 15px; border-radius: 10px; background: rgba(37, 45, 55, 0.6); padding: 10px; }
+            .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
     </style>
 </head>
@@ -210,7 +206,6 @@
 
 <div class="container">
     <div class="user-switcher">
-        <label></label>
         <select id="activeTraderSelect" onchange="refreshApp()">
             <option value="Trader 1">Trader 1</option>
             <option value="Trader 2">Trader 2</option>
@@ -221,17 +216,17 @@
     <div class="header"><h1>Trading Journal</h1></div>
 
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" id="card-balance">
             <h3>Initial Balance</h3>
             <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
                    style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
         </div>
-        <div class="stat-card"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
-        <div class="stat-card"><h3>Trades</h3><div class="value" id="totalTrades">0</div></div>
-        <div class="stat-card"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
-        <div class="stat-card"><h3>P/L ($)</h3><div class="value" id="totalPL">$0.00</div></div>
-        <div class="stat-card"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
-        <div class="stat-card"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
+        <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
+        <div class="stat-card" id="card-trades"><h3>Trades</h3><div class="value" id="totalTrades">0</div></div>
+        <div class="stat-card" id="card-winrate"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
+        <div class="stat-card" id="card-pl"><h3>P/L ($)</h3><div class="value" id="totalPL">$0.00</div></div>
+        <div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
+        <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
     </div>
 
     <div class="form-section">
@@ -267,7 +262,7 @@
                         <option value="EARLY_EXIT">Early Exit</option>
                         <option value="REVENGE">Revenge</option>
                         <option value="LATE_ENTRY">Late Entry</option>
-                         <option value="MISTAKE">Mistake</option>
+                        <option value="MISTAKE">Mistake</option>
                     </select>
                 </div>
                 <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
@@ -338,6 +333,23 @@
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
+    // COUNT-UP ANIMATION FUNKTION
+    function animateValue(id, start, end, duration, isCurrency = false, isPercent = false, suffix = "") {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const val = progress * (end - start) + start;
+            if (isCurrency) obj.textContent = '$' + val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            else if (isPercent) obj.textContent = val.toFixed(1) + '%';
+            else obj.textContent = val.toFixed(isCurrency ? 2 : 1) + suffix;
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
     async function fetchTrades() {
         const { data, error } = await _supabase.from('trades').select('*');
         if (error) console.error('Error:', error);
@@ -353,10 +365,10 @@
 
     function setupDragAndDrop() {
         const dropArea = document.getElementById('screenshot');
-        dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('drag-over'); });
-        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
+        dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = "#00f2ff"; });
+        dropArea.addEventListener('dragleave', () => dropArea.style.borderColor = "#3d4651");
         dropArea.addEventListener('drop', (e) => {
-            e.preventDefault(); dropArea.classList.remove('drag-over');
+            e.preventDefault(); dropArea.style.borderColor = "#3d4651";
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -392,15 +404,24 @@
 
         let traderAllTrades = trades.filter(t => activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
         const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-        document.getElementById('currentEquity').textContent = '$' + (initialBalance + totalNetPL).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-        const wins = filtered.filter(t => t.result === 'WIN'), losses = filtered.filter(t => t.result === 'LOSS');
-        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
         
-        document.getElementById('totalTrades').textContent = filtered.length;
-        document.getElementById('winRate').textContent = filtered.length > 0 ? ((wins.length / filtered.length) * 100).toFixed(1) + '%' : '0%';
-        document.getElementById('totalPL').textContent = '$' + viewPL.toFixed(2);
-        document.getElementById('totalPL').className = 'value ' + (viewPL >= 0 ? 'win' : 'loss');
+        // ANIMATED STATS
+        animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
+        
+        const wins = filtered.filter(t => t.result === 'WIN');
+        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+        const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
+        
+        animateValue('totalTrades', 0, filtered.length, 800, false, false, "");
+        animateValue('winRate', 0, winRateVal, 800, false, true);
+        animateValue('totalPL', 0, viewPL, 800, true);
+        
+        // GLOW LOGIC
+        const plCard = document.getElementById('card-pl');
+        plCard.classList.remove('glow-win', 'glow-loss');
+        if (viewPL > 0) plCard.classList.add('glow-win');
+        else if (viewPL < 0) plCard.classList.add('glow-loss');
+
         const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
         document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
         
@@ -408,12 +429,12 @@
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
-                <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
-                <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+                <td data-label="Date">${t.date}</td><td style="font-size:0.7em; color:#8892b0" data-label="Trader">${t.trader_name || 'Trader 1'}</td><td data-label="Inst.">${t.instrument}</td><td data-label="Strategy">${t.strategy || '-'}</td><td data-label="Dir">${t.direction}</td><td data-label="Entry/Exit">${t.entry}/${t.exit}</td>
+                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}" data-label="P/L ($)">$${Number(t.pl).toFixed(2)}</td>
+                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}" data-label="R">${rMult}R</td>
+                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;" data-label="Tag">${t.mistake}</td>
+                <td data-label="IMG">${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
+                <td data-label="Action"><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
             </tr>`;
         }).join('');
         updateCharts(traderAllTrades);
@@ -427,9 +448,9 @@
         chrono.forEach(t => { runningEquity += Number(t.pl); equityData.push(runningEquity); if (runningEquity > peak) peak = runningEquity; drawdownData.push(runningEquity - peak); });
 
         if (equityChart) equityChart.destroy();
-        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.1)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
+        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.05)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
         if (drawdownChart) drawdownChart.destroy();
-        drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.1)', tension: 0.3, pointRadius: 0 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
+        drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.05)', tension: 0.3, pointRadius: 0 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
         const stratMap = {}; chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
         if (strategyPLChart) strategyPLChart.destroy();
         strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} } } });
