@@ -791,9 +791,63 @@ if (result === 'WIN') {
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
     function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
-    function removeInstrument() { const v = document.getElementById('instrument').value; customInstruments = customInstruments.filter(i => i !== v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); }
-    function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
-    function removeStrategy() { const v = document.getElementById('strategy').value; customStrategies = customStrategies.filter(s => s !== v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); }
+	function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
+    
+	
+	function removeInstrument() {
+    const selectedInstrument = document.getElementById('instrument').value;
+    
+    // Check ob das Instrument in Trades verwendet wird
+    const usedInTrades = trades.filter(t => t.instrument === selectedInstrument).length;
+    
+    if (usedInTrades > 0) {
+        if (!confirm(` WARNING!\n\nThis instrument "${selectedInstrument}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the instrument won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Remove instrument "${selectedInstrument}"?`)) {
+            return;
+        }
+    }
+    
+    // Verhindere dass das letzte Instrument gelöscht wird
+    if (customInstruments.length <= 1) {
+        alert(' Cannot delete the last instrument!\n\nYou need at least one instrument in the list.');
+        return;
+    }
+    
+    customInstruments = customInstruments.filter(i => i !== selectedInstrument);
+    localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+    populateLists();
+}
+
+function removeStrategy() {
+    const selectedStrategy = document.getElementById('strategy').value;
+    
+    // Check ob die Strategy in Trades verwendet wird
+    const usedInTrades = trades.filter(t => t.strategy === selectedStrategy).length;
+    
+    if (usedInTrades > 0) {
+        if (!confirm(` WARNING!\n\nThis strategy "${selectedStrategy}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the strategy won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Remove strategy "${selectedStrategy}"?`)) {
+            return;
+        }
+    }
+    
+    // Verhindere dass die letzte Strategy gelöscht wird
+    if (customStrategies.length <= 1) {
+        alert(' Cannot delete the last strategy!\n\nYou need at least one strategy in the list.');
+        return;
+    }
+    
+    customStrategies = customStrategies.filter(s => s !== selectedStrategy);
+    localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
+    populateLists();
+}
+	
     async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
     async function deleteAllTrades() { if(confirm('Delete ALL?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
     function exportToCSV() { let csv = 'Date,Trader,Instrument,PL\n' + trades.map(t => `${t.date},${t.trader_name},${t.instrument},${t.pl}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
