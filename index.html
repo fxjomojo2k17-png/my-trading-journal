@@ -164,92 +164,48 @@
         }
         
 		
-		
-.header {
-            background-color: #0b0e11;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), 
-                              url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); 
-            background-size: cover;
-            background-position: center;
-            padding: 60px 15px 40px 15px;
-            text-align: center;
-            border-bottom: 3px solid #764ba2;
+         /* MOCKUP 5: Animated Candle Chart */
+        .candle-chart-text {
             position: relative;
-            min-height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-content {
-            position: relative;
-            display: inline-block;
-            z-index: 2;
-        }
-
-        .header h1 { 
-            font-size: 1.8em;
+            font-size: 3em;
+            font-weight: bold;
             letter-spacing: 8px;
-            text-transform: uppercase;
             color: #00f2ff;
-            text-shadow: 0 0 25px rgba(0, 242, 255, 0.8);
-            margin: 0;
-            position: relative;
-            z-index: 3;
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
         }
 
         .chart-overlay {
             position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
             width: 100%;
-            max-width: 800px;
-            height: 80px;
+            height: 60%;
             display: flex;
-            justify-content: space-evenly;
+            justify-content: space-around;
             align-items: flex-end;
-            opacity: 0.5;
-            gap: 6px;
-            z-index: 1;
-            pointer-events: none;
+            opacity: 0.4;
+            gap: 4px;
+            padding: 0 10%;
         }
 
         .mini-candle {
-            width: 8px;
-            background: #00ffaa;
-            border: 2px solid #00ffaa;
+            width: 6px;
+            background: linear-gradient(to bottom, transparent, #00ffaa);
+            border: 1px solid #00ffaa;
             animation: growCandle 1.5s ease-in-out infinite;
-            border-radius: 2px;
-            box-shadow: 0 0 12px rgba(0, 255, 170, 0.6);
-            filter: brightness(1.2);
         }
 
         .mini-candle:nth-child(even) {
-            background: #ff4a68;
+            background: linear-gradient(to bottom, transparent, #ff4a68);
             border-color: #ff4a68;
-            box-shadow: 0 0 12px rgba(255, 74, 104, 0.6);
             animation-delay: -0.5s;
         }
 
-        .mini-candle:nth-child(3n) {
-            animation-delay: -0.8s;
-        }
-
-        .mini-candle:nth-child(4n) {
-            animation-delay: -1.2s;
-        }
-
         @keyframes growCandle {
-            0%, 100% { 
-                transform: scaleY(0.6); 
-                opacity: 0.7; 
-            }
-            50% { 
-                transform: scaleY(1.1); 
-                opacity: 1; 
-            }
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1); }
         }
+
 
 
         .stats-grid {
@@ -395,7 +351,31 @@
         </select>
     </div>
 
-    <div class="header"><h1>Trading Journal</h1></div>
+    <div class="mockup-section">
+            <div class="mockup-title">📊 Mockup 5: Live Chart Background</div>
+            <div class="mockup-description">
+                Der Text schwebt über animierten Mini-Candlesticks, die wie ein Live-Chart wachsen und schrumpfen. 
+                Sehr dynamisch und interaktiv - zeigt direkt, worum es geht!
+            </div>
+            <div class="header-demo">
+                <div style="position: relative; display: inline-block;">
+                    <div class="chart-overlay">
+                        <div class="mini-candle" style="height: 40px;"></div>
+                        <div class="mini-candle" style="height: 60px;"></div>
+                        <div class="mini-candle" style="height: 35px;"></div>
+                        <div class="mini-candle" style="height: 70px;"></div>
+                        <div class="mini-candle" style="height: 45px;"></div>
+                        <div class="mini-candle" style="height: 55px;"></div>
+                        <div class="mini-candle" style="height: 50px;"></div>
+                        <div class="mini-candle" style="height: 65px;"></div>
+                        <div class="mini-candle" style="height: 40px;"></div>
+                        <div class="mini-candle" style="height: 58px;"></div>
+                        <div class="mini-candle" style="height: 42px;"></div>
+                        <div class="mini-candle" style="height: 68px;"></div>
+                    </div>
+                    <div class="candle-chart-text">TRADING JOURNAL</div>
+                </div>
+            </div>
 
     <div class="stats-grid">
         <div class="stat-card" id="card-balance">
