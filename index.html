@@ -522,12 +522,12 @@
             this.speed = 0.4 + Math.random() * 1.2;
             
             if (this.type === 'candle') {
-                this.opacity = 0.05 + Math.random() * 0.15;
+                this.opacity = 0.1 + Math.random() * 0.15;
                 this.width = 3 + Math.random() * 5;
                 this.height = 10 + Math.random() * 30;
                 this.isBullish = Math.random() > 0.5;
             } else {
-                this.opacity = 0.3 + Math.random() * 0.4;
+                this.opacity = 0.6 + Math.random() * 0.4;
                 this.text = formulas[Math.floor(Math.random() * formulas.length)];
                 this.fontSize = 11 + Math.random() * 7;
             }
