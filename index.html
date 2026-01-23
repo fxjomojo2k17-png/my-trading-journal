@@ -165,7 +165,7 @@
         
 		
 		
-       .header {
+  .header {
             background-color: #0b0e11;
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), 
                               url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); 
@@ -200,31 +200,35 @@
 
         .chart-overlay {
             position: absolute;
-            bottom: -10px;
+            bottom: 5px;
             left: 50%;
             transform: translateX(-50%);
-            width: 110%;
-            height: 65%;
+            width: 100%;
+            max-width: 800px;
+            height: 80px;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: flex-end;
-            opacity: 0.35;
-            gap: 4px;
+            opacity: 0.5;
+            gap: 6px;
             z-index: 1;
+            pointer-events: none;
         }
 
         .mini-candle {
-            width: 6px;
-            background: linear-gradient(to bottom, transparent, #00ffaa);
-            border: 1px solid #00ffaa;
+            width: 8px;
+            background: #00ffaa;
+            border: 2px solid #00ffaa;
             animation: growCandle 1.5s ease-in-out infinite;
-            border-radius: 1px;
-            box-shadow: 0 0 8px currentColor;
+            border-radius: 2px;
+            box-shadow: 0 0 12px rgba(0, 255, 170, 0.6);
+            filter: brightness(1.2);
         }
 
         .mini-candle:nth-child(even) {
-            background: linear-gradient(to bottom, transparent, #ff4a68);
+            background: #ff4a68;
             border-color: #ff4a68;
+            box-shadow: 0 0 12px rgba(255, 74, 104, 0.6);
             animation-delay: -0.5s;
         }
 
@@ -237,10 +241,15 @@
         }
 
         @keyframes growCandle {
-            0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
-            50% { transform: scaleY(1); opacity: 1; }
+            0%, 100% { 
+                transform: scaleY(0.6); 
+                opacity: 0.7; 
+            }
+            50% { 
+                transform: scaleY(1.1); 
+                opacity: 1; 
+            }
         }
-
 
 
         .stats-grid {
