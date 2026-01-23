@@ -62,47 +62,80 @@
             position: relative;
         }
 
- 
+        /* WIDER CHART PATTERN DIVIDER */
+        .section-divider {
+            height: 40px;
+            margin: 40px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.8;
+            position: relative;
+            /* Breiter gemacht für ein besseres Chart-Gefühl */
+            max-width: 800px; 
+            width: 90%;
+        }
+
+        /* ULTRA-DENSE REALISTIC CHART DIVIDER */
+.section-divider {
+    height: 70px;
+    margin: 50px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8;
+    position: relative;
+    max-width: 100%; /* Nutzt den vollen Platz */
+    width: 100%;
+}
+
 .section-divider::before {
     content: '';
     width: 100%;
     height: 100%;
-    /* Ein langes SVG mit Kerzen von X=0 bis X=1200 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="80" viewBox="0 0 1200 80"> \
-        \
-        <rect x="10" y="50" width="1" height="20" fill="%235c6680"/><rect x="6" y="55" width="8" height="10" fill="%2300ffaa"/> \
-        <rect x="25" y="45" width="1" height="15" fill="%235c6680"/><rect x="21" y="48" width="8" height="8" fill="%2300ffaa"/> \
-        <rect x="40" y="48" width="1" height="12" fill="%235c6680"/><rect x="36" y="50" width="8" height="6" fill="%23ff4a68"/> \
-        <rect x="55" y="40" width="1" height="20" fill="%235c6680"/><rect x="51" y="42" width="8" height="14" fill="%2300ffaa"/> \
-        <rect x="75" y="35" width="1" height="25" fill="%235c6680"/><rect x="71" y="38" width="8" height="18" fill="%2300ffaa"/> \
-        <rect x="95" y="38" width="1" height="15" fill="%235c6680"/><rect x="91" y="40" width="8" height="10" fill="%23ff4a68"/> \
-        \
-        <rect x="130" y="25" width="1" height="30" fill="%235c6680"/><rect x="126" y="28" width="8" height="22" fill="%2300ffaa"/> \
-        <rect x="155" y="20" width="1" height="20" fill="%235c6680"/><rect x="151" y="22" width="8" height="14" fill="%2300ffaa"/> \
-        <rect x="180" y="15" width="1" height="25" fill="%235c6680"/><rect x="176" y="18" width="8" height="18" fill="%2300ffaa"/> \
-        <rect x="205" y="18" width="1" height="15" fill="%235c6680"/><rect x="201" y="20" width="8" height="8" fill="%23ff4a68"/> \
-        \
-        <rect x="240" y="20" width="1" height="10" fill="%235c6680"/><rect x="236" y="22" width="8" height="5" fill="%2300ffaa"/> \
-        <rect x="270" y="18" width="1" height="12" fill="%235c6680"/><rect x="266" y="20" width="8" height="6" fill="%23ff4a68"/> \
-        <rect x="300" y="22" width="1" height="15" fill="%235c6680"/><rect x="296" y="24" width="8" height="9" fill="%23ff4a68"/> \
-        <rect x="330" y="35" width="1" height="25" fill="%235c6680"/><rect x="326" y="38" width="8" height="18" fill="%23ff4a68"/> \
-        <rect x="360" y="45" width="1" height="20" fill="%235c6680"/><rect x="356" y="48" width="8" height="12" fill="%23ff4a68"/> \
-        <rect x="390" y="42" width="1" height="15" fill="%235c6680"/><rect x="386" y="44" width="8" height="8" fill="%2300ffaa"/> \
-        \
-        <rect x="430" y="30" width="1" height="25" fill="%235c6680"/><rect x="426" y="33" width="8" height="18" fill="%2300ffaa"/> \
-        <rect x="470" y="20" width="1" height="30" fill="%235c6680"/><rect x="466" y="23" width="8" height="22" fill="%2300ffaa"/> \
-        <rect x="510" y="10" width="1" height="20" fill="%235c6680"/><rect x="506" y="13" width="8" height="14" fill="%2300ffaa"/> \
-        <rect x="550" y="15" width="1" height="15" fill="%235c6680"/><rect x="546" y="17" width="8" height="10" fill="%23ff4a68"/> \
-        <rect x="590" y="5" width="1" height="25" fill="%235c6680"/><rect x="586" y="8" width="8" height="18" fill="%2300ffaa"/> \
-        \
-        <rect x="630" y="15" width="1" height="20" fill="%235c6680"/><rect x="626" y="17" width="8" height="14" fill="%23ff4a68"/> \
-        <rect x="670" y="25" width="1" height="15" fill="%235c6680"/><rect x="666" y="27" width="8" height="10" fill="%23ff4a68"/> \
-        <rect x="710" y="35" width="1" height="20" fill="%235c6680"/><rect x="706" y="38" width="8" height="14" fill="%2300ffaa"/> \
+    /* Ein extrem langes SVG mit sehr vielen, eng stehenden Kerzen */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="60" viewBox="0 0 1600 60" preserveAspectRatio="none"> \
+        <g opacity="0.8"> \
+            \
+            <rect x="10" y="45" width="1" height="10" fill="%235c6680"/><rect x="7" y="47" width="7" height="6" fill="%2300ffaa"/> \
+            <rect x="20" y="42" width="1" height="12" fill="%235c6680"/><rect x="17" y="44" width="7" height="8" fill="%2300ffaa"/> \
+            <rect x="30" y="40" width="1" height="10" fill="%235c6680"/><rect x="27" y="41" width="7" height="4" fill="%23ff4a68"/> \
+            <rect x="40" y="35" width="1" height="15" fill="%235c6680"/><rect x="37" y="38" width="7" height="10" fill="%2300ffaa"/> \
+            <rect x="50" y="30" width="1" height="18" fill="%235c6680"/><rect x="47" y="32" width="7" height="12" fill="%2300ffaa"/> \
+            <rect x="60" y="28" width="1" height="12" fill="%235c6680"/><rect x="57" y="30" width="7" height="5" fill="%23ff4a68"/> \
+            <rect x="70" y="22" width="1" height="15" fill="%235c6680"/><rect x="67" y="24" width="7" height="9" fill="%2300ffaa"/> \
+            <rect x="80" y="18" width="1" height="20" fill="%235c6680"/><rect x="77" y="20" width="7" height="14" fill="%2300ffaa"/> \
+            <rect x="90" y="15" width="1" height="12" fill="%235c6680"/><rect x="87" y="17" width="7" height="6" fill="%2300ffaa"/> \
+            <rect x="100" y="12" width="1" height="10" fill="%235c6680"/><rect x="97" y="14" width="7" height="4" fill="%23ff4a68"/> \
+            \
+            <rect x="110" y="14" width="1" height="8" fill="%235c6680"/><rect x="107" y="15" width="7" height="3" fill="%2300ffaa"/> \
+            <rect x="120" y="13" width="1" height="9" fill="%235c6680"/><rect x="117" y="14" width="7" height="4" fill="%23ff4a68"/> \
+            <rect x="130" y="15" width="1" height="10" fill="%235c6680"/><rect x="127" y="16" width="7" height="2" fill="%2300ffaa"/> \
+            <rect x="140" y="12" width="1" height="12" fill="%235c6680"/><rect x="137" y="14" width="7" height="6" fill="%23ff4a68"/> \
+            <rect x="150" y="18" width="1" height="15" fill="%235c6680"/><rect x="147" y="20" width="7" height="9" fill="%23ff4a68"/> \
+            <rect x="160" y="25" width="1" height="12" fill="%235c6680"/><rect x="157" y="27" width="7" height="6" fill="%2300ffaa"/> \
+            <rect x="170" y="22" width="1" height="14" fill="%235c6680"/><rect x="167" y="24" width="7" height="8" fill="%2300ffaa"/> \
+            <rect x="180" y="18" width="1" height="10" fill="%235c6680"/><rect x="177" y="20" width="7" height="4" fill="%23ff4a68"/> \
+            \
+            <rect x="190" y="25" width="1" height="25" fill="%235c6680"/><rect x="187" y="28" width="7" height="18" fill="%23ff4a68"/> \
+            <rect x="200" y="40" width="1" height="15" fill="%235c6680"/><rect x="197" y="43" width="7" height="10" fill="%23ff4a68"/> \
+            <rect x="210" y="48" width="1" height="10" fill="%235c6680"/><rect x="207" y="49" width="7" height="4" fill="%2300ffaa"/> \
+            <rect x="220" y="45" width="1" height="12" fill="%235c6680"/><rect x="217" y="46" width="7" height="7" fill="%2300ffaa"/> \
+            <rect x="230" y="40" width="1" height="15" fill="%235c6680"/><rect x="227" y="42" width="7" height="11" fill="%2300ffaa"/> \
+            <rect x="240" y="35" width="1" height="18" fill="%235c6680"/><rect x="237" y="37" width="7" height="13" fill="%2300ffaa"/> \
+            <rect x="250" y="32" width="1" height="12" fill="%235c6680"/><rect x="247" y="34" width="7" height="6" fill="%23ff4a68"/> \
+            \
+            <rect x="260" y="34" width="1" height="15" fill="%235c6680"/><rect x="257" y="36" width="7" height="10" fill="%2300ffaa"/> \
+            <rect x="270" y="28" width="1" height="12" fill="%235c6680"/><rect x="267" y="30" width="7" height="7" fill="%2300ffaa"/> \
+            <rect x="280" y="22" width="1" height="18" fill="%235c6680"/><rect x="277" y="24" width="7" height="13" fill="%2300ffaa"/> \
+            <rect x="290" y="15" width="1" height="12" fill="%235c6680"/><rect x="287" y="17" width="7" height="8" fill="%2300ffaa"/> \
+            <rect x="300" y="10" width="1" height="10" fill="%235c6680"/><rect x="297" y="11" width="7" height="6" fill="%2300ffaa"/> \
+        </g> \
     </svg>');
-    background-repeat: no-repeat;
+    background-repeat: repeat-x; /* Erzeugt jetzt einen endlosen dichten Chart */
     background-position: left center;
-    background-size: 100% 100%; /* Wichtig: Erzwingt die volle Streckung */
-    filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.5));
+    background-size: auto 100%; /* Behält die Dichte bei und füllt die Höhe */
+    filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.4));
 }
 
         .user-switcher {
