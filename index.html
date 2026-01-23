@@ -24,7 +24,7 @@
             position: relative;
         }
 
-        /* HOLOGRAFISCHE SCAN-LINE 
+        /* HOLOGRAFISCHE SCAN-LINE */
         body::before {
             content: "";
             position: fixed;
@@ -38,7 +38,7 @@
             pointer-events: none;
             animation: scanline 8s linear infinite;
             opacity: 0.5;
-        } */
+        }
 
         @keyframes scanline {
             0% { top: -100px; }
@@ -83,24 +83,49 @@
             position: relative;
         }
 
+        /* NEUER ZERBRECHENDER CANDLESTICK-WALL DIVIDER */
         .section-divider {
-            height: 1px;
-            margin: 40px 10%;
-            background: linear-gradient(90deg, transparent 0%, #3d4651 50%, transparent 100%);
+            height: 60px;
+            margin: 60px 5%;
             position: relative;
+            background: 
+                /* Grüne Candles */
+                repeating-linear-gradient(90deg, transparent 0, transparent 20px, rgba(0, 255, 170, 0.25) 20px, rgba(0, 255, 170, 0.25) 30px, transparent 30px, transparent 60px),
+                /* Rote Candles */
+                repeating-linear-gradient(90deg, transparent 0, transparent 45px, rgba(255, 74, 104, 0.25) 45px, rgba(255, 74, 104, 0.25) 55px, transparent 55px, transparent 60px),
+                /* Dochte */
+                repeating-linear-gradient(90deg, transparent 0, transparent 24px, rgba(255,255,255,0.1) 24px, rgba(255,255,255,0.1) 25px, transparent 25px, transparent 60px);
+            background-size: 60px 70%, 60px 50%, 60px 100%;
+            background-position: center;
+            background-repeat: repeat-x;
+            
+            /* Bruch-Effekt via Clip-Path */
+            clip-path: polygon(
+                0 25%, 15% 10%, 25% 35%, 35% 5%, 50% 40%, 65% 10%, 80% 35%, 90% 5%, 100% 20%,
+                100% 80%, 85% 65%, 75% 95%, 60% 60%, 45% 90%, 30% 70%, 15% 95%, 0% 75%
+            );
+            
+            filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.2));
+            animation: wall-drift 8s infinite alternate ease-in-out;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             opacity: 0.6;
         }
+
         .section-divider::after {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: #764ba2;
-            border-radius: 50%;
-            box-shadow: 0 0 12px #764ba2, 0 0 20px rgba(118, 75, 162, 0.5);
-            position: absolute;
+            content: "MARKET STRUCTURE FRACTURE";
+            font-size: 0.55em;
+            letter-spacing: 6px;
+            color: #00f2ff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00f2ff;
+            opacity: 0.5;
+        }
+
+        @keyframes wall-drift {
+            0% { transform: skewX(-2deg); opacity: 0.5; }
+            100% { transform: skewX(2deg); opacity: 0.8; }
         }
 
         .user-switcher {
@@ -118,7 +143,7 @@
             backdrop-filter: blur(5px);
         }
         .user-switcher select { 
-            background: color: black !important; border: none !important; color: white !important;
+            background: transparent !important; border: none !important; color: white !important;
             font-weight: bold; cursor: pointer; height: auto; width: auto; font-size: 14px;
         }
         
@@ -184,11 +209,12 @@
             transition: all 0.25s ease;
         }
 
-        /* GLOW FOCUS EFFEKT */
+        /* GLOW FOCUS EFFEKT - VERSTÄRKT */
         input:focus, select:focus, textarea:focus {
             border-color: #00f2ff !important;
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
-            background: rgba(45, 55, 65, 0.9) !important;
+            box-shadow: 0 0 12px rgba(0, 242, 255, 0.5), inset 0 0 5px rgba(0, 242, 255, 0.1) !important;
+            background: rgba(45, 55, 65, 0.95) !important;
+            transform: translateY(-1px);
         }
 
         textarea#notes { height: 42px; width: 100%; resize: none; }
@@ -557,8 +583,6 @@
             }
         });
     }
-
-
 
     function populateLists() {
         document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
