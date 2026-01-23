@@ -60,7 +60,7 @@
 }
 
 /* Flash Overlay */
-.flash-overlay {
+#flashOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -69,27 +69,33 @@
     pointer-events: none;
     z-index: 9999;
     opacity: 0;
-    transition: opacity 0.1s ease-out;
 }
 
-.flash-overlay.flash-win {
-    background: rgba(0, 255, 170, 0.2);
-    animation: flashFade 0.3s ease-out;
+#flashOverlay.flash-win {
+    background: rgba(0, 255, 170, 0.3);
+    opacity: 1;
 }
 
-.flash-overlay.flash-loss {
-    background: rgba(255, 74, 104, 0.25);
-    animation: flashFade 0.3s ease-out;
+#flashOverlay.flash-loss {
+    background: rgba(255, 74, 104, 0.35);
+    opacity: 1;
 }
 
-.flash-overlay.flash-be {
-    background: rgba(118, 75, 162, 0.15);
-    animation: flashFade 0.25s ease-out;
+#flashOverlay.flash-be {
+    background: rgba(118, 75, 162, 0.25);
+    opacity: 1;
 }
 
-@keyframes flashFade {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+/* Shake Animation */
+.shake-win, .shake-loss, .shake-be {
+    animation: shake 0.2s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translate(0); }
+    25% { transform: translate(-3px, 3px); }
+    50% { transform: translate(3px, -3px); }
+    75% { transform: translate(-3px, -3px); }
 }
         
         .container {
@@ -414,7 +420,7 @@
         </div>
     </div>
 </div>
-<div id="flashOverlay" class="flash-overlay"></div>
+
 <script>
     /* ANIMATED CYBER BACKGROUND */
     const canvas = document.getElementById('bgCanvas');
@@ -678,27 +684,31 @@
         
 // Visuelles Feedback je nach Result
 const flashOverlay = document.getElementById('flashOverlay');
+const container = document.querySelector('.container');
 
 if (result === 'WIN') {
-    document.body.classList.add('glitch-win');
-    flashOverlay.className = 'flash-overlay flash-win';
+    // Grüner Flash
+    flashOverlay.classList.add('flash-win');
+    container.classList.add('shake-win');
     setTimeout(() => {
-        document.body.classList.remove('glitch-win');
-        flashOverlay.className = 'flash-overlay';
+        flashOverlay.classList.remove('flash-win');
+        container.classList.remove('shake-win');
     }, 300);
 } else if (result === 'LOSS') {
-    document.body.classList.add('glitch-loss');
-    flashOverlay.className = 'flash-overlay flash-loss';
+    // Roter Flash
+    flashOverlay.classList.add('flash-loss');
+    container.classList.add('shake-loss');
     setTimeout(() => {
-        document.body.classList.remove('glitch-loss');
-        flashOverlay.className = 'flash-overlay';
+        flashOverlay.classList.remove('flash-loss');
+        container.classList.remove('shake-loss');
     }, 300);
 } else if (result === 'BE') {
-    document.body.classList.add('glitch-be');
-    flashOverlay.className = 'flash-overlay flash-be';
+    // Lila Flash
+    flashOverlay.classList.add('flash-be');
+    container.classList.add('shake-be');
     setTimeout(() => {
-        document.body.classList.remove('glitch-be');
-        flashOverlay.className = 'flash-overlay';
+        flashOverlay.classList.remove('flash-be');
+        container.classList.remove('shake-be');
     }, 250);
 }
 
@@ -785,5 +795,6 @@ if (result === 'WIN') {
     async function deleteAllTrades() { if(confirm('Delete ALL?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
     function exportToCSV() { let csv = 'Date,Trader,Instrument,PL\n' + trades.map(t => `${t.date},${t.trader_name},${t.instrument},${t.pl}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
 </script>
+<div id="flashOverlay" class="flash-overlay"></div>
 </body>
 </html>
