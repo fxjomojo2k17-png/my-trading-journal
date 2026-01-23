@@ -61,15 +61,16 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
-/* MASSIVER CHART DIVIDER OHNE HINTERGRUND */
+
+/* MASSIVER, TRANSPARENTER CHART-DIVIDER */
 .section-divider {
-    height: 80px; /* Mehr Höhe für Dynamik */
-    margin: 50px 0;
+    height: 100px; /* Mehr Höhe für eine deutliche Kursbewegung */
+    margin: 40px 0;
     width: 100%;
     display: flex;
     align-items: center;
     position: relative;
-    background: transparent;
+    background: transparent; /* Kein Hintergrund-Balken */
     overflow: hidden;
 }
 
@@ -77,32 +78,32 @@
     content: '';
     width: 100%;
     height: 100%;
-    /* Ein extrem breites Chart-Pattern, das organisch wirkt */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="80" viewBox="0 0 1000 80"> \
-        <g opacity="0.5"> \
-            <rect x="10" y="50" width="1" height="20" fill="%235c6680"/><rect x="7" y="55" width="7" height="10" fill="%2300ffaa"/> \
-            <rect x="25" y="45" width="1" height="25" fill="%235c6680"/><rect x="22" y="48" width="7" height="12" fill="%2300ffaa"/> \
-            <rect x="40" y="40" width="1" height="20" fill="%235c6680"/><rect x="37" y="42" width="7" height="8" fill="%23ff4a68"/> \
-            <rect x="55" y="45" width="1" height="15" fill="%235c6680"/><rect x="52" y="48" width="7" height="14" fill="%23ff4a68"/> \
-            <rect x="70" y="30" width="1" height="30" fill="%235c6680"/><rect x="67" y="35" width="7" height="18" fill="%2300ffaa"/> \
-            <rect x="85" y="20" width="1" height="35" fill="%235c6680"/><rect x="82" y="25" width="7" height="25" fill="%2300ffaa"/> \
-            <rect x="100" y="15" width="1" height="25" fill="%235c6680"/><rect x="97" y="18" width="7" height="15" fill="%2300ffaa"/> \
-            <rect x="115" y="25" width="1" height="20" fill="%235c6680"/><rect x="112" y="28" width="7" height="10" fill="%23ff4a68"/> \
-            <rect x="130" y="35" width="1" height="15" fill="%235c6680"/><rect x="127" y="38" width="7" height="8" fill="%23ff4a68"/> \
-            <rect x="145" y="30" width="1" height="25" fill="%235c6680"/><rect x="142" y="32" width="7" height="12" fill="%2300ffaa"/> \
-            <rect x="160" y="15" width="1" height="35" fill="%235c6680"/><rect x="157" y="18" width="7" height="25" fill="%2300ffaa"/> \
-            <rect x="175" y="5" width="1" height="30" fill="%235c6680"/><rect x="172" y="10" width="7" height="15" fill="%2300ffaa"/> \
-            <rect x="190" y="10" width="1" height="20" fill="%235c6680"/><rect x="187" y="12" width="7" height="10" fill="%23ff4a68"/> \
-            <rect x="205" y="20" width="1" height="25" fill="%235c6680"/><rect x="202" y="25" width="7" height="12" fill="%23ff4a68"/> \
-            <rect x="220" y="35" width="1" height="30" fill="%235c6680"/><rect x="217" y="40" width="7" height="15" fill="%23ff4a68"/> \
-            <rect x="235" y="50" width="1" height="20" fill="%235c6680"/><rect x="232" y="55" width="7" height="10" fill="%2300ffaa"/> \
+    /* Ein langes, handgezeichnetes SVG-Pattern (1000px), das wie ein echter Chart aussieht */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="100" viewBox="0 0 1000 100"> \
+        <g opacity="0.4"> \
+            <line x1="0" y1="50" x2="1000" y2="50" stroke="rgba(118,75,162,0.2)" stroke-width="1" stroke-dasharray="5,5"/> \
+            <rect x="20" y="60" width="1" height="25" fill="%235c6680"/><rect x="17" y="65" width="7" height="12" fill="%2300ffaa"/> \
+            <rect x="45" y="55" width="1" height="20" fill="%235c6680"/><rect x="42" y="60" width="7" height="10" fill="%2300ffaa"/> \
+            <rect x="70" y="45" width="1" height="30" fill="%235c6680"/><rect x="67" y="50" width="7" height="18" fill="%2300ffaa"/> \
+            <rect x="95" y="50" width="1" height="20" fill="%235c6680"/><rect x="92" y="55" width="7" height="8" fill="%23ff4a68"/> \
+            <rect x="120" y="55" width="1" height="25" fill="%235c6680"/><rect x="117" y="60" width="7" height="14" fill="%23ff4a68"/> \
+            <rect x="145" y="40" width="1" height="35" fill="%235c6680"/><rect x="142" y="45" width="7" height="22" fill="%2300ffaa"/> \
+            <rect x="170" y="30" width="1" height="30" fill="%235c6680"/><rect x="167" y="35" width="7" height="20" fill="%2300ffaa"/> \
+            <rect x="195" y="20" width="1" height="40" fill="%235c6680"/><rect x="192" y="25" width="7" height="28" fill="%2300ffaa"/> \
+            <rect x="220" y="25" width="1" height="20" fill="%235c6680"/><rect x="217" y="30" width="7" height="10" fill="%23ff4a68"/> \
+            <rect x="245" y="35" width="1" height="25" fill="%235c6680"/><rect x="242" y="40" width="7" height="12" fill="%23ff4a68"/> \
+            <rect x="270" y="30" width="1" height="30" fill="%235c6680"/><rect x="267" y="35" width="7" height="18" fill="%2300ffaa"/> \
+            <rect x="295" y="20" width="1" height="20" fill="%235c6680"/><rect x="292" y="23" width="7" height="12" fill="%2300ffaa"/> \
+            <rect x="320" y="10" width="1" height="25" fill="%235c6680"/><rect x="317" y="15" width="7" height="15" fill="%2300ffaa"/> \
         </g></svg>');
-    background-repeat: repeat-x;
-    background-size: 600px 60px; /* Hier steuern wir die Streckung */
+    background-repeat: no-repeat; /* Kein Kacheln mehr */
+    background-size: 100% 100%; /* Streckt den Chart über die volle Containerbreite */
     background-position: center;
-    filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.4));
-    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
+    /* Sanftes Ausblenden an den Seiten */
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
+        
 
         .user-switcher {
             position: absolute;
