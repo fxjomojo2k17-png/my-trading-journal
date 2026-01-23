@@ -163,7 +163,7 @@
             font-weight: bold; cursor: pointer; height: auto; width: auto; font-size: 14px;
         }
         
-        .header {
+  .header {
             background-color: #0b0e11;
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), 
                               url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); 
@@ -174,14 +174,67 @@
             border-bottom: 3px solid #764ba2;
         }
 
-        .header h1 { font-size: 1.5em; letter-spacing: 1px; text-transform: uppercase; color: #00f2ff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
+        .header h1 { 
+            position: relative;
+            font-size: 1.5em;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: #00f2ff;
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
+            display: inline-block;
+            z-index: 2;
+        }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-            padding: 15px;
-            background: rgba(28, 34, 41, 0.6);
+        .chart-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            opacity: 0.4;
+            gap: 3px;
+            padding: 0 5%;
+            z-index: 1;
+        }
+
+        .mini-candle {
+            width: 5px;
+            background: linear-gradient(to bottom, transparent, #00ffaa);
+            border: 1px solid #00ffaa;
+            animation: growCandle 1.5s ease-in-out infinite;
+            border-radius: 1px;
+        }
+
+        .mini-candle:nth-child(even) {
+            background: linear-gradient(to bottom, transparent, #ff4a68);
+            border-color: #ff4a68;
+            animation-delay: -0.5s;
+        }
+
+        .mini-candle:nth-child(3n) {
+            animation-delay: -0.8s;
+        }
+
+        .mini-candle:nth-child(4n) {
+            animation-delay: -1.2s;
+        }
+
+        @keyframes growCandle {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        @media (min-width: 768px) {
+            .header h1 { font-size: 2em; letter-spacing: 8px; }
+            .mini-candle { width: 6px; }
+        }
+
+        @media (min-width: 1024px) {
+            .header h1 { font-size: 2.5em; letter-spacing: 10px; }
+            .mini-candle { width: 8px; }
         }
         
         .stat-card {
