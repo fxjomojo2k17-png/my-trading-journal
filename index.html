@@ -57,126 +57,35 @@
             backdrop-filter: blur(15px);
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-            
-            /* WICHTIG: Hier geändert von hidden zu visible, damit der Divider ausbrechen kann */
-            overflow: visible; 
-            
+            overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
 
-        /* --- NEW FULL-SCREEN LIVE CHART DIVIDER --- */
-       .section-divider {
-    height: 1px;
-    /* Margin oben/unten 40px, links/rechts 0 für volle Breite */
-    margin: 40px 0; 
-    /* Ein subtilerer Verlauf, der an den Rändern ausfadet */
-    background: linear-gradient(90deg, 
-        rgba(118, 75, 162, 0) 0%, 
-        rgba(118, 75, 162, 0.5) 50%, 
-        rgba(118, 75, 162, 0) 100%);
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Falls der Container Padding hat, hiermit "rausdrücken": */
-    width: calc(100% + 40px); 
-    margin-left: -20px;
-}
-
-        /* Der leuchtende Scanner-Strich in der Mitte (optional, sieht cool aus) */
-        .section-divider::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 1px;
-            height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.8), transparent);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-            z-index: 2;
+        /* WIDER CHART PATTERN DIVIDER */
+        .section-divider {
+            height: 40px;
+            margin: 40px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.8;
+            position: relative;
+            /* Breiter gemacht für ein besseres Chart-Gefühl */
+            max-width: 800px; 
+            width: 90%;
         }
 
         .section-divider::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 200%;    /* Doppelte Breite für nahtloses Scrolling */
+            width: 100%;
             height: 100%;
-            
-            /* Hochauflösendes, dichtes Chart-Pattern (Endlos Loop) */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="100" viewBox="0 0 1000 100" preserveAspectRatio="none"> \
-                <defs><filter id="glow"><feGaussianBlur stdDeviation="1" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs> \
-                <g filter="url(%23glow)" opacity="0.9"> \
-                    \
-                    <rect x="0" y="50" width="5" height="10" fill="%232d343c"/><rect x="10" y="48" width="5" height="14" fill="%2300ffaa"/> \
-                    <rect x="20" y="52" width="5" height="8" fill="%23ff4a68"/><rect x="30" y="45" width="5" height="12" fill="%2300ffaa"/> \
-                    <rect x="40" y="55" width="5" height="6" fill="%23ff4a68"/><rect x="50" y="50" width="5" height="15" fill="%2300ffaa"/> \
-                    <rect x="60" y="40" width="5" height="20" fill="%2300ffaa"/><rect x="70" y="58" width="5" height="8" fill="%23ff4a68"/> \
-                    \
-                    <rect x="80" y="45" width="5" height="12" fill="%2300ffaa"/><rect x="90" y="40" width="5" height="18" fill="%2300ffaa"/> \
-                    <rect x="100" y="35" width="5" height="10" fill="%23ff4a68"/><rect x="110" y="30" width="5" height="22" fill="%2300ffaa"/> \
-                    <rect x="120" y="25" width="5" height="15" fill="%2300ffaa"/><rect x="130" y="20" width="5" height="25" fill="%2300ffaa"/> \
-                    <rect x="140" y="28" width="5" height="10" fill="%23ff4a68"/><rect x="150" y="15" width="5" height="30" fill="%2300ffaa"/> \
-                    \
-                    <rect x="160" y="20" width="5" height="15" fill="%23ff4a68"/><rect x="170" y="25" width="5" height="20" fill="%23ff4a68"/> \
-                    <rect x="180" y="35" width="5" height="10" fill="%2300ffaa"/><rect x="190" y="40" width="5" height="18" fill="%23ff4a68"/> \
-                    <rect x="200" y="50" width="5" height="12" fill="%23ff4a68"/><rect x="210" y="55" width="5" height="8" fill="%2300ffaa"/> \
-                    \
-                    <rect x="220" y="45" width="5" height="25" fill="%2300ffaa"/><rect x="230" y="40" width="5" height="35" fill="%23ff4a68"/> \
-                    <rect x="240" y="60" width="5" height="20" fill="%2300ffaa"/><rect x="250" y="45" width="5" height="30" fill="%23ff4a68"/> \
-                    <rect x="260" y="65" width="5" height="15" fill="%2300ffaa"/><rect x="270" y="50" width="5" height="25" fill="%2300ffaa"/> \
-                    \
-                    <rect x="280" y="40" width="5" height="10" fill="%23ff4a68"/><rect x="290" y="45" width="5" height="12" fill="%2300ffaa"/> \
-                    <rect x="300" y="50" width="5" height="8" fill="%23ff4a68"/><rect x="310" y="42" width="5" height="15" fill="%2300ffaa"/> \
-                    <rect x="320" y="35" width="5" height="18" fill="%2300ffaa"/><rect x="330" y="30" width="5" height="20" fill="%2300ffaa"/> \
-                    <rect x="340" y="40" width="5" height="10" fill="%23ff4a68"/><rect x="350" y="45" width="5" height="12" fill="%2300ffaa"/> \
-                    <rect x="360" y="55" width="5" height="8" fill="%23ff4a68"/><rect x="370" y="50" width="5" height="15" fill="%2300ffaa"/> \
-                    <rect x="380" y="60" width="5" height="10" fill="%23ff4a68"/><rect x="390" y="55" width="5" height="12" fill="%2300ffaa"/> \
-                    <rect x="400" y="45" width="5" height="20" fill="%2300ffaa"/><rect x="410" y="40" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="420" y="50" width="5" height="10" fill="%2300ffaa"/><rect x="430" y="45" width="5" height="18" fill="%2300ffaa"/> \
-                    <rect x="440" y="35" width="5" height="22" fill="%2300ffaa"/><rect x="450" y="40" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="460" y="50" width="5" height="12" fill="%2300ffaa"/><rect x="470" y="55" width="5" height="10" fill="%23ff4a68"/> \
-                    <rect x="480" y="60" width="5" height="8" fill="%2300ffaa"/><rect x="490" y="50" width="5" height="15" fill="%2300ffaa"/> \
-                    <rect x="500" y="40" width="5" height="20" fill="%23ff4a68"/><rect x="510" y="45" width="5" height="18" fill="%2300ffaa"/> \
-                    <rect x="520" y="35" width="5" height="25" fill="%2300ffaa"/><rect x="530" y="40" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="540" y="50" width="5" height="12" fill="%2300ffaa"/><rect x="550" y="55" width="5" height="10" fill="%23ff4a68"/> \
-                    <rect x="560" y="60" width="5" height="15" fill="%2300ffaa"/><rect x="570" y="50" width="5" height="20" fill="%2300ffaa"/> \
-                    <rect x="580" y="40" width="5" height="18" fill="%23ff4a68"/><rect x="590" y="45" width="5" height="12" fill="%2300ffaa"/> \
-                    <rect x="600" y="50" width="5" height="10" fill="%23ff4a68"/><rect x="610" y="55" width="5" height="8" fill="%2300ffaa"/> \
-                    <rect x="620" y="60" width="5" height="15" fill="%23ff4a68"/><rect x="630" y="50" width="5" height="20" fill="%2300ffaa"/> \
-                    <rect x="640" y="40" width="5" height="25" fill="%2300ffaa"/><rect x="650" y="45" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="660" y="50" width="5" height="12" fill="%2300ffaa"/><rect x="670" y="55" width="5" height="10" fill="%23ff4a68"/> \
-                    <rect x="680" y="60" width="5" height="8" fill="%2300ffaa"/><rect x="690" y="50" width="5" height="15" fill="%2300ffaa"/> \
-                    <rect x="700" y="40" width="5" height="20" fill="%23ff4a68"/><rect x="710" y="45" width="5" height="18" fill="%2300ffaa"/> \
-                    <rect x="720" y="35" width="5" height="25" fill="%2300ffaa"/><rect x="730" y="40" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="740" y="50" width="5" height="12" fill="%2300ffaa"/><rect x="750" y="55" width="5" height="10" fill="%23ff4a68"/> \
-                    <rect x="760" y="60" width="5" height="15" fill="%2300ffaa"/><rect x="770" y="50" width="5" height="20" fill="%2300ffaa"/> \
-                    <rect x="780" y="40" width="5" height="18" fill="%23ff4a68"/><rect x="790" y="45" width="5" height="12" fill="%2300ffaa"/> \
-                    <rect x="800" y="50" width="5" height="10" fill="%23ff4a68"/><rect x="810" y="55" width="5" height="8" fill="%2300ffaa"/> \
-                    <rect x="820" y="60" width="5" height="15" fill="%23ff4a68"/><rect x="830" y="50" width="5" height="20" fill="%2300ffaa"/> \
-                    <rect x="840" y="40" width="5" height="25" fill="%2300ffaa"/><rect x="850" y="45" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="860" y="50" width="5" height="12" fill="%2300ffaa"/><rect x="870" y="55" width="5" height="10" fill="%23ff4a68"/> \
-                    <rect x="880" y="60" width="5" height="8" fill="%2300ffaa"/><rect x="890" y="50" width="5" height="15" fill="%2300ffaa"/> \
-                    <rect x="900" y="40" width="5" height="20" fill="%23ff4a68"/><rect x="910" y="45" width="5" height="18" fill="%2300ffaa"/> \
-                    <rect x="920" y="35" width="5" height="25" fill="%2300ffaa"/><rect x="930" y="40" width="5" height="15" fill="%23ff4a68"/> \
-                    <rect x="940" y="50" width="5" height="12" fill="%2300ffaa"/><rect x="950" y="55" width="5" height="10" fill="%23ff4a68"/> \
-                    <rect x="960" y="60" width="5" height="15" fill="%2300ffaa"/><rect x="970" y="50" width="5" height="20" fill="%2300ffaa"/> \
-                    <rect x="980" y="40" width="5" height="18" fill="%23ff4a68"/><rect x="990" y="45" width="5" height="12" fill="%2300ffaa"/> \
-                </g> \
-            </svg>');
-            
+            /* Ein detaillierteres SVG Pattern mit mehr Candles und Dochten */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40" viewBox="0 0 160 40"><rect x="5" y="15" width="1" height="20" fill="%235c6680"/><rect x="2" y="20" width="7" height="10" fill="%2300ffaa"/><rect x="20" y="10" width="1" height="25" fill="%235c6680"/><rect x="17" y="15" width="7" height="15" fill="%2300ffaa"/><rect x="35" y="12" width="1" height="20" fill="%235c6680"/><rect x="32" y="18" width="7" height="12" fill="%23ff4a68"/><rect x="50" y="18" width="1" height="15" fill="%235c6680"/><rect x="47" y="22" width="7" height="8" fill="%23ff4a68"/><rect x="65" y="8" width="1" height="28" fill="%235c6680"/><rect x="62" y="12" width="7" height="18" fill="%2300ffaa"/><rect x="80" y="5" width="1" height="22" fill="%235c6680"/><rect x="77" y="10" width="7" height="10" fill="%2300ffaa"/><rect x="95" y="15" width="1" height="20" fill="%235c6680"/><rect x="92" y="20" width="7" height="8" fill="%23ff4a68"/><rect x="110" y="10" width="1" height="25" fill="%235c6680"/><rect x="107" y="15" width="7" height="12" fill="%23ff4a68"/><rect x="125" y="12" width="1" height="20" fill="%235c6680"/><rect x="122" y="16" width="7" height="10" fill="%2300ffaa"/><rect x="140" y="8" width="1" height="28" fill="%235c6680"/><rect x="137" y="11" width="7" height="16" fill="%2300ffaa"/></svg>');
             background-repeat: repeat-x;
-            background-size: 50% 100%; /* Staucht das Muster horizontal, behält vertikale Füllung */
-            
-            /* Die flüssige Live-Ticker Animation */
-            animation: liveTicker 15s linear infinite;
-        }
-
-        @keyframes liveTicker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); } /* Bewegt sich genau um eine Pattern-Länge */
+            background-position: center;
+            background-size: contain;
+            filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.3));
         }
 
         .user-switcher {
@@ -260,7 +169,6 @@
             transition: all 0.25s ease;
         }
 
-        /* CYAN FOCUS GLOW */
         input:focus, select:focus, textarea:focus {
             border-color: #00f2ff !important;
             box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
