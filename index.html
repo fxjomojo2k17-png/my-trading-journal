@@ -66,25 +66,23 @@
         }
 
         /* --- NEW FULL-SCREEN LIVE CHART DIVIDER --- */
-        .section-divider {
-            height: 100px;                 /* Höhe des Charts */
-            width: 100vw;                  /* Volle Bildschirmbreite */
-            position: relative;
-            left: 50%;
-            right: 50%;
-            margin-left: -50vw;            /* Zieht es nach ganz links aus dem Container */
-            margin-right: -50vw;           /* Zieht es nach ganz rechts */
-            
-            margin-top: 60px;
-            margin-bottom: 60px;
-            
-            background: #0b0e11;           /* Dunkler Hintergrund für Kontrast */
-            border-top: 1px solid rgba(0, 242, 255, 0.2);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.2);
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.9); /* Tiefe */
-            overflow: hidden;              /* Wichtig, damit die Animation nicht scrollt */
-            z-index: 10;
-        }
+       .section-divider {
+    height: 1px;
+    /* Margin oben/unten 40px, links/rechts 0 für volle Breite */
+    margin: 40px 0; 
+    /* Ein subtilerer Verlauf, der an den Rändern ausfadet */
+    background: linear-gradient(90deg, 
+        rgba(118, 75, 162, 0) 0%, 
+        rgba(118, 75, 162, 0.5) 50%, 
+        rgba(118, 75, 162, 0) 100%);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Falls der Container Padding hat, hiermit "rausdrücken": */
+    width: calc(100% + 40px); 
+    margin-left: -20px;
+}
 
         /* Der leuchtende Scanner-Strich in der Mitte (optional, sieht cool aus) */
         .section-divider::after {
