@@ -34,87 +34,6 @@
             z-index: -1; 
             pointer-events: none;
         }
-		
-	/* Dripping Paint Effect im Header */
-.header {
-    position: relative;
-    overflow: visible; /* Wichtig damit es rausläuft */
-}
-
-.header::after {
-    content: '';
-    position: absolute;
-    bottom: -3px;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    background-image: 
-        radial-gradient(circle at 5% 0%, transparent 0%, transparent 8px, var(--drip-color) 8px, var(--drip-color) 12px, transparent 12px),
-        radial-gradient(circle at 12% 0%, transparent 0%, transparent 6px, var(--drip-color) 6px, var(--drip-color) 10px, transparent 10px),
-        radial-gradient(circle at 18% 0%, transparent 0%, transparent 10px, var(--drip-color) 10px, var(--drip-color) 15px, transparent 15px),
-        radial-gradient(circle at 25% 0%, transparent 0%, transparent 7px, var(--drip-color) 7px, var(--drip-color) 11px, transparent 11px),
-        radial-gradient(circle at 32% 0%, transparent 0%, transparent 9px, var(--drip-color) 9px, var(--drip-color) 14px, transparent 14px),
-        radial-gradient(circle at 40% 0%, transparent 0%, transparent 6px, var(--drip-color) 6px, var(--drip-color) 12px, transparent 12px),
-        radial-gradient(circle at 48% 0%, transparent 0%, transparent 11px, var(--drip-color) 11px, var(--drip-color) 16px, transparent 16px),
-        radial-gradient(circle at 55% 0%, transparent 0%, transparent 8px, var(--drip-color) 8px, var(--drip-color) 13px, transparent 13px),
-        radial-gradient(circle at 63% 0%, transparent 0%, transparent 7px, var(--drip-color) 7px, var(--drip-color) 10px, transparent 10px),
-        radial-gradient(circle at 70% 0%, transparent 0%, transparent 10px, var(--drip-color) 10px, var(--drip-color) 15px, transparent 15px),
-        radial-gradient(circle at 77% 0%, transparent 0%, transparent 6px, var(--drip-color) 6px, var(--drip-color) 11px, transparent 11px),
-        radial-gradient(circle at 85% 0%, transparent 0%, transparent 9px, var(--drip-color) 9px, var(--drip-color) 14px, transparent 14px),
-        radial-gradient(circle at 92% 0%, transparent 0%, transparent 7px, var(--drip-color) 7px, var(--drip-color) 12px, transparent 12px),
-        radial-gradient(circle at 98% 0%, transparent 0%, transparent 8px, var(--drip-color) 8px, var(--drip-color) 13px, transparent 13px);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    --drip-color: rgba(0, 255, 170, 0.6);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-/* Profit State - Grüne Tropfen */
-.header.profit-drip::after {
-    opacity: 1;
-    --drip-color: rgba(0, 255, 170, 0.7);
-    animation: drip-profit 2s ease-in-out infinite;
-}
-
-/* Loss State - Rote Tropfen (Blut) */
-.header.loss-drip::after {
-    opacity: 1;
-    --drip-color: rgba(255, 74, 104, 0.8);
-    animation: drip-loss 2s ease-in-out infinite;
-}
-
-@keyframes drip-profit {
-    0% { 
-        transform: translateY(0) scaleY(1);
-        opacity: 0.8;
-    }
-    50% { 
-        transform: translateY(5px) scaleY(1.2);
-        opacity: 1;
-    }
-    100% { 
-        transform: translateY(0) scaleY(1);
-        opacity: 0.8;
-    }
-}
-
-@keyframes drip-loss {
-    0% { 
-        transform: translateY(0) scaleY(1);
-        opacity: 0.9;
-    }
-    50% { 
-        transform: translateY(8px) scaleY(1.3);
-        opacity: 1;
-    }
-    100% { 
-        transform: translateY(0) scaleY(1);
-        opacity: 0.9;
-    }
-}
 
         /* Glitch Class */
 
@@ -700,18 +619,6 @@
 
         let traderAllTrades = trades.filter(t => activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
         const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-    
-    // VISUAL FEEDBACK EFFECTS
-    const header = document.querySelector('.header');
-    
-    // Dripping Effect aktivieren
-    header.classList.remove('profit-drip', 'loss-drip');
-    if (totalNetPL > 0) {
-        header.classList.add('profit-drip');
-    } else if (totalNetPL < 0) {
-        header.classList.add('loss-drip');
-    }
-
         
         animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
         
