@@ -34,6 +34,20 @@
             z-index: -1; 
             pointer-events: none;
         }
+		
+		/* Container Glow States */
+.container.profit-mode {
+    border: 1px solid rgba(0, 255, 170, 0.3);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(0, 255, 170, 0.15);
+    transition: all 0.5s ease;
+}
+
+.container.loss-mode {
+    border: 1px solid rgba(255, 74, 104, 0.3);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(255, 74, 104, 0.15);
+    transition: all 0.5s ease;
+}
+		
 
         /* Glitch Class */
 
