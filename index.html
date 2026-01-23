@@ -36,10 +36,47 @@
         }
 
         /* Glitch Class */
-        .glitch-active {
-            animation: glitch 0.15s ease-in-out;
-            filter: hue-rotate(90deg) brightness(1.2);
-        }
+        
+		/* Glitch Classes für Win/Loss/BE */
+.glitch-win {
+    animation: glitchWin 0.2s ease-in-out;
+}
+
+.glitch-loss {
+    animation: glitchLoss 0.2s ease-in-out;
+}
+
+.glitch-be {
+    animation: glitchBE 0.15s ease-in-out;
+}
+
+@keyframes glitchWin {
+    0% { transform: translate(0); filter: brightness(1); }
+    20% { transform: translate(-2px, 2px); background: rgba(0, 255, 170, 0.1); }
+    40% { transform: translate(-2px, -2px); background: rgba(0, 255, 170, 0.15); }
+    60% { transform: translate(2px, 2px); background: rgba(0, 255, 170, 0.1); }
+    80% { transform: translate(2px, -2px); background: rgba(0, 255, 170, 0.05); }
+    100% { transform: translate(0); filter: brightness(1); }
+}
+
+@keyframes glitchLoss {
+    0% { transform: translate(0); filter: brightness(1); }
+    20% { transform: translate(-3px, 3px); background: rgba(255, 74, 104, 0.15); }
+    40% { transform: translate(-3px, -3px); background: rgba(255, 74, 104, 0.2); }
+    60% { transform: translate(3px, 3px); background: rgba(255, 74, 104, 0.15); }
+    80% { transform: translate(3px, -3px); background: rgba(255, 74, 104, 0.1); }
+    100% { transform: translate(0); filter: brightness(1); }
+}
+
+@keyframes glitchBE {
+    0% { transform: translate(0); filter: brightness(1); }
+    25% { transform: translate(-1px, 1px); background: rgba(118, 75, 162, 0.1); }
+    50% { transform: translate(1px, -1px); background: rgba(118, 75, 162, 0.12); }
+    75% { transform: translate(-1px, -1px); background: rgba(118, 75, 162, 0.08); }
+    100% { transform: translate(0); filter: brightness(1); }
+}
+		
+		
 
         @keyframes glitch {
             0% { transform: translate(0); }
@@ -634,10 +671,17 @@
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
         
-        if (result === 'WIN') {
-            document.body.classList.add('glitch-active');
-            setTimeout(() => document.body.classList.remove('glitch-active'), 150);
-        }
+    // Visuelles Feedback je nach Result
+if (result === 'WIN') {
+    document.body.classList.add('glitch-win');
+    setTimeout(() => document.body.classList.remove('glitch-win'), 200);
+} else if (result === 'LOSS') {
+    document.body.classList.add('glitch-loss');
+    setTimeout(() => document.body.classList.remove('glitch-loss'), 200);
+} else if (result === 'BE') {
+    document.body.classList.add('glitch-be');
+    setTimeout(() => document.body.classList.remove('glitch-be'), 150);
+}
 
         const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
         const data = { 
