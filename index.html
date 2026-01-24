@@ -704,7 +704,7 @@
 
     <div class="trades-table">
         <table>
-            <thead><tr><th>Date</th><th>Trader</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
+            <thead><tr><th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
             <tbody id="tradesBody"></tbody>
         </table>
     </div>
@@ -999,20 +999,19 @@ async function fetchTrades() {
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
     function updateStatsAndTable() {
-        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-        localStorage.setItem('initialBalance', initialBalance);
-        const activeTrader = document.getElementById('activeTraderSelect').value;
-        const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+    const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+    localStorage.setItem('initialBalance', initialBalance);
+    const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
-        let filtered = trades.filter(t => {
-            const matchesTrader = (activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
-            const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
-            const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
-            return matchesTrader && matchesTime && matchesInstrument;
-        });
+    let filtered = trades.filter(t => {
+        const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
+        const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
+        return matchesTime && matchesInstrument;
+    });
 
-        let traderAllTrades = trades.filter(t => activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader);
-        const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+    let traderAllTrades = trades;
+        
+		const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
         
         animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
         
@@ -1036,7 +1035,9 @@ async function fetchTrades() {
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
-                <td>${t.date}</td><td style="font-size:0.7em; color:#8892b0">${t.trader_name || 'Trader 1'}</td><td>${t.instrument}</td><td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+                <td>${t.date}</td><td>${t.instrument}</td>
+				
+				<td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
                 <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
                 <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
                 <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
@@ -1128,15 +1129,17 @@ if (result === 'WIN') {
     }
 
     function renderCalendar() {
-        const grid = document.getElementById('calendarGrid'); const activeTrader = document.getElementById('activeTraderSelect').value;
-        grid.innerHTML = ''; const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
-        document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
-        const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
-        ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
-        for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
-        for (let d = 1; d <= daysInMonth; d++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const dayTrades = trades.filter(t => t.date === dateStr && (activeTrader === 'TEAM' || (t.trader_name || 'Trader 1') === activeTrader));
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = ''; 
+    const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
+    document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
+    const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
+    ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
+    for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayTrades = trades.filter(t => t.date === dateStr);
+			
             const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
             const dayEl = document.createElement('div');
             dayEl.className = `calendar-day ${dayPL > 0 ? 'day-win' : (dayPL < 0 ? 'day-loss' : '')} ${selectedDateFilter === dateStr ? 'selected' : ''}`;
@@ -1327,7 +1330,8 @@ function removeStrategy() {
 	
     async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
     async function deleteAllTrades() { if(confirm('Delete ALL?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
-    function exportToCSV() { let csv = 'Date,Trader,Instrument,PL\n' + trades.map(t => `${t.date},${t.trader_name},${t.instrument},${t.pl}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
+	
+ function exportToCSV() { let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
