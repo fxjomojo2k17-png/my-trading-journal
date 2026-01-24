@@ -1112,7 +1112,7 @@ if (result === 'WIN') {
             strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
             exit: document.getElementById('exit').value, result: result, pl: plValue, 
             risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, 
-            notes: document.getElementById('notes').value, trader_name: activeTrader
+            notes: document.getElementById('notes').value
         };
         if (editId) await _supabase.from('trades').update(data).eq('id', editId);
         else await _supabase.from('trades').insert([data]);
@@ -1223,7 +1223,7 @@ if (result === 'WIN') {
                     mistake: "PLAN",
                     screenshot: "",
                     notes: `Imported from TradingView`,
-                    trader_name: activeTrader
+                    
                 });
             }
         } else {
@@ -1248,7 +1248,7 @@ if (result === 'WIN') {
                         mistake: "PLAN",
                         screenshot: "",
                         notes: "",
-                        trader_name: activeTrader 
+                       
                     });
                 }
             }
