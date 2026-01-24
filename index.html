@@ -481,8 +481,9 @@
         .btn-secondary { background: #3d4651; color: white; }
         .btn-export { background: transparent !important; border: 1px solid #00f2ff !important; color: #00f2ff !important; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; border-radius: 4px; cursor: pointer; }
 
-        .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        .chart-box { background: rgba(37, 45, 55, 0.6); padding: 15px; border-radius: 12px; height: 320px; border: 1px solid rgba(255,255,255,0.05); }
+       .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+.chart-box { background: rgba(37, 45, 55, 0.6); padding: 15px; border-radius: 12px; height: 320px; border: 1px solid rgba(255,255,255,0.05); }
+.chart-box-wide { grid-column: 1 / -1; height: 450px; }
 
         .calendar-section { padding: 20px; max-width: 450px; margin: 0 auto; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #8892b0; font-size: 0.75em; text-transform: uppercase; font-weight: bold; }
@@ -677,13 +678,14 @@
 
     <div class="section-divider"></div>
 
-    <div class="charts-container">
-        <div class="chart-box"><canvas id="equityChart"></canvas></div>
-        <div class="chart-box"><canvas id="drawdownChart"></canvas></div>
-        <div class="chart-box"><canvas id="strategyPLChart"></canvas></div>
-        <div class="chart-box"><canvas id="distributionChart"></canvas></div>
-        <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
-    </div>
+  <div class="charts-container">
+    <div class="chart-box"><canvas id="equityChart"></canvas></div>
+    <div class="chart-box"><canvas id="drawdownChart"></canvas></div>
+    <div class="chart-box"><canvas id="strategyPLChart"></canvas></div>
+    <div class="chart-box"><canvas id="distributionChart"></canvas></div>
+    <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
+    <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
+</div>
 
     <div class="section-divider"></div>
 
@@ -938,7 +940,7 @@ async function checkAuth() {
     let trades = [];
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
-    let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart;
+    let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
 
@@ -1067,7 +1069,9 @@ async function fetchTrades() {
         const dD = [0,0,0,0,0,0,0]; chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
         if (weekdayChart) weekdayChart.destroy();
         weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' }, legend: {display:false} } } });
-    }
+    
+		createHeatmap(chartTrades);
+	}
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1268,6 +1272,129 @@ if (result === 'WIN') {
     }
 
     function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
+	
+	function createHeatmap(chartTrades) {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const hours = Array.from({length: 24}, (_, i) => i);
+    
+    // Grid initialisieren
+    const heatmapData = {};
+    days.forEach((_, dayIdx) => {
+        hours.forEach(hour => {
+            heatmapData[`${dayIdx}-${hour}`] = { pl: 0, count: 0 };
+        });
+    });
+    
+    // Trade Daten sammeln
+    chartTrades.forEach(t => {
+        if (!t.time) return;
+        const date = new Date(t.date + ' ' + t.time);
+        const dayIdx = date.getDay();
+        const hour = date.getHours();
+        const key = `${dayIdx}-${hour}`;
+        
+        if (heatmapData[key]) {
+            heatmapData[key].pl += Number(t.pl);
+            heatmapData[key].count += 1;
+        }
+    });
+    
+    // Matrix für Chart erstellen
+    const matrixData = [];
+    days.forEach((_, dayIdx) => {
+        hours.forEach(hour => {
+            const key = `${dayIdx}-${hour}`;
+            const cell = heatmapData[key];
+            
+            if (cell.count > 0) {
+                matrixData.push({
+                    x: hour,
+                    y: dayIdx,
+                    v: cell.pl / cell.count, // Durchschnitt
+                    count: cell.count,
+                    totalPL: cell.pl
+                });
+            }
+        });
+    });
+    
+    // Min/Max für Farben
+    const values = matrixData.map(d => d.v);
+    const absMax = Math.max(...values.map(Math.abs), 1);
+    
+    // Chart erstellen
+    if (heatmapChart) heatmapChart.destroy();
+    
+    heatmapChart = new Chart(document.getElementById('heatmapChart').getContext('2d'), {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                label: 'Avg P/L',
+                data: matrixData,
+                backgroundColor: matrixData.map(d => {
+                    const intensity = Math.abs(d.v) / absMax;
+                    if (d.v > 0) return `rgba(0, 255, 170, ${0.3 + intensity * 0.6})`;
+                    if (d.v < 0) return `rgba(255, 74, 104, ${0.3 + intensity * 0.6})`;
+                    return 'rgba(100, 100, 100, 0.3)';
+                }),
+                borderColor: matrixData.map(d => d.v > 0 ? '#00ffaa' : '#ff4a68'),
+                borderWidth: 1,
+                radius: matrixData.map(d => 8 + Math.min(d.count * 3, 15))
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Hour of Day', color: '#8892b0' },
+                    ticks: { 
+                        color: '#8892b0',
+                        callback: (val) => val + ':00'
+                    },
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    min: 0,
+                    max: 23
+                },
+                y: {
+                    title: { display: true, text: 'Day of Week', color: '#8892b0' },
+                    ticks: { 
+                        color: '#8892b0',
+                        callback: (val) => days[val]
+                    },
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    min: 0,
+                    max: 6
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'PERFORMANCE HEATMAP (Day vs Hour)',
+                    color: '#00f2ff',
+                    font: { size: 14, weight: 'bold' }
+                },
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: (items) => {
+                            const d = items[0].raw;
+                            return `${days[d.y]} at ${d.x}:00`;
+                        },
+                        label: (item) => {
+                            const d = item.raw;
+                            return [
+                                `Avg P/L: $${d.v.toFixed(2)}`,
+                                `Total P/L: $${d.totalPL.toFixed(2)}`,
+                                `Trades: ${d.count}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+	
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
     function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
