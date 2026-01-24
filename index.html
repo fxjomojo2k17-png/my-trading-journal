@@ -842,19 +842,22 @@
 let currentUser = null;
 
     // Auth Funktionen
-    async function checkAuth() {
-        const { data: { session } } = await _supabase.auth.getSession();
-        if (session) {
-            currentUser = session.user;
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('userEmail').textContent = currentUser.email;
-            fetchTrades();
-        } else {
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-        }
+async function checkAuth() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session) {
+        currentUser = session.user;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('userEmail').textContent = currentUser.email;
+        
+        // Initialisiere alle wichtigen Funktionen
+        populateLists();
+        fetchTrades();
+    } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('mainApp').style.display = 'none';
     }
+}
 
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value;
@@ -1068,8 +1071,7 @@ async function fetchTrades() {
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const editId = document.getElementById('editId').value;
-        const activeTrader = document.getElementById('activeTraderSelect').value;
-        if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
+        if (!currentUser) return alert("Please login first!");
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
         
@@ -1157,10 +1159,9 @@ if (result === 'WIN') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-  async function processBulkImport() {
-        const activeTrader = document.getElementById('activeTraderSelect').value; 
-        if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
-        
+ async function processBulkImport() {
+    if (!currentUser) return alert("Please login first!");
+	
         const area = document.getElementById('importArea'), raw = area.value.trim(); 
         if(!raw) return alert("Please paste data!");
         
