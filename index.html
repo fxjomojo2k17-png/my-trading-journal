@@ -23,6 +23,194 @@
             transition: transform 0.1s ease-out;
             position: relative;
         }
+		
+		/* LOGIN SCREEN */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(11, 14, 17, 0.3) 0%, rgba(26, 31, 38, 0.5) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .login-box {
+            background: rgba(22, 26, 30, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            border: 1px solid rgba(118, 75, 162, 0.4);
+            max-width: 400px;
+            width: 90%;
+            backdrop-filter: blur(15px);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-box h2 {
+            color: #00f2ff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8892b0;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(37, 45, 55, 0.8);
+            border: 1px solid #3d4651;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .login-form input:focus {
+            border-color: #00f2ff;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+            outline: none;
+            background: rgba(45, 55, 65, 0.9);
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .login-form button:active {
+            transform: translateY(0);
+        }
+
+        .login-toggle {
+            text-align: center;
+            margin-top: 20px;
+            color: #8892b0;
+            font-size: 0.9em;
+        }
+
+        .login-toggle a {
+            color: #00f2ff;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-toggle a:hover {
+            text-decoration: underline;
+            text-shadow: 0 0 8px rgba(0, 242, 255, 0.5);
+        }
+
+        .error-message, .success-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .error-message {
+            background: rgba(255, 74, 104, 0.2);
+            border: 1px solid #ff4a68;
+            color: #ff4a68;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 170, 0.2);
+            border: 1px solid #00ffaa;
+            color: #00ffaa;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(37, 45, 55, 0.8);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(118, 75, 162, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .user-info span {
+            color: #00f2ff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            background: #ff4a68;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #ff3050;
+            transform: translateY(-1px);
+        }
+		
+		
 
         /* ANIMATED BACKGROUND CANVAS */
         #bgCanvas {
@@ -353,13 +541,52 @@
 
 <img id="screenshot-preview-popup" src="" alt="Preview">
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+    <div class="login-box">
+        <h2>🔐 TRADING JOURNAL</h2>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <div id="loginForm" class="login-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            <button onclick="handleLogin()">Login</button>
+            <div class="login-toggle">
+                Don't have an account? <a onclick="toggleAuthMode()">Sign Up</a>
+            </div>
+        </div>
+        
+        <div id="signupForm" class="login-form" style="display:none;">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="signupEmail" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signupPassword" placeholder="••••••••" required>
+            </div>
+            <button onclick="handleSignup()">Create Account</button>
+            <div class="login-toggle">
+                Already have an account? <a onclick="toggleAuthMode()">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APP (versteckt bis Login) -->
+<div id="mainApp" style="display:none;">
+
 <div class="container">
-    <div class="user-switcher">
-        <select id="activeTraderSelect" onchange="refreshApp()">
-            <option value="Trader 1">Trader 1</option>
-            <option value="Trader 2">Trader 2</option>
-            <option value="TEAM">Team View</option>
-        </select>
+   <div class="user-info">
+        <span id="userEmail"></span>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
     </div>
 
     <div class="header">
@@ -612,6 +839,99 @@
     const { createClient } = supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let currentUser = null;
+
+    // Auth Funktionen
+    async function checkAuth() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (session) {
+            currentUser = session.user;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userEmail').textContent = currentUser.email;
+            fetchTrades();
+        } else {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (error) {
+            showError(error.message);
+        } else {
+            checkAuth();
+        }
+    }
+
+    async function handleSignup() {
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        
+        if (password.length < 6) {
+            showError('Password must be at least 6 characters');
+            return;
+        }
+        
+        const { data, error } = await _supabase.auth.signUp({
+            email: email,
+            password: password
+        });
+        
+        if (error) {
+            showError(error.message);
+        } else {
+            showSuccess('Account created! Please check your email to verify.');
+        }
+    }
+
+    async function handleLogout() {
+        await _supabase.auth.signOut();
+        currentUser = null;
+        trades = [];
+        checkAuth();
+    }
+
+    function toggleAuthMode() {
+        const login = document.getElementById('loginForm');
+        const signup = document.getElementById('signupForm');
+        const errorMsg = document.getElementById('errorMessage');
+        const successMsg = document.getElementById('successMessage');
+        
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        
+        if (login.style.display === 'none') {
+            login.style.display = 'block';
+            signup.style.display = 'none';
+        } else {
+            login.style.display = 'none';
+            signup.style.display = 'block';
+        }
+    }
+
+    function showError(message) {
+        const el = document.getElementById('errorMessage');
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    function showSuccess(message) {
+        const el = document.getElementById('successMessage');
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
     let trades = [];
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
@@ -637,17 +957,18 @@
         window.requestAnimationFrame(step);
     }
 
-    async function fetchTrades() {
-        const { data, error } = await _supabase.from('trades').select('*');
+async function fetchTrades() {
+        if (!currentUser) return;
+        const { data, error } = await _supabase.from('trades').select('*').eq('user_id', currentUser.id);
         if (error) console.error('Error:', error);
         else { trades = data || []; refreshApp(); }
     }
 
-    window.addEventListener('load', () => {
+ window.addEventListener('load', () => {
+        checkAuth();
         const savedBalance = localStorage.getItem('initialBalance');
         if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
         setupDragAndDrop();
-        fetchTrades();
     });
 
     function setupDragAndDrop() {
@@ -784,6 +1105,7 @@ if (result === 'WIN') {
 
         const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
         const data = { 
+            user_id: currentUser.id,
             date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
             strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
             exit: document.getElementById('exit').value, result: result, pl: plValue, 
@@ -886,6 +1208,7 @@ if (result === 'WIN') {
                 const entryPrice = avgPriceMatch ? parseFloat(avgPriceMatch[1]).toString() : '0';
                 
                 newTrades.push({ 
+                    user_id: currentUser.id,
                     date: date,
                     time: time,
                     instrument: instrument,
@@ -909,8 +1232,9 @@ if (result === 'WIN') {
                 const parts = line.split('\t').map(p => p.trim());
                 if(parts.length >= 7) {
                     const dateParts = parts[2].split(' ');
-                    newTrades.push({ 
-                        date: `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`, 
+                   newTrades.push({ 
+                        user_id: currentUser.id,
+                        date: `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`,
                         time: dateParts[3].substring(0, 5), 
                         instrument: parts[0], 
                         strategy: 'Imported', 
@@ -1005,5 +1329,8 @@ function removeStrategy() {
     function exportToCSV() { let csv = 'Date,Trader,Instrument,PL\n' + trades.map(t => `${t.date},${t.trader_name},${t.instrument},${t.pl}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
+
+</div> <!-- Ende mainApp -->
+
 </body>
 </html>
