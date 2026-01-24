@@ -835,23 +835,108 @@ if (result === 'WIN') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function processBulkImport() {
-        const activeTrader = document.getElementById('activeTraderSelect').value; if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
-        const area = document.getElementById('importArea'), raw = area.value.trim(); if(!raw) return alert("Please paste data!");
-        const lines = raw.split('\n'), newTrades = [], months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-        for(let line of lines) {
-            const parts = line.split('\t').map(p => p.trim());
-            if(parts.length >= 7) {
-                const dateParts = parts[2].split(' ');
+  async function processBulkImport() {
+        const activeTrader = document.getElementById('activeTraderSelect').value; 
+        if (activeTrader === 'TEAM') return alert("Select a specific Trader!");
+        
+        const area = document.getElementById('importArea'), raw = area.value.trim(); 
+        if(!raw) return alert("Please paste data!");
+        
+        const lines = raw.split('\n');
+        const newTrades = [];
+        
+        // Check if it's TradingView format (contains "Realized P&L" header)
+        const isTradingViewFormat = lines[0].includes('Realized P&L');
+        
+        if (isTradingViewFormat) {
+            // TradingView Format Processing
+            for(let i = 1; i < lines.length; i++) { // Skip header
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const parts = line.split(',');
+                if (parts.length < 6) continue;
+                
+                // Extract date and time from first column: "2026-01-23 17:10:50"
+                const dateTime = parts[0].split(' ');
+                const date = dateTime[0]; // "2026-01-23"
+                const time = dateTime[1].substring(0, 5); // "17:10"
+                
+                // Extract P/L
+                const pl = parseFloat(parts[3]);
+                
+                // Extract action details from last column
+                const action = parts.slice(5).join(','); // Rejoin in case there are commas in action
+                
+                // Extract direction (long or short)
+                const isLong = action.toLowerCase().includes('close long');
+                const direction = isLong ? 'LONG' : 'SHORT';
+                
+                // Extract symbol: "BLACKBULL:GER40" -> "GER40" or "BROKER:SYMBOL" -> "SYMBOL"
+                // Matches any broker prefix followed by colon, or just the symbol itself
+                const symbolMatch = action.match(/symbol\s+(?:\w+:)?(\w+)/i);
+                const instrument = symbolMatch ? symbolMatch[1] : 'UNKNOWN';
+                
+                // Extract exit price: "at price 10135.4"
+                const priceMatch = action.match(/at price ([\d.]+)/);
+                const exitPrice = priceMatch ? priceMatch[1] : '0';
+                
+                // Extract avg entry price: "Position AVG Price was 10145.300000"
+                const avgPriceMatch = action.match(/AVG Price was ([\d.]+)/);
+                const entryPrice = avgPriceMatch ? avgPriceMatch[1] : '0';
+                
                 newTrades.push({ 
-                    date: `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`, time: dateParts[3].substring(0, 5), 
-                    instrument: parts[0], strategy: 'Imported', direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT', 
-                    entry: parts[3], exit: parts[4], pl: parseFloat(parts[6]), result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', 
-                    risk: "100", mistake: "PLAN", trader_name: activeTrader 
+                    date: date,
+                    time: time,
+                    instrument: instrument,
+                    strategy: 'TradingView',
+                    direction: direction,
+                    entry: entryPrice,
+                    exit: exitPrice,
+                    pl: pl,
+                    result: pl >= 0 ? 'WIN' : 'LOSS',
+                    risk: "100",
+                    mistake: "PLAN",
+                    screenshot: "",
+                    notes: `Imported from TradingView`,
+                    trader_name: activeTrader
                 });
             }
+        } else {
+            // Original Tab-separated format
+            const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+            for(let line of lines) {
+                const parts = line.split('\t').map(p => p.trim());
+                if(parts.length >= 7) {
+                    const dateParts = parts[2].split(' ');
+                    newTrades.push({ 
+                        date: `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`, 
+                        time: dateParts[3].substring(0, 5), 
+                        instrument: parts[0], 
+                        strategy: 'Imported', 
+                        direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT', 
+                        entry: parts[3], 
+                        exit: parts[4], 
+                        pl: parseFloat(parts[6]), 
+                        result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', 
+                        risk: "100", 
+                        mistake: "PLAN",
+                        screenshot: "",
+                        notes: "",
+                        trader_name: activeTrader 
+                    });
+                }
+            }
         }
-        if(newTrades.length > 0) { await _supabase.from('trades').insert(newTrades); area.value = ""; fetchTrades(); }
+        
+        if(newTrades.length > 0) { 
+            await _supabase.from('trades').insert(newTrades); 
+            area.value = ""; 
+            alert(`✅ Successfully imported ${newTrades.length} trades!`);
+            fetchTrades(); 
+        } else {
+            alert("❌ No valid trades found. Please check the format.");
+        }
     }
 
     function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
