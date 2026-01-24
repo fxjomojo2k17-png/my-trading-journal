@@ -879,11 +879,11 @@ if (result === 'WIN') {
                 
                 // Extract exit price: "at price 10135.4"
                 const priceMatch = action.match(/at price ([\d.]+)/);
-                const exitPrice = priceMatch ? priceMatch[1] : '0';
+                const exitPrice = priceMatch ? parseFloat(priceMatch[1]).toString() : '0';
                 
                 // Extract avg entry price: "Position AVG Price was 10145.300000"
                 const avgPriceMatch = action.match(/AVG Price was ([\d.]+)/);
-                const entryPrice = avgPriceMatch ? avgPriceMatch[1] : '0';
+                const entryPrice = avgPriceMatch ? parseFloat(avgPriceMatch[1]).toString() : '0';
                 
                 newTrades.push({ 
                     date: date,
