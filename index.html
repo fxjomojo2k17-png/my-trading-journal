@@ -786,44 +786,30 @@
 
             <div class="api-credentials-box">
                 <h4 style="color:#00f2ff; margin-bottom:15px; border-bottom:1px solid #444; padding-bottom:10px;">
-                    ⚙️ Deine Sync Zugangsdaten
+                     Sync Settings
                 </h4>
-                <p style="font-size:0.9em; color:#aaa; margin-bottom:15px;">
-                    Kopiere diese Werte in die Eingabefelder des Skripts im MetaTrader.
-                </p>
-                
-                <div class="credential-row">
-                    <label>Supabase URL:</label>
-                    <div class="copy-input">
-                        <input type="text" id="disp_url" readonly value="https://DEIN_PROJEKT.supabase.co"> 
-                        <button onclick="copyToClip('disp_url')">Copy</button>
-                    </div>
-                </div>
-                
-                <div class="credential-row">
-                    <label>API Key (Anon):</label>
-                    <div class="copy-input">
-                        <input type="text" id="disp_key" readonly value="DEIN_ANON_KEY_HIER_EINFÜGEN">
-                        <button onclick="copyToClip('disp_key')">Copy</button>
-                    </div>
-                </div>
+
 
                 <div class="credential-row">
-                    <label>Deine User ID:</label>
+                    <label>User ID:</label>
                     <div class="copy-input">
-                        <input type="text" id="disp_uid" readonly placeholder="Bitte erst einloggen...">
+                        <input type="text" id="disp_uid" readonly placeholder="Login first...">
                         <button onclick="copyToClip('disp_uid')">Copy</button>
                     </div>
                 </div>
             </div>
 
             <div class="mt-instructions">
-                <h4>⚠️ Wichtige Einstellung im MetaTrader:</h4>
+                <h4> Settings MetaTrader:</h4>
                 <ol>
-                    <li>Gehe zu <b>Extras</b> → <b>Optionen</b> → <b>Experten</b>.</li>
-                    <li>Setze den Haken bei: <b>"WebRequest für folgende URLs erlauben"</b>.</li>
-                    <li>Füge deine Supabase URL hinzu (die von oben).</li>
-                    <li>Doppelklicke das Skript im Navigator und füge die Daten ein.</li>
+<li>Download .mq5		</li>
+<li>Open the .mq5 File in Texteditor and input your <b>User ID (as seen on the website)</b> on line 10 input string InpUserID      = <b>"YOURUSERID";</b>.  </li>
+<li>In Metatrader Click “File” -> “Open data folder” – “MQL5” –> Scripts. and insert the .mq5 File.</li>
+<li>Go to <b>Tools</b> → <b>Options</b> → <b>Expert Advisors</b>.</li>
+<li>Check the box: <b>"Allow WebRequest for listed URL"</b>.</li>
+<li>Add URL : <b>https://nrmivhzvwqpnwedvkbbz.supabase.co</b>.</li>
+<li><b>Refresh Metatrader</b> and select the script in the <b>navigator</b> and pull it on the chart.</li>
+
                 </ol>
             </div>
         </div>
