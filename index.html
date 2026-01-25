@@ -24,6 +24,54 @@
             position: relative;
         }
 		
+		
+		/* AUTO SYNC STYLES */
+.mt-integration-box {
+    background: rgba(22, 26, 30, 0.6);
+    border: 1px solid rgba(118, 75, 162, 0.3);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+.mt-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;
+}
+.mt-card {
+    background: rgba(37, 45, 55, 0.8); padding: 20px; border-radius: 10px; text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.3s ease;
+}
+.mt-card:hover { transform: translateY(-5px); border-color: #00f2ff; }
+.mt-icon {
+    width: 50px; height: 50px; background: #fff; color: #000; font-weight: bold; font-size: 24px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
+}
+.mt-icon.mt5 { background: #00f2ff; }
+.btn-download {
+    display: inline-block; padding: 8px 16px; background: transparent; border: 1px solid #764ba2;
+    color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.85em; margin-top: 10px;
+}
+.btn-download:hover { background: #764ba2; }
+
+.api-credentials-box {
+    background: #0f1216; border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px;
+}
+.credential-row { margin-bottom: 12px; }
+.credential-row label { display: block; color: #888; font-size: 0.75em; margin-bottom: 4px; text-transform: uppercase; }
+.copy-input { display: flex; gap: 8px; }
+.copy-input input {
+    flex: 1; background: #1a1d21 !important; border: 1px solid #333 !important; color: #00ffaa !important;
+    font-family: monospace; font-size: 13px; padding: 8px; border-radius: 4px;
+}
+.copy-input button {
+    background: #333; color: white; border: none; padding: 0 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;
+}
+.copy-input button:hover { background: #555; }
+.mt-instructions { background: rgba(0,242,255,0.05); padding: 15px; border-radius: 6px; border-left: 2px solid #00f2ff; }
+.mt-instructions h4 { color: #00f2ff; margin-bottom: 5px; font-size: 0.9em; }
+.mt-instructions ol { padding-left: 20px; color: #aaa; font-size: 0.85em; line-height: 1.6; }
+.mt-instructions b { color: #e0e0e0; }
+		
+		
 		/* LOGIN SCREEN */
         #loginScreen {
             position: fixed;
@@ -711,13 +759,77 @@
         </table>
     </div>
 
-    <div class="import-section">
-        <div class="import-container">
-            <h3 style="margin-bottom:10px; color:#00f2ff;">Smart Import</h3>
-            <textarea id="importArea" class="import-textarea" placeholder="Paste broker history here..."></textarea>
-            <button onclick="processBulkImport()" class="btn-primary" style="width:100%; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Import Trades Now</button>
+<div class="import-section">
+    <div class="container-narrow" style="max-width: 900px; margin: 0 auto;">
+        
+        <div class="mt-integration-box">
+            <h2 style="color: #fff; text-align: center; margin-bottom: 30px; letter-spacing: 2px;">
+                <span style="color: #00f2ff;">METATRADER</span> AUTO-SYNC
+            </h2>
+
+            <div class="mt-grid">
+                <div class="mt-card">
+                    <div class="mt-icon">4</div>
+                    <h3>MetaTrader 4</h3>
+                    <p style="font-size:0.8em; color:#aaa; margin-bottom:10px;">Auto-Sync Script</p>
+                    <a href="JournalSync_MT4.mq4" download class="btn-download">Download .mq4</a>
+                </div>
+                <div class="mt-card">
+                    <div class="mt-icon mt5">5</div>
+                    <h3>MetaTrader 5</h3>
+                    <p style="font-size:0.8em; color:#aaa; margin-bottom:10px;">Auto-Sync Script</p>
+                    <a href="JournalSync_MT5.mq5" download class="btn-download">Download .mq5</a>
+                </div>
+            </div>
+
+            <div class="section-divider" style="margin: 20px auto; opacity:0.3;"></div>
+
+            <div class="api-credentials-box">
+                <h4 style="color:#00f2ff; margin-bottom:15px; border-bottom:1px solid #444; padding-bottom:10px;">
+                    ⚙️ Deine Sync Zugangsdaten
+                </h4>
+                <p style="font-size:0.9em; color:#aaa; margin-bottom:15px;">
+                    Kopiere diese Werte in die Eingabefelder des Skripts im MetaTrader.
+                </p>
+                
+                <div class="credential-row">
+                    <label>Supabase URL:</label>
+                    <div class="copy-input">
+                        <input type="text" id="disp_url" readonly value="https://DEIN_PROJEKT.supabase.co"> 
+                        <button onclick="copyToClip('disp_url')">Copy</button>
+                    </div>
+                </div>
+                
+                <div class="credential-row">
+                    <label>API Key (Anon):</label>
+                    <div class="copy-input">
+                        <input type="text" id="disp_key" readonly value="DEIN_ANON_KEY_HIER_EINFÜGEN">
+                        <button onclick="copyToClip('disp_key')">Copy</button>
+                    </div>
+                </div>
+
+                <div class="credential-row">
+                    <label>Deine User ID:</label>
+                    <div class="copy-input">
+                        <input type="text" id="disp_uid" readonly placeholder="Bitte erst einloggen...">
+                        <button onclick="copyToClip('disp_uid')">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-instructions">
+                <h4>⚠️ Wichtige Einstellung im MetaTrader:</h4>
+                <ol>
+                    <li>Gehe zu <b>Extras</b> → <b>Optionen</b> → <b>Experten</b>.</li>
+                    <li>Setze den Haken bei: <b>"WebRequest für folgende URLs erlauben"</b>.</li>
+                    <li>Füge deine Supabase URL hinzu (die von oben).</li>
+                    <li>Doppelklicke das Skript im Navigator und füge die Daten ein.</li>
+                </ol>
+            </div>
         </div>
+
     </div>
+</div>
 </div>
 
 <script>
@@ -851,7 +963,10 @@ async function checkAuth() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         document.getElementById('userEmail').textContent = currentUser.email;
-        
+        const uidInput = document.getElementById('disp_uid');
+        if(uidInput) uidInput.value = currentUser.id;
+		
+		
         // Initialisiere alle wichtigen Funktionen
         populateLists();
         fetchTrades();
@@ -860,6 +975,16 @@ async function checkAuth() {
         document.getElementById('mainApp').style.display = 'none';
     }
 }
+
+function copyToClip(id) {
+    const el = document.getElementById(id);
+    el.select();
+    el.setSelectionRange(0, 99999); // Für Mobile
+    navigator.clipboard.writeText(el.value).then(() => {
+        alert("Copied!");
+    });
+}
+
 
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value;
