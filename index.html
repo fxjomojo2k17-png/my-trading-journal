@@ -797,7 +797,7 @@
                     <div class="mt-icon mt5">5</div>
                     <h3>MetaTrader 5</h3>
                     <p style="font-size:0.8em; color:#aaa; margin-bottom:10px;">Auto-Sync Script</p>
-                    <a href="JournalSync_Final_EA.mq5" download class="btn-download">Download .mq5</a>
+                    <a href="JournalSync_MT5.mq5" download class="btn-download">Download .mq5</a>
                 </div>
             </div>
 			
@@ -1603,20 +1603,20 @@ function removeStrategy() {
 async function downloadPersonalizedEA() {
     let userId = "";
 
-    // 1. Versuch: Aus der Anzeige lesen (das was du auf dem Bildschirm siehst)
+    // 1. Versuch: Aus der Anzeige lesen
     const displayElement = document.getElementById('userIdDisplay');
     if (displayElement) {
         userId = displayElement.textContent.trim();
     }
 
-    // 2. Versuch: Falls Anzeige "Lade..." sagt, versuche die interne Variable
+    // 2. Versuch: Falls Anzeige noch lädt, interne Variable prüfen
     if (!userId || userId.includes("Lade") || userId.length < 10) {
         if (typeof _currentUserId !== 'undefined' && _currentUserId) {
             userId = _currentUserId;
         }
     }
 
-    // 3. Versuch: Direkt aus Supabase (falls vorhanden)
+    // 3. Versuch: Direkt von Supabase Auth
     if (!userId || userId.length < 10) {
         try {
             const { data: { session } } = await _supabase.auth.getSession();
@@ -1624,29 +1624,29 @@ async function downloadPersonalizedEA() {
         } catch (e) {}
     }
 
-    // FINALER CHECK
     if (!userId || userId.includes("Lade") || userId.length < 10) {
-        alert("ID noch nicht bereit. Bitte loggen Sie sich ein oder warten Sie, bis die Trades geladen wurden.");
+        alert("ID noch nicht bereit. Bitte warten Sie kurz, bis das Journal geladen ist.");
         return;
     }
 
-    // Der EA Code mit deiner ID
+    // Das EA Template basierend auf der stabilen Final_EA Version (V5 Logik)
     const eaCode = `//+------------------------------------------------------------------+
 //|                                     JournalSync_Pro_Connector.mq5|
-//|                                     USER: ${userId}               |
+//|                                     User-ID: ${userId}            |
 //+------------------------------------------------------------------+
 #property copyright "Trading Journal Pro"
-#property version   "5.50"
+#property version   "5.60"
 #property strict
+#property description "Automatischer Sync für Ihr Trading Journal"
 
-input string InpUserID   = "${userId}"; 
-input int    InpInterval = 5; 
+input string InpUserID      = "${userId}"; 
+input int    InpInterval    = 5; 
 
-string SysUrl = "https://nrmivhzvwqpnwedvkbbz.supabase.co"; 
-string SysKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybWl2aHp2d3FwbndlZHZrYmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjgzMTIsImV4cCI6MjA4NDMwNDMxMn0.DmpCTBurgMHoba3KpsjRCEOqltV4-bL06ezPr7gAbyg";
+string InpSupabaseUrl = "https://nrmivhzvwqpnwedvkbbz.supabase.co"; 
+string InpApiKey      = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybWl2aHp2d3FwbndlZHZrYmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjgzMTIsImV4cCI6MjA4NDMwNDMxMn0.DmpCTBurgMHoba3KpsjRCEOqltV4-bL06ezPr7gAbyg";
 
 int OnInit() {
-   Print(">>> Sync Aktiv für ID: ", InpUserID);
+   Print(">>> Auto-Sync PRO Aktiviert für ID: ", InpUserID);
    EventSetTimer(InpInterval * 60); 
    SyncNow(); 
    return(INIT_SUCCEEDED);
@@ -1656,30 +1656,60 @@ void OnDeinit(const int reason) { EventKillTimer(); }
 void OnTimer() { SyncNow(); }
 
 void SyncNow() {
+   // Synchronisiert die letzten 30 Tage
    if(!HistorySelect(TimeCurrent() - (30 * 86400), TimeCurrent())) return;
-   int total = HistoryDealsTotal();
-   for(int i = 0; i < total; i++) {
-      ulong t = HistoryDealGetTicket(i);
-      double p = HistoryDealGetDouble(t, DEAL_PROFIT) + HistoryDealGetDouble(t, DEAL_SWAP) + HistoryDealGetDouble(t, DEAL_COMMISSION);
-      if(p == 0 || t <= 0) continue; 
-      string sym = HistoryDealGetString(t, DEAL_SYMBOL);
-      datetime tm = (datetime)HistoryDealGetInteger(t, DEAL_TIME);
-      double pr  = HistoryDealGetDouble(t, DEAL_PRICE);
-      string dStr = TimeToString(tm, TIME_DATE);
-      StringReplace(dStr, ".", "-");
-      string json = "{\\"p_user_id\\":\\""+InpUserID+"\\",\\"p_date\\":\\""+dStr+"\\",\\"p_time\\":\\""+TimeToString(tm, TIME_MINUTES)+"\\",\\"p_instrument\\":\\""+sym+"\\",\\"p_strategy\\":\\"Auto-Sync-Pro\\",\\"p_direction\\":\\""+((HistoryDealGetInteger(t, DEAL_TYPE)==DEAL_TYPE_SELL)?"SHORT":"LONG")+"\\",\\"p_entry\\":"+DoubleToString(pr, 2)+",\\"p_exit\\":"+DoubleToString(pr, 2)+",\\"p_pl\\":"+DoubleToString(p, 2)+",\\"p_result\\":\\""+((p>=0)?"WIN":"LOSS")+"\\",\\"p_notes\\":\\"Auto-Import\\",\\"p_mt5_id\\":\\""+IntegerToString(t)+"\\",\\"p_status\\":\\"Closed\\"}";
+   
+   int totalDeals = HistoryDealsTotal();
+   for(int i = 0; i < totalDeals; i++) {
+      ulong ticket = HistoryDealGetTicket(i);
+      if(ticket <= 0) continue;
+
+      double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+      double swap = HistoryDealGetDouble(ticket, DEAL_SWAP);
+      double comm = HistoryDealGetDouble(ticket, DEAL_COMMISSION);
+      double totalPL = profit + swap + comm;
+      
+      // Nur abgeschlossene Trades (Profit != 0)
+      if(totalPL == 0) continue; 
+
+      string symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
+      datetime time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
+      double exitPrice = HistoryDealGetDouble(ticket, DEAL_PRICE);
+      long type = HistoryDealGetInteger(ticket, DEAL_TYPE);
+      
+      string dateStr = TimeToString(time, TIME_DATE);
+      StringReplace(dateStr, ".", "-");
+
+      string json = "{\\"p_user_id\\":\\""+InpUserID+"\\","+
+                    "\\"p_date\\":\\""+dateStr+"\\","+
+                    "\\"p_time\\":\\""+TimeToString(time, TIME_MINUTES)+"\\","+
+                    "\\"p_instrument\\":\\""+symbol+"\\","+
+                    "\\"p_strategy\\":\\"Auto-Sync-Pro\\","+
+                    "\\"p_direction\\":\\""+((type==DEAL_TYPE_SELL)?"SHORT":"LONG")+"\\","+
+                    "\\"p_entry\\":"+DoubleToString(exitPrice, 2)+","+
+                    "\\"p_exit\\":"+DoubleToString(exitPrice, 2)+","+
+                    "\\"p_pl\\":"+DoubleToString(totalPL, 2)+","+
+                    "\\"p_result\\":\\""+((totalPL>=0)?"WIN":"LOSS")+"\\","+
+                    "\\"p_notes\\":\\"Automatischer MT5 Import\\","+
+                    "\\"p_mt5_id\\":\\""+IntegerToString(ticket)+"\\","+
+                    "\\"p_status\\":\\"Closed\\"}";
+
       char postData[], resultData[]; string resultHeaders;
       StringToCharArray(json, postData, 0, StringLen(json));
-      WebRequest("POST", SysUrl + "/rest/v1/rpc/upload_trade", "Content-Type: application/json\\r\\napikey: " + SysKey + "\\r\\nAuthorization: Bearer " + SysKey + "\\r\\n", 5000, postData, resultData, resultHeaders);
+      
+      WebRequest("POST", InpSupabaseUrl + "/rest/v1/rpc/upload_trade", 
+                 "Content-Type: application/json\\r\\napikey: " + InpApiKey + "\\r\\nAuthorization: Bearer " + InpApiKey + "\\r\\n", 
+                 5000, postData, resultData, resultHeaders);
    }
 }
 `;
 
+    // Download-Vorgang
     const blob = new Blob([eaCode], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'JournalSync_' + userId.substring(0,5) + '.mq5';
+    a.download = 'JournalSync_Pro.mq5';
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
