@@ -24,59 +24,6 @@
             position: relative;
         }
 		
-		
-		.dashboard-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.main-chart { flex: 2; min-width: 300px; }
-
-.recent-trades-card {
-    flex: 1;
-    min-width: 250px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.trades-mini-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 15px;
-}
-
-.mini-trade-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.asset-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.asset-logo {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #2a2e39;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.asset-name { font-weight: 600; font-size: 14px; }
-.trade-res { font-family: monospace; font-weight: bold; }
-		
 /* Custom Neon Checkbox */
 .trade-checkbox, #selectAll {
     appearance: none; /* Entfernt den Standard-Browser-Look */
@@ -912,17 +859,7 @@ tr.row-loss {
     <div class="chart-box"><canvas id="distributionChart"></canvas></div>
     <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
 	<!--	<div class="chart-box" ><canvas id="avgChart"></canvas></div> -->
-	<div class="dashboard-row">
-    <div class="chart-box main-chart">
-        <canvas id="weeklyChart"></canvas>
-    </div>
-
-    <div class="recent-trades-card">
-        <h3>Recent Closed Trades</h3>
-        <div id="recentTradesList" class="trades-mini-list">
-            </div>
-    </div>
-</div>
+	
     <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
 
 
@@ -1456,45 +1393,8 @@ async function fetchTrades() {
         </tr>`;
     }).join('');
 
-function updateRecentTradesList(filteredTrades) {
-    const listContainer = document.getElementById('recentTradesList');
-    if (!listContainer) return;
-
-    // Die letzten 5 geschlossenen Trades
-    const lastFive = [...filteredTrades]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5);
-
-    listContainer.innerHTML = lastFive.map(t => {
-        const pnl = parseFloat(t.pl);
-        const asset = t.instrument.toUpperCase();
-        
-        // Dynamische Logo-URL (Beispiel für Krypto)
-        // Für Gold/Forex nutzen wir einen Platzhalter-Kreis mit Text
-        const logoUrl = asset.includes('BTC') ? 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' :
-                        asset.includes('ETH') ? 'https://cryptologos.cc/logos/ethereum-eth-logo.png' : null;
-
-        return `
-            <div class="mini-trade-item">
-                <div class="asset-info">
-                    ${logoUrl 
-                        ? `<img src="${logoUrl}" class="asset-logo">` 
-                        : `<div class="asset-logo">${asset.substring(0, 2)}</div>`
-                    }
-                    <span class="asset-name">${asset}</span>
-                </div>
-                <span class="trade-res ${pnl >= 0 ? 'win' : 'loss'}">
-                    ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}
-                </span>
-            </div>
-        `;
-    }).join('');
-}
-
     if (typeof updateCharts === "function") updateCharts(traderAllTrades);
 }
-
-
 
     function updateCharts(chartTrades) {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
@@ -2096,8 +1996,6 @@ function renderAvgChart(win, loss) {
         }
     });
 }
-
-
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
