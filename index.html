@@ -1266,10 +1266,6 @@ async function fetchTrades() {
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
     localStorage.setItem('initialBalance', initialBalance);
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
-	
-	// --- DIESE ZEILE HIER EINFÜGEN ---
-    if (this.lastFilter !== instrumentFilter) { currentPage = 1; this.lastFilter = instrumentFilter; }
-    // ---------------------------------
 
     let filtered = trades.filter(t => {
         const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
@@ -1324,16 +1320,8 @@ async function fetchTrades() {
     const start = (currentPage - 1) * tradesPerPage;
     const paginatedTrades = sorted.slice(start, start + tradesPerPage);
 
-// UI Update für Seitenzahlen
-    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
+    // UI Update für Seitenzahlen
     document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-    
-    // --- NEU: Berechnung für den Trade-Zähler ---
-    const countStart = sorted.length > 0 ? start + 1 : 0;
-    const countEnd = Math.min(start + tradesPerPage, sorted.length);
-    document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
-    // --------------------------------------------
-
     document.getElementById('prevPage').disabled = (currentPage === 1);
     document.getElementById('nextPage').disabled = (currentPage === totalPages);
 
