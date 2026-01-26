@@ -800,6 +800,20 @@
                     <a href="JournalSync_MT5.mq5" download class="btn-download">Download .mq5</a>
                 </div>
             </div>
+			
+			<div style="background: #f4f7f6; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin: 20px 0;">
+    <h3 style="margin-top: 0;">MT5 Auto-Sync Setup</h3>
+    <p>Laden Sie Ihren persönlichen EA herunter. Ihre User-ID ist bereits im Code hinterlegt.</p>
+    
+    <button onclick="downloadPersonalizedEA()" 
+            style="background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        Personalisierten EA herunterladen (.mq5)
+    </button>
+    
+    <p style="font-size: 0.8em; color: #666; margin-top: 10px;">
+        Anleitung: MQ5-Datei in den MetaTrader-Ordner <code>MQL5/Experts</code> kopieren, kompilieren und auf den Chart ziehen.
+    </p>
+</div>
 
             <div class="section-divider" style="margin: 20px auto; opacity:0.3;"></div>
 
@@ -1589,6 +1603,94 @@ function removeStrategy() {
     async function deleteAllTrades() { if(confirm('Delete ALL?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
 	
  function exportToCSV() { let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
+
+function downloadPersonalizedEA() {
+    // 1. Die ID direkt aus dem HTML-Element auslesen, wo sie ohnehin generiert wird
+    const userIdElement = document.getElementById('userIdDisplay');
+    const userId = userIdElement ? userIdElement.textContent.trim() : null;
+
+    if (!userId || userId === "Nicht eingeloggt" || userId === "") {
+        alert("Fehler: Keine User-ID gefunden. Bitte stellen Sie sicher, dass Sie eingeloggt sind.");
+        return;
+    }
+
+    // 2. Das EA-Template (mit dem fixierten Code von vorhin)
+    const eaCode = `//+------------------------------------------------------------------+
+//|                                     JournalSync_Pro_Connector.mq5|
+//|                                     Generated for: ${userId}      |
+//+------------------------------------------------------------------+
+#property copyright "Trading Journal Pro"
+#property version   "5.50"
+#property strict
+
+input string InpUserID   = "${userId}"; 
+input int    InpInterval = 5; 
+
+string SysUrl = "https://nrmivhzvwqpnwedvkbbz.supabase.co"; 
+string SysKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybWl2aHp2d3FwbndlZHZrYmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjgzMTIsImV4cCI6MjA4NDMwNDMxMn0.DmpCTBurgMHoba3KpsjRCEOqltV4-bL06ezPr7gAbyg";
+
+int OnInit() {
+   Print(">>> JournalSync gestartet für ID: ", InpUserID);
+   EventSetTimer(InpInterval * 60); 
+   SyncNow(); 
+   return(INIT_SUCCEEDED);
+}
+
+void OnDeinit(const int reason) { EventKillTimer(); }
+void OnTimer() { SyncNow(); }
+
+void SyncNow() {
+   if(!HistorySelect(TimeCurrent() - (14 * 86400), TimeCurrent())) return;
+   
+   int totalDeals = HistoryDealsTotal();
+   for(int i = 0; i < totalDeals; i++) {
+      ulong ticket = HistoryDealGetTicket(i);
+      double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+      if(profit == 0 || ticket <= 0) continue; 
+
+      string symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
+      datetime time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
+      double price  = HistoryDealGetDouble(ticket, DEAL_PRICE);
+      long type     = HistoryDealGetInteger(ticket, DEAL_TYPE);
+      
+      string dateStr = TimeToString(time, TIME_DATE);
+      StringReplace(dateStr, ".", "-");
+
+      string json = "{\\"p_user_id\\":\\""+InpUserID+"\\","+
+                    "\\"p_date\\":\\""+dateStr+"\\","+
+                    "\\"p_time\\":\\""+TimeToString(time, TIME_MINUTES)+"\\","+
+                    "\\"p_instrument\\":\\""+symbol+"\\","+
+                    "\\"p_strategy\\":\\"Auto-Sync-Pro\\","+
+                    "\\"p_direction\\":\\""+((type==DEAL_TYPE_SELL)?"SHORT":"LONG")+"\\","+
+                    "\\"p_entry\\":"+DoubleToString(price, 2)+","+
+                    "\\"p_exit\\":"+DoubleToString(price, 2)+","+
+                    "\\"p_pl\\":"+DoubleToString(profit, 2)+","+
+                    "\\"p_result\\":\\""+((profit>=0)?"WIN":"LOSS")+"\\","+
+                    "\\"p_notes\\":\\"Automatischer Import\\","+
+                    "\\"p_mt5_id\\":\\""+IntegerToString(ticket)+"\\","+
+                    "\\"p_status\\":\\"Closed\\"}";
+
+      char postData[], resultData[]; string resultHeaders;
+      StringToCharArray(json, postData, 0, StringLen(json));
+      WebRequest("POST", SysUrl + "/rest/v1/rpc/upload_trade", 
+                 "Content-Type: application/json\\r\\napikey: " + SysKey + "\\r\\nAuthorization: Bearer " + SysKey + "\\r\\n", 
+                 5000, postData, resultData, resultHeaders);
+   }
+}
+`;
+
+    // 3. Datei-Download
+    const blob = new Blob([eaCode], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'JournalSync_Pro.mq5';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
