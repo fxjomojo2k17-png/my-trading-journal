@@ -854,9 +854,14 @@
         </table>
     </div>
 	
-	<div class="pagination-container">
+<div class="pagination-container">
     <button class="page-btn" id="prevPage" onclick="changePage(-1)">← Previous</button>
-    <span id="pageInfo">Page 1 of 1</span>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+        <span id="pageInfo">Page 1 of 1</span>
+        <span id="tradeCounter" style="font-size: 0.75em; color: #00f2ff; opacity: 0.8;">Showing 0-0 of 0</span>
+    </div>
+    
     <button class="page-btn" id="nextPage" onclick="changePage(1)">Next →</button>
 </div>
 
@@ -1261,6 +1266,10 @@ async function fetchTrades() {
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
     localStorage.setItem('initialBalance', initialBalance);
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+	
+	// --- DIESE ZEILE HIER EINFÜGEN ---
+    if (this.lastFilter !== instrumentFilter) { currentPage = 1; this.lastFilter = instrumentFilter; }
+    // ---------------------------------
 
     let filtered = trades.filter(t => {
         const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
@@ -1315,8 +1324,16 @@ async function fetchTrades() {
     const start = (currentPage - 1) * tradesPerPage;
     const paginatedTrades = sorted.slice(start, start + tradesPerPage);
 
-    // UI Update für Seitenzahlen
+// UI Update für Seitenzahlen
+    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
     document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+    
+    // --- NEU: Berechnung für den Trade-Zähler ---
+    const countStart = sorted.length > 0 ? start + 1 : 0;
+    const countEnd = Math.min(start + tradesPerPage, sorted.length);
+    document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
+    // --------------------------------------------
+
     document.getElementById('prevPage').disabled = (currentPage === 1);
     document.getElementById('nextPage').disabled = (currentPage === totalPages);
 
