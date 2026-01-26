@@ -1229,6 +1229,7 @@ function copyToClip(id) {
     let trades = [];
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
+	let customTags = JSON.parse(localStorage.getItem('customTags')) || ['High Conviction', 'FOMO', 'A-Setup'];
     let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
@@ -1390,6 +1391,7 @@ function populateLists() {
             <td>${t.date}</td>
             <td>${t.instrument}</td>
             <td>${t.strategy || '-'}</td>
+			<td style="font-size: 0.85em; color: #b388ff; font-style: italic;">${t.tag || '-'}</td>
             <td>${t.direction}</td>
             <td>${t.entry}/${t.exit}</td>
             <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
@@ -1757,7 +1759,7 @@ if (result === 'WIN') {
 	function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
     
 	// Liste für die Tags (wird aus LocalStorage geladen oder Standardwerte)
-let customTags = JSON.parse(localStorage.getItem('customTags')) || ['High Conviction', 'News', 'A-Setup'];
+let customTags = JSON.parse(localStorage.getItem('customTags')) || ['High Conviction', 'News', 'A-Setup', 'FOMO', 'Early Exit', 'Fail', 'Per Plan'];
 
 function addNewTag() {
     const v = prompt("New Tag:");
