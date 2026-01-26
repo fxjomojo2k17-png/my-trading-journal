@@ -24,25 +24,53 @@
             position: relative;
         }
 		
-		/* Checkbox Styling */
-/* Checkbox dezent und zentriert */
-.trade-checkbox { 
-    cursor: pointer; 
-    width: 14px; 
-    height: 14px; 
-    accent-color: #00f2ff; 
+/* Custom Neon Checkbox */
+.trade-checkbox, #selectAll {
+    appearance: none; /* Entfernt den Standard-Browser-Look */
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #764ba2; /* Dein Lila-Ton */
+    border-radius: 3px;
+    background: rgba(118, 75, 162, 0.1);
+    cursor: pointer;
+    position: relative;
     vertical-align: middle;
-    margin: 0;
+    transition: all 0.2s ease;
+    outline: none;
 }
 
-/* Die erste Spalte der Tabelle schmaler machen */
+/* Effekt beim Drüberfahren (Hover) */
+.trade-checkbox:hover, #selectAll:hover {
+    border-color: #00f2ff; /* Neon-Cyan beim Hover */
+    box-shadow: 0 0 8px rgba(0, 242, 255, 0.5);
+}
+
+/* Wenn die Checkbox markiert ist */
+.trade-checkbox:checked, #selectAll:checked {
+    background-color: #764ba2;
+    border-color: #00f2ff;
+    box-shadow: 0 0 10px rgba(118, 75, 162, 0.8);
+}
+
+/* Das Häkchen-Symbol (weißes V) */
+.trade-checkbox:checked::after, #selectAll:checked::after {
+    content: '✔';
+    position: absolute;
+    color: white;
+    font-size: 10px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Die erste Spalte fixieren */
 .trades-table th:first-child, 
 .trades-table td:first-child {
-    width: 30px;
+    width: 40px;
     text-align: center;
-    padding-left: 5px;
-    padding-right: 5px;
 }
+
 
 .btn-delete-selected { background: #ffa726; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; margin-right: 10px; }
 		
@@ -779,7 +807,7 @@
         <table>
             <thead><tr>
 			
-			<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" style="width:14px; height:14px; cursor:pointer;"></th>
+			<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
 			
 			<th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
             <tbody id="tradesBody"></tbody>
