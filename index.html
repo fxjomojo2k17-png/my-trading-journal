@@ -634,43 +634,7 @@
         }
 		
 		
-		/* Pagination Styling */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background: rgba(28, 34, 41, 0.4);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.page-btn {
-    background: rgba(118, 75, 162, 0.2);
-    border: 1px solid #764ba2;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.page-btn:hover:not(:disabled) {
-    background: #764ba2;
-    box-shadow: 0 0 10px rgba(118, 75, 162, 0.5);
-}
-
-.page-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    border-color: #444;
-}
-
-#pageInfo {
-    font-size: 0.9em;
-    color: #8892b0;
-    font-family: monospace;
-}
+		
 		
     </style>
 </head>
@@ -853,17 +817,6 @@
             <tbody id="tradesBody"></tbody>
         </table>
     </div>
-	
-<div class="pagination-container">
-    <button class="page-btn" id="prevPage" onclick="changePage(-1)">← Previous</button>
-    
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-        <span id="pageInfo">Page 1 of 1</span>
-        <span id="tradeCounter" style="font-size: 0.75em; color: #00f2ff; opacity: 0.8;">Showing 0-0 of 0</span>
-    </div>
-    
-    <button class="page-btn" id="nextPage" onclick="changePage(1)">Next →</button>
-</div>
 
 <div class="section-divider"></div>	
 
@@ -1202,8 +1155,6 @@ function copyToClip(id) {
     let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
-	let currentPage = 1;
-const tradesPerPage = 25;
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
@@ -1262,7 +1213,6 @@ async function fetchTrades() {
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
     function updateStatsAndTable() {
-	currentPage = 1;
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
     localStorage.setItem('initialBalance', initialBalance);
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
@@ -1308,33 +1258,8 @@ async function fetchTrades() {
     const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
     document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
     
-    // ... (vorheriger Code für Berechnungen bleibt gleich)
-
     const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
-    
-    // NEU: Pagination Logik
-    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
-    if (currentPage > totalPages) currentPage = totalPages; // Falls Seite durch Filterung verschwindet
-
-    // Nur die Trades für die aktuelle Seite ausschneiden
-    const start = (currentPage - 1) * tradesPerPage;
-    const paginatedTrades = sorted.slice(start, start + tradesPerPage);
-
-// UI Update für Seitenzahlen
-    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
-    document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-    
-    // --- NEU: Berechnung für den Trade-Zähler ---
-    const countStart = sorted.length > 0 ? start + 1 : 0;
-    const countEnd = Math.min(start + tradesPerPage, sorted.length);
-    document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
-    // --------------------------------------------
-
-    document.getElementById('prevPage').disabled = (currentPage === 1);
-    document.getElementById('nextPage').disabled = (currentPage === totalPages);
-
-    // Jetzt paginatedTrades statt sorted mappen:
-    document.getElementById('tradesBody').innerHTML = paginatedTrades.map(t => {
+    document.getElementById('tradesBody').innerHTML = sorted.map(t => {
         const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
         return `<tr>
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
@@ -1347,20 +1272,8 @@ async function fetchTrades() {
             <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
         </tr>`;
     }).join('');
-
     updateCharts(traderAllTrades);
 }
-
-// NEUE FUNKTION ZUM SEITENWECHSEL (ganz unten im Script einfügen)
-function changePage(delta) {
-    currentPage += delta;
-    updateStatsAndTable();
-    // Optional: Scrollt nach oben zur Tabelle beim Seitenwechsel
-    document.querySelector('.trades-table').scrollIntoView({ behavior: 'smooth' });
-}
-	
-	
-
 
     function updateCharts(chartTrades) {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
