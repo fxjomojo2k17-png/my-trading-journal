@@ -1298,105 +1298,77 @@ async function fetchTrades() {
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
    function updateStatsAndTable() {
-    try {
-        const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
-        const searchTerm = document.getElementById('historySearch').value.toLowerCase();
+    const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+    const searchTerm = document.getElementById('historySearch').value.toLowerCase();
 
-        // Filterung der Trades
-        let filteredTrades = allTrades.filter(t => {
-            const matchesInstrument = instrumentFilter === 'all' || t.instrument === instrumentFilter;
-            const matchesSearch = t.instrument.toLowerCase().includes(searchTerm) || 
-                                 (t.notes && t.notes.toLowerCase().includes(searchTerm));
-            return matchesInstrument && matchesSearch;
-        });
-
-        // BERECHNUNG AVG WIN / LOSS
-        const wins = filteredTrades.filter(t => parseFloat(t.pnl) > 0);
-        const losses = filteredTrades.filter(t => parseFloat(t.pnl) < 0);
-
-        const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + parseFloat(t.pnl), 0) / wins.length : 0;
-        const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + parseFloat(t.pnl), 0) / losses.length : 0;
-
-        // Anzeige aktualisieren (nur wenn Elemente existieren)
-        if(document.getElementById('avgWin')) document.getElementById('avgWin').innerText = `$${avgWin.toFixed(2)}`;
-        if(document.getElementById('avgLoss')) document.getElementById('avgLoss').innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
-
-        // Diagramm zeichnen
-        renderAvgChart(avgWin, avgLoss);
-
-        // RESTLICHE STATISTIKEN
-        const totalPnL = filteredTrades.reduce((sum, t) => sum + parseFloat(t.pnl), 0);
-        const winRate = filteredTrades.length > 0 ? (wins.length / filteredTrades.length) * 100 : 0;
-
-        document.getElementById('totalPnL').innerText = `$${totalPnL.toFixed(2)}`;
-        document.getElementById('totalPnL').className = 'value ' + (totalPnL >= 0 ? 'win' : 'loss');
-        document.getElementById('winRate').innerText = `${winRate.toFixed(1)}%`;
-
-        // TABELLE ZEICHNEN
-        const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
-        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-        const start = (currentPage - 1) * itemsPerPage;
-        const paginatedTrades = filteredTrades.slice(start, start + itemsPerPage);
-
-        document.getElementById('pageInfo').innerText = `Seite ${currentPage} von ${Math.max(1, totalPages)}`;
-        document.getElementById('prevPage').disabled = currentPage === 1;
-        document.getElementById('nextPage').disabled = currentPage >= totalPages;
-        document.getElementById('tradeCounter').innerText = `${filteredTrades.length} Trades gefunden`;
-
-        const tbody = document.getElementById('tradeLog');
-        tbody.innerHTML = '';
-
-        paginatedTrades.forEach(t => {
-            const pnl = parseFloat(t.pnl);
-            const row = document.createElement('tr');
-            row.className = pnl > 1 ? 'row-win' : (pnl < -1 ? 'row-loss' : '');
-            row.innerHTML = `
-                <td><input type="checkbox" class="trade-checkbox" data-id="${t.id}"></td>
-                <td data-label="Datum">${new Date(t.created_at).toLocaleDateString()}</td>
-                <td data-label="Instrument"><b>${t.instrument}</b></td>
-                <td data-label="Seite">${t.side}</td>
-                <td data-label="PnL" class="${pnl >= 0 ? 'win' : 'loss'} font-bold">$${pnl.toFixed(2)}</td>
-                <td data-label="Status">${t.status}</td>
-                <td data-label="Aktionen">
-                    <button class="btn-sm edit-btn" onclick="editTrade('${t.id}')">Edit</button>
-                    <button class="btn-sm del-btn" onclick="deleteTrade('${t.id}')">Del</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (typeof updateChart === "function") updateChart(filteredTrades);
-
-    } catch (err) {
-        console.error("Fehler in updateStatsAndTable:", err);
-    }
-}
-
-// HILFSFUNKTION FÜR DAS DIAGRAMM
-let avgChartInstance = null;
-function renderAvgChart(win, loss) {
-    const canvas = document.getElementById('avgChart');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (avgChartInstance) avgChartInstance.destroy();
-
-    avgChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Avg Win', 'Avg Loss'],
-            datasets: [{
-                data: [win, Math.abs(loss)],
-                backgroundColor: ['#00ffaa', '#ff4a68'],
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } }
-        }
+    let filteredTrades = allTrades.filter(t => {
+        const matchesInstrument = instrumentFilter === 'all' || t.instrument === instrumentFilter;
+        const matchesSearch = t.instrument.toLowerCase().includes(searchTerm) || 
+                             (t.notes && t.notes.toLowerCase().includes(searchTerm));
+        return matchesInstrument && matchesSearch;
     });
+
+    // --- NEU: DURCHSCHNITTE BERECHNEN ---
+    const wins = filteredTrades.filter(t => parseFloat(t.pnl) > 0);
+    const losses = filteredTrades.filter(t => parseFloat(t.pnl) < 0);
+
+    const avgWin = wins.length > 0 
+        ? wins.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / wins.length 
+        : 0;
+
+    const avgLoss = losses.length > 0 
+        ? losses.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / losses.length 
+        : 0;
+
+    // UI Aktualisieren
+    document.getElementById('avgWin').innerText = `$${avgWin.toFixed(2)}`;
+    document.getElementById('avgLoss').innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
+
+    // Diagramm aktualisieren
+    renderAvgChart(avgWin, avgLoss);
+    // ------------------------------------
+
+    const totalPnL = filteredTrades.reduce((sum, t) => sum + parseFloat(t.pnl), 0);
+    const winCount = wins.length;
+    const winRate = filteredTrades.length > 0 ? (winCount / filteredTrades.length) * 100 : 0;
+
+    document.getElementById('totalPnL').innerText = `$${totalPnL.toFixed(2)}`;
+    document.getElementById('totalPnL').className = 'value ' + (totalPnL >= 0 ? 'win' : 'loss');
+    document.getElementById('winRate').innerText = `${winRate.toFixed(1)}%`;
+
+    const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
+    if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+    const start = (currentPage - 1) * itemsPerPage;
+    const paginatedTrades = filteredTrades.slice(start, start + itemsPerPage);
+
+    document.getElementById('pageInfo').innerText = `Seite ${currentPage} von ${Math.max(1, totalPages)}`;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+    document.getElementById('tradeCounter').innerText = `${filteredTrades.length} Trades gefunden`;
+
+    const tbody = document.getElementById('tradeLog');
+    tbody.innerHTML = '';
+
+    paginatedTrades.forEach(t => {
+        const pnl = parseFloat(t.pnl);
+        const row = document.createElement('tr');
+        row.className = pnl > 0 ? 'row-win' : (pnl < 0 ? 'row-loss' : '');
+        row.innerHTML = `
+            <td><input type="checkbox" class="trade-checkbox" data-id="${t.id}"></td>
+            <td data-label="Datum">${new Date(t.created_at).toLocaleDateString()}</td>
+            <td data-label="Instrument"><b>${t.instrument}</b></td>
+            <td data-label="Seite">${t.side}</td>
+            <td data-label="PnL" class="${pnl >= 0 ? 'win' : 'loss'} font-bold">$${pnl.toFixed(2)}</td>
+            <td data-label="Status">${t.status}</td>
+            <td data-label="Aktionen">
+                <button class="btn-sm edit-btn" onclick="editTrade('${t.id}')">Edit</button>
+                <button class="btn-sm del-btn" onclick="deleteTrade('${t.id}')">Del</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    updateChart(filteredTrades);
 }
 
     function updateCharts(chartTrades) {
