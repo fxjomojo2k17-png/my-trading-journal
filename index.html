@@ -1266,10 +1266,6 @@ async function fetchTrades() {
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
     localStorage.setItem('initialBalance', initialBalance);
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
-	
-	// --- DIESE ZEILE HIER EINFÜGEN ---
-    if (this.lastFilter !== instrumentFilter) { currentPage = 1; this.lastFilter = instrumentFilter; }
-    // ---------------------------------
 
     let filtered = trades.filter(t => {
         const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
