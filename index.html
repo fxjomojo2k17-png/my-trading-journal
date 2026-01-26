@@ -967,12 +967,6 @@
 </div>
 
 <script>
-
-let currentPage = 1;
-const tradesPerPage = 25;
-let selectedDateFilter = null; // Falls du Datumsfilter nutzt
-let currentViewDate = new Date();
-
     /* ANIMATED CYBER BACKGROUND */
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
@@ -1268,12 +1262,15 @@ async function fetchTrades() {
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
     function updateStatsAndTable() {
-    // 1. Initialisierung
+	currentPage = 1;
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
     localStorage.setItem('initialBalance', initialBalance);
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+	
+	// --- DIESE ZEILE HIER EINFÜGEN ---
+    if (this.lastFilter !== instrumentFilter) { currentPage = 1; this.lastFilter = instrumentFilter; }
+    // ---------------------------------
 
-    // 2. Filtern der Trades
     let filtered = trades.filter(t => {
         const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
         const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
@@ -1281,60 +1278,66 @@ async function fetchTrades() {
     });
 
     let traderAllTrades = trades;
+        
     const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
     
-    // 3. Stats animieren
     animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
     
     const wins = filtered.filter(t => t.result === 'WIN');
     const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
     const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
     
+    // --- NEU: PROFIT FACTOR BERECHNUNG ---
     const totalWinAmount = filtered.filter(t => Number(t.pl) > 0).reduce((sum, t) => sum + Number(t.pl), 0);
     const totalLossAmount = Math.abs(filtered.filter(t => Number(t.pl) < 0).reduce((sum, t) => sum + Number(t.pl), 0));
-    let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
+    
+    let pf = 0;
+    if (totalLossAmount === 0) {
+        pf = totalWinAmount > 0 ? totalWinAmount : 0; // Wenn keine Verluste, ist der Gewinn der Faktor
+    } else {
+        pf = totalWinAmount / totalLossAmount;
+    }
+    // -------------------------------------
 
     animateValue('totalTrades', 0, filtered.length, 800);
     animateValue('winRate', 0, winRateVal, 800, false, true);
     animateValue('totalPL', 0, viewPL, 800, true);
-    // Stelle sicher, dass 'profitFactor' als ID in deinem HTML existiert!
-    if(document.getElementById('profitFactor')) animateValue('profitFactor', 0, pf, 800);
+    animateValue('profitFactor', 0, pf, 800); // Den Wert animieren
 
-    // 4. Glow Effekt
     const plCard = document.getElementById('card-pl');
-    if (plCard) {
-        plCard.classList.remove('glow-win', 'glow-loss');
-        if (viewPL > 0) plCard.classList.add('glow-win');
-        else if (viewPL < 0) plCard.classList.add('glow-loss');
-    }
+    plCard.classList.remove('glow-win', 'glow-loss');
+    if (viewPL > 0) plCard.classList.add('glow-win');
+    else if (viewPL < 0) plCard.classList.add('glow-loss');
 
-    // 5. R-Multiplikatoren
     const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-    const avgRElement = document.getElementById('avgR');
-    if (avgRElement) avgRElement.textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
+    document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
     
-    // 6. Sortieren & Pagination
-    const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + (t.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00')));
-    
-    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
-    if (currentPage > totalPages) currentPage = totalPages;
+    // ... (vorheriger Code für Berechnungen bleibt gleich)
 
+    const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+    
+    // NEU: Pagination Logik
+    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
+    if (currentPage > totalPages) currentPage = totalPages; // Falls Seite durch Filterung verschwindet
+
+    // Nur die Trades für die aktuelle Seite ausschneiden
     const start = (currentPage - 1) * tradesPerPage;
     const paginatedTrades = sorted.slice(start, start + tradesPerPage);
 
-    // Pagination UI Updates
-    if(document.getElementById('pageInfo')) document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+// UI Update für Seitenzahlen
+    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
+    document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
     
+    // --- NEU: Berechnung für den Trade-Zähler ---
     const countStart = sorted.length > 0 ? start + 1 : 0;
     const countEnd = Math.min(start + tradesPerPage, sorted.length);
-    if(document.getElementById('tradeCounter')) {
-        document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
-    }
+    document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
+    // --------------------------------------------
 
-    if(document.getElementById('prevPage')) document.getElementById('prevPage').disabled = (currentPage === 1);
-    if(document.getElementById('nextPage')) document.getElementById('nextPage').disabled = (currentPage === totalPages);
+    document.getElementById('prevPage').disabled = (currentPage === 1);
+    document.getElementById('nextPage').disabled = (currentPage === totalPages);
 
-    // 7. Tabelle rendern
+    // Jetzt paginatedTrades statt sorted mappen:
     document.getElementById('tradesBody').innerHTML = paginatedTrades.map(t => {
         const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
         return `<tr>
@@ -1349,7 +1352,7 @@ async function fetchTrades() {
         </tr>`;
     }).join('');
 
-    if (typeof updateCharts === "function") updateCharts(traderAllTrades);
+    updateCharts(traderAllTrades);
 }
 
 // NEUE FUNKTION ZUM SEITENWECHSEL (ganz unten im Script einfügen)
