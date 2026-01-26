@@ -25,7 +25,25 @@
         }
 		
 		/* Checkbox Styling */
-.trade-checkbox { cursor: pointer; width: 16px; height: 16px; accent-color: #00f2ff; }
+/* Checkbox dezent und zentriert */
+.trade-checkbox { 
+    cursor: pointer; 
+    width: 14px; 
+    height: 14px; 
+    accent-color: #00f2ff; 
+    vertical-align: middle;
+    margin: 0;
+}
+
+/* Die erste Spalte der Tabelle schmaler machen */
+.trades-table th:first-child, 
+.trades-table td:first-child {
+    width: 30px;
+    text-align: center;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 .btn-delete-selected { background: #ffa726; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; margin-right: 10px; }
 		
 		
@@ -761,7 +779,7 @@
         <table>
             <thead><tr>
 			
-			<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+			<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" style="width:14px; height:14px; cursor:pointer;"></th>
 			
 			<th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
             <tbody id="tradesBody"></tbody>
