@@ -801,10 +801,13 @@
                 </div>
             </div>
 			
-<div style="background: #1b1f23; border: 1px solid #30363d; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center;">
-    <h3 style="color: #58a6ff; margin-bottom: 10px; font-size: 1.1rem;">MT5 Auto-Sync Connector</h3>
-    <button onclick="downloadPersonalizedEA()" style="background: #238636; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem;">
-        🚀 EA mit meiner ID herunterladen
+<div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+    <h3 style="color: #58a6ff; margin-bottom: 8px;">MT5 Auto-Sync Connector</h3>
+    <p style="font-size: 0.85em; color: #8b949e; margin-bottom: 15px;">
+        Klicken Sie hier, um Ihren personalisierten EA herunterzuladen. Die ID wird automatisch eingefügt.
+    </p>
+    <button onclick="downloadPersonalizedEA()" style="background: #238636; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#2ea043'" onmouseout="this.style.background='#238636'">
+        📥 EA mit meiner ID herunterladen
     </button>
 </div>
 
@@ -1597,25 +1600,40 @@ function removeStrategy() {
 	
  function exportToCSV() { let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
 
-function downloadPersonalizedEA() {
-    // Weg 1: Versuche die globale Variable zu lesen (aus deinem Journal-Script)
-    let userId = (typeof _currentUserId !== 'undefined') ? _currentUserId : "";
+async function downloadPersonalizedEA() {
+    let userId = "";
 
-    // Weg 2: Falls Variable leer, nimm den Text aus der Anzeige
-    if (!userId || userId.length < 10) {
-        const el = document.getElementById('userIdDisplay');
-        if (el) userId = el.textContent.trim();
+    // 1. Versuch: Aus der Anzeige lesen (das was du auf dem Bildschirm siehst)
+    const displayElement = document.getElementById('userIdDisplay');
+    if (displayElement) {
+        userId = displayElement.textContent.trim();
     }
 
-    // Sicherheitscheck
+    // 2. Versuch: Falls Anzeige "Lade..." sagt, versuche die interne Variable
     if (!userId || userId.includes("Lade") || userId.length < 10) {
-        alert("ID noch nicht bereit. Bitte warte kurz, bis dein Journal geladen ist (ID muss oben stehen).");
+        if (typeof _currentUserId !== 'undefined' && _currentUserId) {
+            userId = _currentUserId;
+        }
+    }
+
+    // 3. Versuch: Direkt aus Supabase (falls vorhanden)
+    if (!userId || userId.length < 10) {
+        try {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) userId = session.user.id;
+        } catch (e) {}
+    }
+
+    // FINALER CHECK
+    if (!userId || userId.includes("Lade") || userId.length < 10) {
+        alert("ID noch nicht bereit. Bitte loggen Sie sich ein oder warten Sie, bis die Trades geladen wurden.");
         return;
     }
 
+    // Der EA Code mit deiner ID
     const eaCode = `//+------------------------------------------------------------------+
 //|                                     JournalSync_Pro_Connector.mq5|
-//|                                     USER_ID: ${userId}            |
+//|                                     USER: ${userId}               |
 //+------------------------------------------------------------------+
 #property copyright "Trading Journal Pro"
 #property version   "5.50"
@@ -1628,7 +1646,7 @@ string SysUrl = "https://nrmivhzvwqpnwedvkbbz.supabase.co";
 string SysKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybWl2aHp2d3FwbndlZHZrYmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjgzMTIsImV4cCI6MjA4NDMwNDMxMn0.DmpCTBurgMHoba3KpsjRCEOqltV4-bL06ezPr7gAbyg";
 
 int OnInit() {
-   Print(">>> Sync gestartet für ID: ", InpUserID);
+   Print(">>> Sync Aktiv für ID: ", InpUserID);
    EventSetTimer(InpInterval * 60); 
    SyncNow(); 
    return(INIT_SUCCEEDED);
@@ -1639,18 +1657,17 @@ void OnTimer() { SyncNow(); }
 
 void SyncNow() {
    if(!HistorySelect(TimeCurrent() - (30 * 86400), TimeCurrent())) return;
-   int totalDeals = HistoryDealsTotal();
-   for(int i = 0; i < totalDeals; i++) {
-      ulong ticket = HistoryDealGetTicket(i);
-      double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
-      if(profit == 0 || ticket <= 0) continue; 
-      string symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
-      datetime time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
-      double price  = HistoryDealGetDouble(ticket, DEAL_PRICE);
-      long type     = HistoryDealGetInteger(ticket, DEAL_TYPE);
-      string dateStr = TimeToString(time, TIME_DATE);
-      StringReplace(dateStr, ".", "-");
-      string json = "{\\"p_user_id\\":\\""+InpUserID+"\\",\\"p_date\\":\\""+dateStr+"\\",\\"p_time\\":\\""+TimeToString(time, TIME_MINUTES)+"\\",\\"p_instrument\\":\\""+symbol+"\\",\\"p_strategy\\":\\"Auto-Sync-Pro\\",\\"p_direction\\":\\""+((type==DEAL_TYPE_SELL)?"SHORT":"LONG")+"\\",\\"p_entry\\":"+DoubleToString(price, 2)+",\\"p_exit\\":"+DoubleToString(price, 2)+",\\"p_pl\\":"+DoubleToString(profit, 2)+",\\"p_result\\":\\""+((profit>=0)?"WIN":"LOSS")+"\\",\\"p_notes\\":\\"Auto-Import\\",\\"p_mt5_id\\":\\""+IntegerToString(ticket)+"\\",\\"p_status\\":\\"Closed\\"}";
+   int total = HistoryDealsTotal();
+   for(int i = 0; i < total; i++) {
+      ulong t = HistoryDealGetTicket(i);
+      double p = HistoryDealGetDouble(t, DEAL_PROFIT) + HistoryDealGetDouble(t, DEAL_SWAP) + HistoryDealGetDouble(t, DEAL_COMMISSION);
+      if(p == 0 || t <= 0) continue; 
+      string sym = HistoryDealGetString(t, DEAL_SYMBOL);
+      datetime tm = (datetime)HistoryDealGetInteger(t, DEAL_TIME);
+      double pr  = HistoryDealGetDouble(t, DEAL_PRICE);
+      string dStr = TimeToString(tm, TIME_DATE);
+      StringReplace(dStr, ".", "-");
+      string json = "{\\"p_user_id\\":\\""+InpUserID+"\\",\\"p_date\\":\\""+dStr+"\\",\\"p_time\\":\\""+TimeToString(tm, TIME_MINUTES)+"\\",\\"p_instrument\\":\\""+sym+"\\",\\"p_strategy\\":\\"Auto-Sync-Pro\\",\\"p_direction\\":\\""+((HistoryDealGetInteger(t, DEAL_TYPE)==DEAL_TYPE_SELL)?"SHORT":"LONG")+"\\",\\"p_entry\\":"+DoubleToString(pr, 2)+",\\"p_exit\\":"+DoubleToString(pr, 2)+",\\"p_pl\\":"+DoubleToString(p, 2)+",\\"p_result\\":\\""+((p>=0)?"WIN":"LOSS")+"\\",\\"p_notes\\":\\"Auto-Import\\",\\"p_mt5_id\\":\\""+IntegerToString(t)+"\\",\\"p_status\\":\\"Closed\\"}";
       char postData[], resultData[]; string resultHeaders;
       StringToCharArray(json, postData, 0, StringLen(json));
       WebRequest("POST", SysUrl + "/rest/v1/rpc/upload_trade", "Content-Type: application/json\\r\\napikey: " + SysKey + "\\r\\nAuthorization: Bearer " + SysKey + "\\r\\n", 5000, postData, resultData, resultHeaders);
@@ -1662,7 +1679,7 @@ void SyncNow() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'JournalSync_Personalisiert.mq5';
+    a.download = 'JournalSync_' + userId.substring(0,5) + '.mq5';
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
