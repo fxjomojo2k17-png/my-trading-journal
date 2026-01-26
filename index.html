@@ -685,6 +685,20 @@
     opacity: 0.8;
     letter-spacing: 1px;
 }
+
+/* Dezenter Zeilen-Schimmer */
+tr.row-win {
+    background: linear-gradient(90deg, rgba(0, 255, 135, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+tr.row-loss {
+    background: linear-gradient(90deg, rgba(255, 82, 82, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* Hover-Effekt verstärken für bessere Lesbarkeit */
+.trades-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
     </style>
 </head>
 <body>
@@ -1339,7 +1353,9 @@ async function fetchTrades() {
     // 7. Tabelle rendern
     document.getElementById('tradesBody').innerHTML = paginatedTrades.map(t => {
         const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-        return `<tr>
+        const rowClass = Number(t.pl) >= 0 ? 'row-win' : 'row-loss'; // Klasse bestimmen
+        
+        return `<tr class="${rowClass}">
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
             <td>${t.date}</td>
             <td>${t.instrument}</td>
