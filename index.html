@@ -1459,6 +1459,41 @@ async function fetchTrades() {
     if (typeof updateCharts === "function") updateCharts(traderAllTrades);
 }
 
+function updateRecentTradesList(filteredTrades) {
+    const listContainer = document.getElementById('recentTradesList');
+    if (!listContainer) return;
+
+    // Die letzten 5 geschlossenen Trades
+    const lastFive = [...filteredTrades]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+
+    listContainer.innerHTML = lastFive.map(t => {
+        const pnl = parseFloat(t.pl);
+        const asset = t.instrument.toUpperCase();
+        
+        // Dynamische Logo-URL (Beispiel für Krypto)
+        // Für Gold/Forex nutzen wir einen Platzhalter-Kreis mit Text
+        const logoUrl = asset.includes('BTC') ? 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' :
+                        asset.includes('ETH') ? 'https://cryptologos.cc/logos/ethereum-eth-logo.png' : null;
+
+        return `
+            <div class="mini-trade-item">
+                <div class="asset-info">
+                    ${logoUrl 
+                        ? `<img src="${logoUrl}" class="asset-logo">` 
+                        : `<div class="asset-logo">${asset.substring(0, 2)}</div>`
+                    }
+                    <span class="asset-name">${asset}</span>
+                </div>
+                <span class="trade-res ${pnl >= 0 ? 'win' : 'loss'}">
+                    ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}
+                </span>
+            </div>
+        `;
+    }).join('');
+}
+
     function updateCharts(chartTrades) {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
         const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
@@ -2060,40 +2095,7 @@ function renderAvgChart(win, loss) {
     });
 }
 
-function updateRecentTradesList(filteredTrades) {
-    const listContainer = document.getElementById('recentTradesList');
-    if (!listContainer) return;
 
-    // Die letzten 5 geschlossenen Trades
-    const lastFive = [...filteredTrades]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5);
-
-    listContainer.innerHTML = lastFive.map(t => {
-        const pnl = parseFloat(t.pl);
-        const asset = t.instrument.toUpperCase();
-        
-        // Dynamische Logo-URL (Beispiel für Krypto)
-        // Für Gold/Forex nutzen wir einen Platzhalter-Kreis mit Text
-        const logoUrl = asset.includes('BTC') ? 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' :
-                        asset.includes('ETH') ? 'https://cryptologos.cc/logos/ethereum-eth-logo.png' : null;
-
-        return `
-            <div class="mini-trade-item">
-                <div class="asset-info">
-                    ${logoUrl 
-                        ? `<img src="${logoUrl}" class="asset-logo">` 
-                        : `<div class="asset-logo">${asset.substring(0, 2)}</div>`
-                    }
-                    <span class="asset-name">${asset}</span>
-                </div>
-                <span class="trade-res ${pnl >= 0 ? 'win' : 'loss'}">
-                    ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}
-                </span>
-            </div>
-        `;
-    }).join('');
-}
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
