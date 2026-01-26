@@ -1916,12 +1916,21 @@ function changePage(delta) {
     currentPage += delta;
     updateStatsAndTable();
 
-    // Springt sanft zum Anfang der Sektion, in der die Tabelle liegt
-    const tableSection = document.querySelector('.history-section');
-    if (tableSection) {
-        tableSection.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
+    // Wir suchen erst die Sektion, dann die Tabelle, dann die Überschrift
+    const scrollTarget = document.querySelector('.history-section') || 
+                         document.querySelector('.trades-table') || 
+                         document.querySelector('h2');
+
+    if (scrollTarget) {
+        // Berechne die Position mit einem kleinen Offset (50px) nach oben, 
+        // damit die Überschrift nicht am Rand klebt
+        const offset = 50;
+        const elementPosition = scrollTarget.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
         });
     }
 }
