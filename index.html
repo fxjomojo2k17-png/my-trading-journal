@@ -632,6 +632,59 @@
             .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
             .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
         }
+		
+		.pagination-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-btn {
+    background: rgba(118, 75, 162, 0.2);
+    border: 1px solid #764ba2;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #764ba2;
+    box-shadow: 0 0 10px rgba(118, 75, 162, 0.5);
+    border-color: #00f2ff;
+}
+
+.page-btn:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+    border-color: #444;
+}
+
+#pageInfo {
+    font-size: 0.9em;
+    color: #e0e0e0;
+    font-family: monospace;
+}
+
+#tradeCounter {
+    font-size: 0.75em;
+    color: #00f2ff; /* Neon Cyan */
+    opacity: 0.8;
+    letter-spacing: 1px;
+}
     </style>
 </head>
 <body>
@@ -813,10 +866,13 @@
             <tbody id="tradesBody"></tbody>
         </table>
     </div>
-<div style="display: flex; justify-content: center; align-items: center; gap: 20px; padding: 20px;">
-    <button id="prevPage" onclick="changePage(-1)" style="padding: 10px; cursor: pointer;">← Zurück</button>
-    <span id="pageInfo">Seite 1 von 1</span>
-    <button id="nextPage" onclick="changePage(1)" style="padding: 10px; cursor: pointer;">Weiter →</button>
+<div class="pagination-container">
+    <div id="tradeCounter">Showing 0-0 of 0 Trades</div>
+    <div class="pagination-buttons">
+        <button class="page-btn" id="prevPage" onclick="changePage(-1)">← Prev</button>
+        <span id="pageInfo">Page 1 of 1</span>
+        <button class="page-btn" id="nextPage" onclick="changePage(1)">Next →</button>
+    </div>
 </div>
 <div class="section-divider"></div>	
 
@@ -1217,58 +1273,91 @@ async function fetchTrades() {
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
    function updateStatsAndTable() {
+    // 1. Grundlegende Daten laden
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
     localStorage.setItem('initialBalance', initialBalance);
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
-    // 1. Filtern
+    // 2. Filtern der Trades
     let filtered = trades.filter(t => {
         const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
         const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
         return matchesTime && matchesInstrument;
     });
 
-    // 2. Stats & Profit Factor
+    let traderAllTrades = trades;
+    const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+    
+    // 3. Stats & Profit Factor Berechnung
+    animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
+    
     const wins = filtered.filter(t => t.result === 'WIN');
     const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+    const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
+    
     const totalWinAmount = filtered.filter(t => Number(t.pl) > 0).reduce((sum, t) => sum + Number(t.pl), 0);
     const totalLossAmount = Math.abs(filtered.filter(t => Number(t.pl) < 0).reduce((sum, t) => sum + Number(t.pl), 0));
     let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
 
     animateValue('totalTrades', 0, filtered.length, 800);
-    animateValue('winRate', 0, filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0, 800, false, true);
+    animateValue('winRate', 0, winRateVal, 800, false, true);
     animateValue('totalPL', 0, viewPL, 800, true);
     if(document.getElementById('profitFactor')) animateValue('profitFactor', 0, pf, 800);
 
-    // 3. PAGINATION LOGIK
+    // 4. Glow Effekt für die Karte
+    const plCard = document.getElementById('card-pl');
+    if (plCard) {
+        plCard.classList.remove('glow-win', 'glow-loss');
+        if (viewPL > 0) plCard.classList.add('glow-win');
+        else if (viewPL < 0) plCard.classList.add('glow-loss');
+    }
+
+    // 5. Durchschnittlicher R-Multiplikator
+    const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
+    const avgRElement = document.getElementById('avgR');
+    if (avgRElement) avgRElement.textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
+    
+    // 6. SORTIERUNG & PAGINATION
     const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + (b.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00')));
+    
     const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
     if (currentPage > totalPages) currentPage = totalPages;
 
     const start = (currentPage - 1) * tradesPerPage;
     const paginatedTrades = sorted.slice(start, start + tradesPerPage);
 
-    // Pagination UI Updates
+    // Pagination UI Updates (Text-Anzeigen)
+    const countStart = sorted.length > 0 ? start + 1 : 0;
+    const countEnd = Math.min(start + tradesPerPage, sorted.length);
+    
     if(document.getElementById('pageInfo')) document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+    if(document.getElementById('tradeCounter')) document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
+    
     if(document.getElementById('prevPage')) document.getElementById('prevPage').disabled = (currentPage === 1);
-    if(document.getElementById('nextPage')) document.getElementById('nextPage').disabled = (currentPage === totalPages);
+    if(document.getElementById('nextPage')) document.getElementById('nextPage').disabled = (currentPage === totalPages || sorted.length === 0);
 
-    // 4. Tabelle rendern
+    // 7. Tabelle rendern
     document.getElementById('tradesBody').innerHTML = paginatedTrades.map(t => {
         const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
         return `<tr>
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
-            <td>${t.date}</td><td>${t.instrument}</td>
-            <td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+            <td>${t.date}</td>
+            <td>${t.instrument}</td>
+            <td>${t.strategy || '-'}</td>
+            <td>${t.direction}</td>
+            <td>${t.entry}/${t.exit}</td>
             <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
             <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
             <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
-            <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-            <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+            <td>${t.screenshot ? `<a href="#" onclick="showPreview('${t.screenshot}'); return false;">🖼️</a>` : '-'}</td>
+            <td>
+                <button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button>
+                <button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button>
+            </td>
         </tr>`;
     }).join('');
 
-    if (typeof updateCharts === "function") updateCharts(trades);
+    if (typeof updateCharts === "function") updateCharts(traderAllTrades);
 }
 
     function updateCharts(chartTrades) {
