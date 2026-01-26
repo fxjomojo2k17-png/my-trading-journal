@@ -1220,44 +1220,55 @@ async function fetchTrades() {
 
     let traderAllTrades = trades;
         
-		const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-        
-        animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
-        
-        const wins = filtered.filter(t => t.result === 'WIN');
-        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
-        const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
-        
-        animateValue('totalTrades', 0, filtered.length, 800);
-        animateValue('winRate', 0, winRateVal, 800, false, true);
-        animateValue('totalPL', 0, viewPL, 800, true);
-        
-        const plCard = document.getElementById('card-pl');
-        plCard.classList.remove('glow-win', 'glow-loss');
-        if (viewPL > 0) plCard.classList.add('glow-win');
-        else if (viewPL < 0) plCard.classList.add('glow-loss');
-
-        const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-        document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
-        
-        const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
-        document.getElementById('tradesBody').innerHTML = sorted.map(t => {
-            const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            return `<tr>
-			
-			<td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
-                <td>${t.date}</td><td>${t.instrument}</td>
-				
-				<td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
-                <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
-            </tr>`;
-        }).join('');
-        updateCharts(traderAllTrades);
+    const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+    
+    animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
+    
+    const wins = filtered.filter(t => t.result === 'WIN');
+    const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+    const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
+    
+    // --- NEU: PROFIT FACTOR BERECHNUNG ---
+    const totalWinAmount = filtered.filter(t => Number(t.pl) > 0).reduce((sum, t) => sum + Number(t.pl), 0);
+    const totalLossAmount = Math.abs(filtered.filter(t => Number(t.pl) < 0).reduce((sum, t) => sum + Number(t.pl), 0));
+    
+    let pf = 0;
+    if (totalLossAmount === 0) {
+        pf = totalWinAmount > 0 ? totalWinAmount : 0; // Wenn keine Verluste, ist der Gewinn der Faktor
+    } else {
+        pf = totalWinAmount / totalLossAmount;
     }
+    // -------------------------------------
+
+    animateValue('totalTrades', 0, filtered.length, 800);
+    animateValue('winRate', 0, winRateVal, 800, false, true);
+    animateValue('totalPL', 0, viewPL, 800, true);
+    animateValue('profitFactor', 0, pf, 800); // Den Wert animieren
+
+    const plCard = document.getElementById('card-pl');
+    plCard.classList.remove('glow-win', 'glow-loss');
+    if (viewPL > 0) plCard.classList.add('glow-win');
+    else if (viewPL < 0) plCard.classList.add('glow-loss');
+
+    const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
+    document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
+    
+    const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+    document.getElementById('tradesBody').innerHTML = sorted.map(t => {
+        const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
+        return `<tr>
+            <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
+            <td>${t.date}</td><td>${t.instrument}</td>
+            <td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
+            <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
+            <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
+            <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
+            <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
+            <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
+        </tr>`;
+    }).join('');
+    updateCharts(traderAllTrades);
+}
 
     function updateCharts(chartTrades) {
         const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
