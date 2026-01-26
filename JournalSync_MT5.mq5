@@ -7,7 +7,7 @@
 
 input string InpSupabaseUrl = "https://nrmivhzvwqpnwedvkbbz.supabase.co"; 
 input string InpApiKey      = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybWl2aHp2d3FwbndlZHZrYmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjgzMTIsImV4cCI6MjA4NDMwNDMxMn0.DmpCTBurgMHoba3KpsjRCEOqltV4-bL06ezPr7gAbyg";
-input string InpUserID      = "5a694710-07cf-49d6-91b9-94bd638f8ad8";
+input string InpUserID      = "";
 input int    InpDays        = 365;
 
 // Hilfsfunktion zum Entfernen von unnötigen Nullen
@@ -98,3 +98,4 @@ void OnStart()
    }
    Alert("Fertig! ", synced, " Trades sauber übertragen.");
 }
+
