@@ -1915,6 +1915,15 @@ async function deleteSelectedTrades() {
 function changePage(delta) {
     currentPage += delta;
     updateStatsAndTable();
+
+    // Springt sanft zum Anfang der Sektion, in der die Tabelle liegt
+    const tableSection = document.querySelector('.history-section');
+    if (tableSection) {
+        tableSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }
 }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
