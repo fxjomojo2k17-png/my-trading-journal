@@ -1601,11 +1601,17 @@ function removeStrategy() {
  function exportToCSV() { let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
 
 function downloadPersonalizedEA() {
-    // Wir nehmen die ID direkt aus der Variable deiner Datei
-    const userId = typeof _currentUserId !== 'undefined' ? _currentUserId : null;
+    // Wir holen die ID direkt aus dem HTML-Element, das du auf der Seite siehst
+    const displayElement = document.getElementById('userIdDisplay');
+    let userId = "";
 
-    if (!userId || userId === "" || userId.length < 5) {
-        alert("Fehler: Keine User-ID gefunden. Bitte stellen Sie sicher, dass Sie eingeloggt sind oder die Seite fertig geladen hat.");
+    if (displayElement) {
+        userId = displayElement.textContent.trim();
+    }
+
+    // Falls die Anzeige noch auf "Lade..." steht oder leer ist
+    if (!userId || userId === "Lade..." || userId === "Nicht eingeloggt" || userId.length < 5) {
+        alert("Fehler: Die User-ID wurde noch nicht erkannt. Bitte lade die Seite neu oder warte kurz.");
         return;
     }
 
