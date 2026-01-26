@@ -24,7 +24,15 @@
             position: relative;
         }
 		
-		
+		/* Checkbox Styling */
+        input[type="checkbox"] {
+            accent-color: #00f2ff;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
 		/* AUTO SYNC STYLES */
 .mt-integration-box {
     background: rgba(22, 26, 30, 0.6);
@@ -563,1178 +571,1124 @@
 
         .win { color: #00ffaa !important; }
         .loss { color: #ff4a68 !important; }
-        .btn-sm { padding: 6px 10px; font-size: 0.75em; border-radius: 4px; border: 1px solid transparent; cursor: pointer; margin-right: 5px; }
-        .edit-btn { background: rgba(0, 242, 255, 0.1); border-color: #00f2ff; color: #00f2ff; }
-        .del-btn { background: rgba(255, 74, 104, 0.1); border-color: #ff4a68; color: #ff4a68; }
 
-        .import-section { background: rgba(28, 34, 41, 0.6); padding: 30px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
+        .badge {
+            padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; text-transform: uppercase;
+        }
+        .badge.long { background: rgba(0, 255, 170, 0.15); color: #00ffaa; }
+        .badge.short { background: rgba(255, 74, 104, 0.15); color: #ff4a68; }
+        .badge.win { background: rgba(0, 255, 170, 0.2); color: #00ffaa; border: 1px solid rgba(0, 255, 170, 0.4); }
+        .badge.loss { background: rgba(255, 74, 104, 0.2); color: #ff4a68; border: 1px solid rgba(255, 74, 104, 0.4); }
+        .badge.be { background: rgba(118, 75, 162, 0.2); color: #d6bcfa; border: 1px solid rgba(118, 75, 162, 0.4); }
+
+        .btn-sm { padding: 6px 10px; font-size: 0.75em; border-radius: 4px; border: 1px solid transparent; cursor: pointer; margin-right: 5px; }
+        .edit-btn { background: rgba(0, 242, 255, 0.1); color: #00f2ff; border-color: rgba(0, 242, 255, 0.3); }
+        .edit-btn:hover { background: rgba(0, 242, 255, 0.2); }
+        .delete-btn { background: rgba(239, 83, 80, 0.1); color: #ef5350; border-color: rgba(239, 83, 80, 0.3); }
+        .delete-btn:hover { background: rgba(239, 83, 80, 0.2); }
 
         #screenshot-preview-popup {
-            position: fixed; display: none; z-index: 10000; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            max-width: 90vw; max-height: 85vh; border: 3px solid #764ba2; border-radius: 12px; box-shadow: 0 0 100px rgba(0,0,0,0.9);
-            pointer-events: none; object-fit: contain; background: #0b0e11;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            max-width: 80vw; max-height: 80vh; z-index: 10001; display: none;
+            border-radius: 12px; box-shadow: 0 0 50px rgba(0,0,0,0.8); border: 2px solid #00f2ff;
         }
 
+        /* Responsive Improvements */
         @media (max-width: 768px) {
-            .trades-table table, .trades-table thead, .trades-table tbody, .trades-table th, .trades-table td, .trades-table tr { display: block; }
-            .trades-table tr { border: 1px solid #2d343c; margin-bottom: 15px; border-radius: 10px; background: rgba(37, 45, 55, 0.6); padding: 10px; }
-            .trades-table td { border: none; position: relative; padding-left: 50%; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            .trades-table td:before { content: attr(data-label); position: absolute; left: 10px; width: 45%; text-align: left; font-weight: bold; color: #8892b0; text-transform: uppercase; font-size: 0.75em; }
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .span-2 { grid-column: span 2; }
+            .history-controls { justify-content: center; flex-direction: column; gap: 10px; }
+            #historyInstrumentFilter { width: 100% !important; }
+            .btn-export, .btn-delete-all { width: 100%; }
         }
+
+        /* Modal / Overlay für Import */
+        .import-section {
+            padding: 20px; margin-top: 30px; background: rgba(15, 18, 22, 0.6); border-radius: 12px; border: 1px dashed #3d4651;
+        }
+        .import-section h3 { font-size: 0.9em; color: #00f2ff; margin-bottom: 15px; text-transform: uppercase; }
+        .import-area {
+            width: 100%; height: 100px; background: rgba(37, 45, 55, 0.8); border: 1px solid #3d4651; color: #00ffaa;
+            padding: 10px; font-family: monospace; font-size: 12px; border-radius: 6px; resize: none; margin-bottom: 10px;
+        }
+        .import-area:focus { border-color: #00f2ff; outline: none; }
     </style>
 </head>
 <body>
+    <canvas id="bgCanvas"></canvas>
+    <img id="screenshot-preview-popup" src="" alt="Preview">
 
-<canvas id="bgCanvas"></canvas>
-
-<img id="screenshot-preview-popup" src="" alt="Preview">
-
-<!-- LOGIN SCREEN -->
-<div id="loginScreen">
-    <div class="login-box">
-        <h2>🔐 TRADING JOURNAL</h2>
-        <div id="errorMessage" class="error-message"></div>
-        <div id="successMessage" class="success-message"></div>
-        
-        <div id="loginForm" class="login-form">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="your@email.com" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="••••••••" required>
-            </div>
-            <button onclick="handleLogin()">Login</button>
-            <div class="login-toggle">
-                Don't have an account? <a onclick="toggleAuthMode()">Sign Up</a>
-            </div>
-        </div>
-        
-        <div id="signupForm" class="login-form" style="display:none;">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="signupEmail" placeholder="your@email.com" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="signupPassword" placeholder="••••••••" required>
-            </div>
-            <button onclick="handleSignup()">Create Account</button>
-            <div class="login-toggle">
-                Already have an account? <a onclick="toggleAuthMode()">Login</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MAIN APP (versteckt bis Login) -->
-<div id="mainApp" style="display:none;">
-
-<div class="container">
-   <div class="user-info">
-        <span id="userEmail"></span>
-        <button class="btn-logout" onclick="handleLogout()">Logout</button>
-    </div>
-
-    <div class="header">
-	<!-- MOCKUP 5 -->
-        <div class="mockup-section">
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>🔐 TRADING JOURNAL</h2>
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
             
-        
-            <div class="header-demo">
-                <div style="position: relative; display: inline-block;">
-                    <div class="chart-overlay">
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 60px;"></div>
-                        <div class="mini-candle" style="height: 35px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 45px;"></div>
-                        <div class="mini-candle" style="height: 55px;"></div>
-                        <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 65px;"></div>
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-                    </div>
-            <div class="candle-chart-text">TRADING JOURNAL</div>
+            <div id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
                 </div>
-            </div></div>
-	</div>
-
-    <div class="stats-grid">
-        <div class="stat-card" id="card-balance">
-            <h3>Initial Balance</h3>
-            <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
-                   style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
-        </div>
-        <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
-        <div class="stat-card" id="card-trades"><h3>Trades</h3><div class="value" id="totalTrades">0</div></div>
-        <div class="stat-card" id="card-winrate"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
-        <div class="stat-card" id="card-pl"><h3>P/L ($)</h3><div class="value" id="totalPL">$0.00</div></div>
-        <div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
-        <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
-    </div>
-
-    <div class="form-section">
-        <form id="tradeForm">
-            <input type="hidden" id="editId" value="">
-            <div class="form-grid">
-                <div class="form-group"><label>Date</label><input type="date" id="date" required></div>
-                <div class="form-group"><label>Time</label><input type="time" id="time" required></div>
-                <div class="form-group span-2"><label>Instrument</label>
-                    <div class="combo-container">
-                        <select id="instrument" required></select>
-                        <button type="button" class="btn-action btn-add" onclick="addNewInstrument()">+</button>
-                        <button type="button" class="btn-action btn-del" onclick="removeInstrument()">–</button>
-                    </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
                 </div>
-                <div class="form-group span-2"><label>Strategy</label>
-                    <div class="combo-container">
-                        <select id="strategy" required></select>
-                        <button type="button" class="btn-action btn-add" onclick="addNewStrategy()">+</button>
-                        <button type="button" class="btn-action btn-del" onclick="removeStrategy()">–</button>
-                    </div>
-                </div>
-                <div class="form-group"><label>Direction</label><select id="direction" required><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
-                <div class="form-group"><label>Entry</label><input type="text" id="entry" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Exit</label><input type="text" id="exit" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
-                <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Tag</label>
-                    <select id="mistake">
-                        <option value="PLAN">Per Plan</option>
-                        <option value="FOMO">FOMO</option>
-                        <option value="EARLY_EXIT">Early Exit</option>
-                        <option value="REVENGE">Revenge</option>
-                        <option value="LATE_ENTRY">Late Entry</option>
-                        <option value="MISTAKE">Mistake</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
-                <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
-            </div>
-            <div class="button-group">
-                <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
-                <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="section-divider"></div>
-
-  <div class="charts-container">
-    <div class="chart-box"><canvas id="equityChart"></canvas></div>
-    <div class="chart-box"><canvas id="drawdownChart"></canvas></div>
-    <div class="chart-box"><canvas id="strategyPLChart"></canvas></div>
-    <div class="chart-box"><canvas id="distributionChart"></canvas></div>
-    <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
-    <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
-</div>
-
-    <div class="section-divider"></div>
-
-    <div class="calendar-section">
-        <div class="calendar-header">
-            <span id="calendarMonth">Month</span>
-            <div style="display:flex; gap:5px;"><button class="btn-sm edit-btn" onclick="changeMonth(-1)">←</button><button class="btn-sm edit-btn" onclick="changeMonth(1)">→</button></div>
-        </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-    </div>
-
-    <div class="history-controls">
-        <label>Filter Instrument:</label>
-        <select id="historyInstrumentFilter" onchange="updateStatsAndTable()"><option value="ALL">All Instruments</option></select>
-        <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
-        <button type="button" onclick="deleteAllTrades()" class="btn-delete-all">Delete All Trades</button>
-    </div>
-
-    <div class="trades-table">
-        <table>
-            <thead><tr><th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
-            <tbody id="tradesBody"></tbody>
-        </table>
-    </div>
-	
-
-<div class="import-section">
-
-  <div class="import-container">
-            <h3 style="margin-bottom:10px; color:#00f2ff;">Import copy and paste</h3>
-            <textarea id="importArea" class="import-textarea" placeholder="Paste broker (Tradingview) history here..."></textarea>
-            <button onclick="processBulkImport()" class="btn-primary" style="width:15%; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Import Trades Now</button>
-        </div><br><br>
-
-
-    <div class="container-narrow" style="max-width: 900px; margin: 0 auto;">
-        
-        <div class="mt-integration-box">
-            <h2 style="color: #fff; text-align: center; margin-bottom: 30px; letter-spacing: 2px;">
-                <span style="color: #00f2ff;">METATRADER</span> AUTO-SYNC
-            </h2>
-
-            <div class="mt-grid">
-			
-			<div class="mt-card" style="opacity: 0.7;">
-    <div class="mt-icon" style="background: #555;">4</div>
-    <h3>MetaTrader 4</h3>
-    <p style="font-size:0.8em; color:#aaa; margin-bottom:10px;">Auto-Sync Script</p>
-    
-	
-	<span class="btn-download" 
-          style="background: #444; color: #888; cursor: not-allowed; border: 1px dashed #666; display: inline-block; padding: 10px 20px; text-decoration: none; border-radius: 5px;" 
-          title="Currently under development">
-        Under Development
-    </span>
-</div>
-			
-			<!--
-                <div class="mt-card">
-                    <div class="mt-icon">4</div>
-                    <h3>MetaTrader 4</h3>
-                    <p style="font-size:0.8em; color:#aaa; margin-bottom:10px;">Auto-Sync Script</p>
-                    <a href="JournalSync_MT4.mq4" download class="btn-download">Download .mq4</a>
-                </div>
-				-->
-				
-				
-				
-                <div class="mt-card">
-                    <div class="mt-icon mt5">5</div>
-                    <h3>MetaTrader 5</h3>
-                    <p style="font-size:0.8em; color:#aaa; margin-bottom:10px;">Auto-Sync Script</p>
-                    <button onclick="downloadPersonalizedEA()" download class="btn-download">Download .mq5</a>
-	
+                <button onclick="handleLogin()">Login</button>
+                <div class="login-toggle">
+                    Don't have an account? <a onclick="toggleAuthMode()">Sign Up</a>
                 </div>
             </div>
-			
 
-            <div class="section-divider" style="margin: 20px auto; opacity:0.3;"></div>
-
-           <!-- <div class="api-credentials-box">
-                <h4 style="color:#00f2ff; margin-bottom:15px; border-bottom:1px solid #444; padding-bottom:10px;">
-                     Sync Settings
-                </h4>	-->
-
-
-                <div class="credential-row" style="display: none;">
-                    <label>User ID:</label>
-                    <div class="copy-input">
-                        <input type="text" id="disp_uid" readonly placeholder="Login first...">
-                        <button onclick="copyToClip('disp_uid')">Copy</button>
-                    </div>
+            <div id="signupForm" class="login-form" style="display:none;">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" required>
                 </div>
-            <!-- </div> 	-->
-
-            <div class="mt-instructions">
-			
-<!-- <div style="background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; color: #e6edf3; font-family: sans-serif; line-height: 1.6;"> -->
-    
-	<h1 style="color: #00f2ff; border-bottom: 1px solid #30363d; padding-bottom: 10px;">MT5 Auto-Sync Setup</h1>
-    
-    <ol style="padding-left: 20px; margin-top: 15px;">
-        <li><strong>Download:</strong> Click the button above to get your personalized <code>.mq5</code> file. Your User-ID is already included.</li>
-        <li><strong>Locate Folder:</strong> Open MetaTrader 5, go to <code>File > Open Data Folder</code>, then navigate to <code>MQL5 > Experts</code>.</li>
-        <li><strong>Copy File:</strong> Paste the downloaded file into the <code>Experts</code> folder.</li>
-        <li><strong>Enable WebRequest:</strong> Go to <code>Tools > Options > Expert Advisors</code>.
-            <ul style="list-style-type: circle; padding-left: 20px; margin-top: 5px; color: #8b949e;">
-                <li>Check "Allow WebRequest for listed URL"</li>
-                <li>Add: <code>https://nrmivhzvwqpnwedvkbbz.supabase.co</code></li>
-            </ul>
-        </li>
-        <li><strong>Activate:</strong> In MT5 Navigator, right-click <code>Experts > Refresh</code>. Drag the script onto any chart and ensure "Algo Trading" is enabled at the top.</li>
-      </ol>
-	  
-	  
-<!-- </div> -->
-
-
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••" required>
+                </div>
+                <button onclick="handleSignup()">Create Account</button>
+                <div class="login-toggle">
+                    Already have an account? <a onclick="toggleAuthMode()">Login</a>
+                </div>
             </div>
         </div>
-
     </div>
-</div>
-</div>
 
-<script>
-    /* ANIMATED CYBER BACKGROUND */
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    let elements = [];
-    let mouseTrail = [];
-    let mouse = { x: -100, y: -100 };
+    <div id="mainApp" style="display:none;">
+        <div class="container">
+            <div class="user-info">
+                <span id="userEmail"></span>
+                <button class="btn-logout" onclick="handleLogout()">Logout</button>
+            </div>
 
-    const formulas = [
-        "RR = (Exit - Entry) / (Entry - SL)", "P/L = Lot × (pips × value)", 
-        "0.618 (Golden Ratio)", "0.618 Retracement", "EV = (W% × AvgW) - (L% × AvgL)", "Market Profile", 
-        "Value Area", "Fair Value", "Volume", "Breakout", "Smart Money Concepts", "Engulfing", "∑(x - μ)²",
-        "Profit", "Margin Call", "Candlestick Pattern"
-    ];
+            <div class="header">
+                 <div class="mockup-section">
+                    <div class="header-demo">
+                        <div style="position: relative; display: inline-block;">
+                            <div class="chart-overlay">
+                                <div class="mini-candle" style="height: 40px;"></div>
+                                <div class="mini-candle" style="height: 60px;"></div>
+                                <div class="mini-candle" style="height: 35px;"></div>
+                                <div class="mini-candle" style="height: 70px;"></div>
+                                <div class="mini-candle" style="height: 45px;"></div>
+                                <div class="mini-candle" style="height: 55px;"></div>
+                                <div class="mini-candle" style="height: 50px;"></div>
+                                <div class="mini-candle" style="height: 65px;"></div>
+                                <div class="mini-candle" style="height: 40px;"></div>
+                                <div class="mini-candle" style="height: 58px;"></div>
+                                <div class="mini-candle" style="height: 42px;"></div>
+                                <div class="mini-candle" style="height: 68px;"></div>
+                            </div>
+                            <div class="candle-chart-text">TRADING JOURNAL</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    function initCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
+            <div class="stats-grid">
+                <div class="stat-card" id="currentEquityCard">
+                    <h3>Current Equity</h3>
+                    <div class="value" id="currentEquity">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Trades</h3>
+                    <div class="value" id="totalTrades">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Win Rate</h3>
+                    <div class="value" id="winRate">0%</div>
+                </div>
+                <div class="stat-card" id="totalPLCard">
+                    <h3>View P/L</h3>
+                    <div class="value" id="totalPL">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Profit Factor</h3>
+                    <div class="value" id="profitFactor">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg. Risk</h3>
+                    <div class="value" id="avgRisk">$0.00</div>
+                </div>
+            </div>
 
-    class FallingElement {
-        constructor(type) {
-            this.type = type; 
-            this.reset();
-        }
-        reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * -canvas.height;
-            this.speed = 0.4 + Math.random() * 1.2;
-            
-            if (this.type === 'candle') {
-                this.opacity = 0.2 + Math.random() * 0.15;
-                this.width = 3 + Math.random() * 5;
-                this.height = 10 + Math.random() * 30;
-                this.isBullish = Math.random() > 0.5;
-            } else {
-                this.opacity = 1.2 + Math.random() * 0.4;
-                this.text = formulas[Math.floor(Math.random() * formulas.length)];
-                this.fontSize = 11 + Math.random() * 7;
-            }
-        }
-        update() {
-            this.y += this.speed;
-            if (this.y > canvas.height) this.reset();
-        }
-        draw() {
-            if (this.type === 'candle') {
-                ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
-                ctx.fillStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity * 0.3})` : `rgba(255, 74, 104, ${this.opacity * 0.3})`;
-                ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(this.x + this.width/2, this.y - 4); ctx.lineTo(this.x + this.width/2, this.y + this.height + 4); ctx.stroke();
-                ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
-            } else {
-                ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
-                ctx.font = `bold ${this.fontSize}px 'Courier New', monospace`;
-                ctx.fillText(this.text, this.x, this.y);
-            }
-        }
-    }
+            <div id="flashOverlay"></div>
 
-    class MouseCandle {
-        constructor(x, y) {
-            this.x = x; this.y = y;
-            this.opacity = 0.6;
-            this.isBullish = Math.random() > 0.5;
-        }
-        update() { this.opacity -= 0.02; }
-        draw() {
-            ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
-            ctx.strokeRect(this.x - 2, this.y - 7.5, 4, 15);
-        }
-    }
+            <div class="form-section">
+                <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <label style="margin:0;">Initial Balance:</label>
+                    <input type="number" id="initialBalanceInput" value="10000" style="width: 120px; height: 32px;" onchange="updateStatsAndTable()">
+                </div>
+                
+                <form id="tradeForm">
+                    <input type="hidden" id="editId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Date</label><input type="date" id="date" required></div>
+                        <div class="form-group"><label>Time</label><input type="time" id="time" required></div>
+                        <div class="form-group">
+                            <label>Instrument</label>
+                            <div class="combo-container">
+                                <select id="instrument" required></select>
+                                <button type="button" class="btn-action btn-add" onclick="addNewInstrument()">+</button>
+                                <button type="button" class="btn-action btn-del" onclick="removeInstrument()">-</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Strategy</label>
+                            <div class="combo-container">
+                                <select id="strategy" required></select>
+                                <button type="button" class="btn-action btn-add" onclick="addNewStrategy()">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Direction</label>
+                            <select id="direction">
+                                <option value="LONG">Long</option>
+                                <option value="SHORT">Short</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Entry Price</label><input type="text" id="entry" oninput="validateNumber(this)" required></div>
+                        <div class="form-group"><label>Exit Price</label><input type="text" id="exit" oninput="validateNumber(this)" required></div>
+                        <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" oninput="validateNumber(this)" required></div>
+                        <div class="form-group">
+                            <label>Result</label>
+                            <select id="result">
+                                <option value="WIN">Win</option>
+                                <option value="LOSS">Loss</option>
+                                <option value="BE">Breakeven</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Risk Amount ($)</label><input type="text" id="risk" value="100" oninput="validateNumber(this)"></div>
+                        <div class="form-group"><label>Tag</label>
+                            <select id="mistake">
+                                <option value="PLAN">Per Plan</option>
+                                <option value="FOMO">FOMO</option>
+                                <option value="EARLY_EXIT">Early Exit</option>
+                                <option value="REVENGE">Revenge</option>
+                                <option value="LATE_ENTRY">Late Entry</option>
+                                <option value="MISTAKE">Mistake</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
+                        <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
+                        <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
 
-    function drawNeuralLines() {
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i < elements.length; i++) {
-            for (let j = i + 1; j < elements.length; j++) {
-                let dx = elements[i].x - elements[j].x;
-                let dy = elements[i].y - elements[j].y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 100) {
-                    ctx.strokeStyle = `rgba(118, 75, 162, ${0.1 * (1 - dist/100)})`;
-                    ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y); ctx.stroke();
-                }
-            }
-        }
-    }
+            <div class="section-divider"></div>
 
-    function setupBG() {
-        elements = [
-            ...Array.from({ length: 70 }, () => new FallingElement('candle')),
-            ...Array.from({ length: 25 }, () => new FallingElement('formula'))
+            <div class="charts-container">
+                <div class="chart-box"><canvas id="equityChart"></canvas></div>
+                <div class="chart-box"><canvas id="drawdownChart"></canvas></div>
+                <div class="chart-box"><canvas id="strategyPLChart"></canvas></div>
+                <div class="chart-box"><canvas id="distributionChart"></canvas></div>
+                <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
+                <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <span id="calendarMonth">Month</span>
+                    <div style="display:flex; gap:5px;"><button class="btn-sm edit-btn" onclick="changeMonth(-1)">←</button><button class="btn-sm edit-btn" onclick="changeMonth(1)">→</button></div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <div class="history-controls">
+                <label>Filter Instrument:</label>
+                <select id="historyInstrumentFilter" onchange="updateStatsAndTable()"><option value="ALL">All Instruments</option></select>
+                <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
+                <button type="button" onclick="deleteSelectedTrades()" class="btn-delete-all" style="background: #ffa726; margin-right: 5px;">Delete Selected</button>
+                <button type="button" onclick="deleteAllTrades()" class="btn-delete-all">Delete All Trades</button>
+            </div>
+
+            <div class="trades-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th>
+                            <th>Date</th>
+                            <th>Instrument</th>
+                            <th>Type</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>P/L</th>
+                            <th>Result</th>
+                            <th>Notes</th>
+                            <th>Screenshot</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="import-section">
+                <h3>Bulk Trade Import (TradingView CSV Copy-Paste)</h3>
+                <textarea id="importArea" class="import-area" placeholder="Paste CSV data from TradingView here... (Date,Symbol,Side,Realized P&L,etc.)"></textarea>
+                <button type="button" class="btn-secondary" onclick="processBulkImport()">Import Data</button>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="mt-integration-box">
+                <div class="mt-grid">
+                    <div class="mt-card">
+                        <div class="mt-icon mt5">MT5</div>
+                        <h3>MetaTrader 5 Sync</h3>
+                        <p style="font-size: 0.8em; color: #8892b0; margin-top: 10px;">Lade dir den EA herunter, um Trades automatisch aus dem MT5 Terminal in dein Journal zu übertragen.</p>
+                        <button onclick="downloadPersonalizedEA()" class="btn-download">Download MT5 EA</button>
+                    </div>
+
+                    <div class="credential-box-container">
+                        <div class="api-credentials-box">
+                            <div class="credential-row">
+                                <label>Supabase URL</label>
+                                <div class="copy-input">
+                                    <input type="text" id="supabaseUrlInput" readonly value="https://nrmivhzvwqpnwedvkbbz.supabase.co">
+                                    <button onclick="copyToClipboard('supabaseUrlInput')">Copy</button>
+                                </div>
+                            </div>
+                            <div class="credential-row">
+                                <label>Supabase API Key (Anon)</label>
+                                <div class="copy-input">
+                                    <input type="password" id="supabaseKeyInput" readonly value="your_api_key">
+                                    <button onclick="copyToClipboard('supabaseKeyInput')">Copy</button>
+                                </div>
+                            </div>
+                            <div class="credential-row">
+                                <label>Your User ID</label>
+                                <div class="copy-input">
+                                    <input type="text" id="userIdDisplay" readonly value="Lade...">
+                                    <button onclick="copyToClipboard('userIdDisplay')">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-instructions">
+                            <h4>MT5 AUTO-SYNC (BETA)</h4>
+                            <ol>
+                                <li><strong>Download EA:</strong> JournalSync_Pro.mq5 is already included.</li>
+                                <li><strong>Locate Folder:</strong> Open MetaTrader 5, go to <code>File > Open Data Folder</code>, then navigate to <code>MQL5 > Experts</code>.</li>
+                                <li><strong>Copy File:</strong> Paste the downloaded file into the <code>Experts</code> folder.</li>
+                                <li><strong>Enable WebRequest:</strong> Go to <code>Tools > Options > Expert Advisors</code>.
+                                    <ul style="list-style-type: circle; padding-left: 20px; margin-top: 5px; color: #8b949e;">
+                                        <li>Check "Allow WebRequest for listed URL"</li>
+                                        <li>Add: <code>https://nrmivhzvwqpnwedvkbbz.supabase.co</code></li>
+                                    </ul>
+                                </li>
+                                <li><strong>Activate:</strong> In MT5 Navigator, right-click <code>Experts > Refresh</code>. Drag the script onto any chart and ensure "Algo Trading" is enabled at the top.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ANIMATED CYBER BACKGROUND */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let elements = [];
+        let mouseTrail = [];
+        let mouse = { x: -100, y: -100 };
+
+        const formulas = [
+            "RR = (Exit - Entry) / (Entry - SL)",
+            "P/L = Lot × (pips × value)",
+            "0.618 (Golden Ratio)",
+            "0.618 Retracement",
+            "EV = (W% × AvgW) - (L% × AvgL)",
+            "Market Profile",
+            "Value Area",
+            "Fair Value",
+            "Volume",
+            "Breakout",
+            "Smart Money Concepts",
+            "Engulfing",
+            "∑(x - μ)²",
+            "Profit",
+            "Margin Call",
+            "Candlestick Pattern"
         ];
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawNeuralLines();
-            elements.forEach(e => { e.update(); e.draw(); });
-            mouseTrail.forEach((mc, i) => {
-                mc.update(); mc.draw();
-                if (mc.opacity <= 0) mouseTrail.splice(i, 1);
-            });
-            requestAnimationFrame(animate);
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-        animate();
-    }
 
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX; mouse.y = e.clientY;
-        if (Math.random() > 0.7) mouseTrail.push(new MouseCandle(mouse.x, mouse.y));
-    });
-
-    window.addEventListener('resize', initCanvas);
-    initCanvas();
-    setupBG();
-
-    /* LOGIC */
-    const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_-fh0VxK2T7Jy2M80qVI9fA_IkyVO_U2'; 
-    const { createClient } = supabase;
-    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let currentUser = null;
-
-    // Auth Funktionen
-async function checkAuth() {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (session) {
-        currentUser = session.user;
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('userEmail').textContent = currentUser.email;
-        const uidInput = document.getElementById('disp_uid');
-        if(uidInput) uidInput.value = currentUser.id;
-		
-		
-        // Initialisiere alle wichtigen Funktionen
-        populateLists();
-        fetchTrades();
-    } else {
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('mainApp').style.display = 'none';
-    }
-}
-
-function copyToClip(id) {
-    const el = document.getElementById(id);
-    el.select();
-    el.setSelectionRange(0, 99999); // Für Mobile
-    navigator.clipboard.writeText(el.value).then(() => {
-        alert("Copied!");
-    });
-}
-
-
-    async function handleLogin() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        
-        const { data, error } = await _supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) {
-            showError(error.message);
-        } else {
-            checkAuth();
-        }
-    }
-
-    async function handleSignup() {
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        
-        if (password.length < 6) {
-            showError('Password must be at least 6 characters');
-            return;
-        }
-        
-        const { data, error } = await _supabase.auth.signUp({
-            email: email,
-            password: password
-        });
-        
-        if (error) {
-            showError(error.message);
-        } else {
-            showSuccess('Account created! Please check your email to verify.');
-        }
-    }
-
-    async function handleLogout() {
-        await _supabase.auth.signOut();
-        currentUser = null;
-        trades = [];
-        checkAuth();
-    }
-
-    function toggleAuthMode() {
-        const login = document.getElementById('loginForm');
-        const signup = document.getElementById('signupForm');
-        const errorMsg = document.getElementById('errorMessage');
-        const successMsg = document.getElementById('successMessage');
-        
-        errorMsg.style.display = 'none';
-        successMsg.style.display = 'none';
-        
-        if (login.style.display === 'none') {
-            login.style.display = 'block';
-            signup.style.display = 'none';
-        } else {
-            login.style.display = 'none';
-            signup.style.display = 'block';
-        }
-    }
-
-    function showError(message) {
-        const el = document.getElementById('errorMessage');
-        el.textContent = message;
-        el.style.display = 'block';
-        setTimeout(() => el.style.display = 'none', 5000);
-    }
-
-    function showSuccess(message) {
-        const el = document.getElementById('successMessage');
-        el.textContent = message;
-        el.style.display = 'block';
-        setTimeout(() => el.style.display = 'none', 5000);
-    }
-
-    let trades = [];
-    let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
-    let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
-    let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
-    let currentViewDate = new Date();
-    let selectedDateFilter = null;
-
-    function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
-
-    function animateValue(id, start, end, duration, isCurrency = false, isPercent = false, suffix = "") {
-        const obj = document.getElementById(id);
-        if (!obj) return;
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            const val = progress * (end - start) + start;
-            if (isCurrency) obj.textContent = '$' + val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            else if (isPercent) obj.textContent = val.toFixed(1) + '%';
-            else obj.textContent = val.toFixed(isCurrency ? 2 : 1) + suffix;
-            if (progress < 1) window.requestAnimationFrame(step);
-        };
-        window.requestAnimationFrame(step);
-    }
-
-async function fetchTrades() {
-        if (!currentUser) return;
-        const { data, error } = await _supabase.from('trades').select('*').eq('user_id', currentUser.id);
-        if (error) console.error('Error:', error);
-        else { trades = data || []; refreshApp(); }
-    }
-
- window.addEventListener('load', () => {
-        checkAuth();
-        const savedBalance = localStorage.getItem('initialBalance');
-        if (savedBalance) document.getElementById('initialBalanceInput').value = savedBalance;
-        setupDragAndDrop();
-    });
-
-    function setupDragAndDrop() {
-        const dropArea = document.getElementById('screenshot');
-        dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = "#00f2ff"; });
-        dropArea.addEventListener('dragleave', () => dropArea.style.borderColor = "#3d4651");
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault(); dropArea.style.borderColor = "#3d4651";
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => { dropArea.value = ev.target.result; };
-                reader.readAsDataURL(file);
+        class FallingElement {
+            constructor(type) {
+                this.type = type;
+                this.reset();
             }
-        });
-    }
-
-    function populateLists() {
-        document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
-        document.getElementById('strategy').innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
-        const filter = document.getElementById('historyInstrumentFilter');
-        filter.innerHTML = `<option value="ALL">All Instruments</option>` + customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
-    }
-
-    function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
-
-    function updateStatsAndTable() {
-    const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-    localStorage.setItem('initialBalance', initialBalance);
-    const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
-
-    let filtered = trades.filter(t => {
-        const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
-        const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
-        return matchesTime && matchesInstrument;
-    });
-
-    let traderAllTrades = trades;
-        
-		const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-        
-        animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
-        
-        const wins = filtered.filter(t => t.result === 'WIN');
-        const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
-        const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
-        
-        animateValue('totalTrades', 0, filtered.length, 800);
-        animateValue('winRate', 0, winRateVal, 800, false, true);
-        animateValue('totalPL', 0, viewPL, 800, true);
-        
-        const plCard = document.getElementById('card-pl');
-        plCard.classList.remove('glow-win', 'glow-loss');
-        if (viewPL > 0) plCard.classList.add('glow-win');
-        else if (viewPL < 0) plCard.classList.add('glow-loss');
-
-        const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-        document.getElementById('avgR').textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
-        
-        const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
-        document.getElementById('tradesBody').innerHTML = sorted.map(t => {
-            const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-            return `<tr>
-                <td>${t.date}</td><td>${t.instrument}</td>
-				
-				<td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
-                <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-                <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-                <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
-                <td>${t.screenshot ? `<a href="#" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">🖼️</a>` : '-'}</td>
-                <td><button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button><button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button></td>
-            </tr>`;
-        }).join('');
-        updateCharts(traderAllTrades);
-    }
-
-    function updateCharts(chartTrades) {
-        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-        const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        let runningEquity = initialBalance, peak = initialBalance;
-        const equityData = [initialBalance], drawdownData = [0];
-        chrono.forEach(t => { runningEquity += Number(t.pl); equityData.push(runningEquity); if (runningEquity > peak) peak = runningEquity; drawdownData.push(runningEquity - peak); });
-
-        if (equityChart) equityChart.destroy();
-        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.05)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
-        if (drawdownChart) drawdownChart.destroy();
-        drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.05)', tension: 0.3, pointRadius: 0 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
-        const stratMap = {}; chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
-        if (strategyPLChart) strategyPLChart.destroy();
-        strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} } } });
-        if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' }, legend: {display:false} } } });
-        const dD = [0,0,0,0,0,0,0]; chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
-        if (weekdayChart) weekdayChart.destroy();
-        weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' }, legend: {display:false} } } });
-    
-		createHeatmap(chartTrades);
-	}
-
-    document.getElementById('tradeForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const editId = document.getElementById('editId').value;
-        if (!currentUser) return alert("Please login first!");
-        let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
-        const result = document.getElementById('result').value;
-        
-// Visuelles Feedback je nach Result
-const flashOverlay = document.getElementById('flashOverlay');
-const container = document.querySelector('.container');
-
-if (result === 'WIN') {
-    // Grüner Flash
-    flashOverlay.classList.add('flash-win');
-    container.classList.add('shake-win');
-    setTimeout(() => {
-        flashOverlay.classList.remove('flash-win');
-        container.classList.remove('shake-win');
-    }, 300);
-} else if (result === 'LOSS') {
-    // Roter Flash
-    flashOverlay.classList.add('flash-loss');
-    container.classList.add('shake-loss');
-    setTimeout(() => {
-        flashOverlay.classList.remove('flash-loss');
-        container.classList.remove('shake-loss');
-    }, 300);
-} else if (result === 'BE') {
-    // Lila Flash
-    flashOverlay.classList.add('flash-be');
-    container.classList.add('shake-be');
-    setTimeout(() => {
-        flashOverlay.classList.remove('flash-be');
-        container.classList.remove('shake-be');
-    }, 250);
-}
-
-        const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
-        const data = { 
-            user_id: currentUser.id,
-            date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
-            strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
-            exit: document.getElementById('exit').value, result: result, pl: plValue, 
-            risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, 
-            notes: document.getElementById('notes').value
-        };
-        if (editId) await _supabase.from('trades').update(data).eq('id', editId);
-        else await _supabase.from('trades').insert([data]);
-        fetchTrades();
-    });
-
-    function resetForm() { 
-        document.getElementById('tradeForm').reset(); document.getElementById('editId').value = ""; 
-        document.getElementById('submitBtn').textContent = "Save Trade";
-        const now = new Date(); document.getElementById('date').value = now.toISOString().split('T')[0];
-        document.getElementById('time').value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        populateLists(); 
-    }
-
-    function renderCalendar() {
-    const grid = document.getElementById('calendarGrid');
-    grid.innerHTML = ''; 
-    const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
-    document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
-    const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
-    ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
-    for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const dayTrades = trades.filter(t => t.date === dateStr);
-			
-            const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-            const dayEl = document.createElement('div');
-            dayEl.className = `calendar-day ${dayPL > 0 ? 'day-win' : (dayPL < 0 ? 'day-loss' : '')} ${selectedDateFilter === dateStr ? 'selected' : ''}`;
-            dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>`;
-            dayEl.onclick = () => { selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr; renderCalendar(); updateStatsAndTable(); };
-            grid.appendChild(dayEl);
-        }
-    }
-
-    function prepareEdit(id) {
-        const t = trades.find(tr => tr.id === id);
-        document.getElementById('date').value = t.date; document.getElementById('time').value = t.time; 
-        document.getElementById('instrument').value = t.instrument; document.getElementById('strategy').value = t.strategy;
-        document.getElementById('direction').value = t.direction; document.getElementById('entry').value = t.entry; 
-        document.getElementById('exit').value = t.exit; document.getElementById('result').value = t.result; 
-        document.getElementById('pl').value = Math.abs(t.pl); document.getElementById('risk').value = t.risk; 
-        document.getElementById('mistake').value = t.mistake; document.getElementById('screenshot').value = t.screenshot; 
-        document.getElementById('notes').value = t.notes; document.getElementById('editId').value = t.id; 
-        document.getElementById('submitBtn').textContent = "Update Trade";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
- async function processBulkImport() {
-    if (!currentUser) return alert("Please login first!");
-	
-        const area = document.getElementById('importArea'), raw = area.value.trim(); 
-        if(!raw) return alert("Please paste data!");
-        
-        const lines = raw.split('\n');
-        const newTrades = [];
-        
-        // Check if it's TradingView format (contains "Realized P&L" header)
-        const isTradingViewFormat = lines[0].includes('Realized P&L');
-        
-        if (isTradingViewFormat) {
-            // TradingView Format Processing
-            for(let i = 1; i < lines.length; i++) { // Skip header
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                const parts = line.split(',');
-                if (parts.length < 6) continue;
-                
-                // Extract date and time from first column: "2026-01-23 17:10:50"
-                const dateTime = parts[0].split(' ');
-                const date = dateTime[0]; // "2026-01-23"
-                const time = dateTime[1].substring(0, 5); // "17:10"
-                
-                // Extract P/L
-                const pl = parseFloat(parts[3]);
-                
-                // Extract action details from last column
-                const action = parts.slice(5).join(','); // Rejoin in case there are commas in action
-                
-                // Extract direction (long or short)
-                const isLong = action.toLowerCase().includes('close long');
-                const direction = isLong ? 'LONG' : 'SHORT';
-                
-                // Extract symbol: "BLACKBULL:GER40" -> "GER40" or "BROKER:SYMBOL" -> "SYMBOL"
-                // Matches any broker prefix followed by colon, or just the symbol itself
-                const symbolMatch = action.match(/symbol\s+(?:\w+:)?(\w+)/i);
-                const instrument = symbolMatch ? symbolMatch[1] : 'UNKNOWN';
-                
-                // Extract exit price: "at price 10135.4"
-                const priceMatch = action.match(/at price ([\d.]+)/);
-                const exitPrice = priceMatch ? parseFloat(priceMatch[1]).toString() : '0';
-                
-                // Extract avg entry price: "Position AVG Price was 10145.300000"
-                const avgPriceMatch = action.match(/AVG Price was ([\d.]+)/);
-                const entryPrice = avgPriceMatch ? parseFloat(avgPriceMatch[1]).toString() : '0';
-                
-                newTrades.push({ 
-                    user_id: currentUser.id,
-                    date: date,
-                    time: time,
-                    instrument: instrument,
-                    strategy: 'TradingView',
-                    direction: direction,
-                    entry: entryPrice,
-                    exit: exitPrice,
-                    pl: pl,
-                    result: pl >= 0 ? 'WIN' : 'LOSS',
-                    risk: "100",
-                    mistake: "PLAN",
-                    screenshot: "",
-                    notes: `Imported from TradingView`,
-                    
-                });
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -50 - Math.random() * canvas.height;
+                this.speed = 1 + Math.random() * 2.5;
+                this.text = this.type === 'formula' ? formulas[Math.floor(Math.random() * formulas.length)] : '';
+                this.opacity = 0.05 + Math.random() * 0.15;
             }
-        } else {
-            // Original Tab-separated format
-            const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-            for(let line of lines) {
-                const parts = line.split('\t').map(p => p.trim());
-                if(parts.length >= 7) {
-                    const dateParts = parts[2].split(' ');
-                   newTrades.push({ 
-                        user_id: currentUser.id,
-                        date: `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`,
-                        time: dateParts[3].substring(0, 5), 
-                        instrument: parts[0], 
-                        strategy: 'Imported', 
-                        direction: parts[1].toUpperCase().includes('BUY') ? 'LONG' : 'SHORT', 
-                        entry: parts[3], 
-                        exit: parts[4], 
-                        pl: parseFloat(parts[6]), 
-                        result: parseFloat(parts[6]) >= 0 ? 'WIN' : 'LOSS', 
-                        risk: "100", 
-                        mistake: "PLAN",
-                        screenshot: "",
-                        notes: "",
-                       
-                    });
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) this.reset();
+            }
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                if (this.type === 'candle') {
+                    ctx.strokeStyle = Math.random() > 0.5 ? '#00ffaa' : '#ff4a68';
+                    ctx.strokeRect(this.x, this.y, 2, 12);
+                } else {
+                    ctx.fillStyle = '#764ba2';
+                    ctx.font = `9px 'Courier New', monospace`;
+                    ctx.fillText(this.text, this.x, this.y);
                 }
             }
         }
-        
-        if(newTrades.length > 0) { 
-            await _supabase.from('trades').insert(newTrades); 
-            area.value = ""; 
-            alert(`✅ Successfully imported ${newTrades.length} trades!`);
-            fetchTrades(); 
-        } else {
-            alert("❌ No valid trades found. Please check the format.");
-        }
-    }
 
-    function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
-	
-	function createHeatmap(chartTrades) {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const hours = Array.from({length: 24}, (_, i) => i);
-    
-    // Grid initialisieren
-    const heatmapData = {};
-    days.forEach((_, dayIdx) => {
-        hours.forEach(hour => {
-            heatmapData[`${dayIdx}-${hour}`] = { pl: 0, count: 0 };
-        });
-    });
-    
-    // Trade Daten sammeln
-    chartTrades.forEach(t => {
-        if (!t.time) return;
-        const date = new Date(t.date + ' ' + t.time);
-        const dayIdx = date.getDay();
-        const hour = date.getHours();
-        const key = `${dayIdx}-${hour}`;
-        
-        if (heatmapData[key]) {
-            heatmapData[key].pl += Number(t.pl);
-            heatmapData[key].count += 1;
-        }
-    });
-    
-    // Matrix für Chart erstellen
-    const matrixData = [];
-    days.forEach((_, dayIdx) => {
-        hours.forEach(hour => {
-            const key = `${dayIdx}-${hour}`;
-            const cell = heatmapData[key];
-            
-            if (cell.count > 0) {
-                matrixData.push({
-                    x: hour,
-                    y: dayIdx,
-                    v: cell.pl / cell.count, // Durchschnitt
-                    count: cell.count,
-                    totalPL: cell.pl
-                });
+        class MouseCandle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.opacity = 0.6;
+                this.isBullish = Math.random() > 0.5;
             }
-        });
-    });
-    
-    // Min/Max für Farben
-    const values = matrixData.map(d => d.v);
-    const absMax = Math.max(...values.map(Math.abs), 1);
-    
-    // Chart erstellen
-    if (heatmapChart) heatmapChart.destroy();
-    
-    heatmapChart = new Chart(document.getElementById('heatmapChart').getContext('2d'), {
-        type: 'bubble',
-        data: {
-            datasets: [{
-                label: 'Avg P/L',
-                data: matrixData,
-                backgroundColor: matrixData.map(d => {
-                    const intensity = Math.abs(d.v) / absMax;
-                    if (d.v > 0) return `rgba(0, 255, 170, ${0.3 + intensity * 0.6})`;
-                    if (d.v < 0) return `rgba(255, 74, 104, ${0.3 + intensity * 0.6})`;
-                    return 'rgba(100, 100, 100, 0.3)';
-                }),
-                borderColor: matrixData.map(d => d.v > 0 ? '#00ffaa' : '#ff4a68'),
-                borderWidth: 1,
-                radius: matrixData.map(d => 8 + Math.min(d.count * 3, 15))
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: { display: true, text: 'Hour of Day', color: '#8892b0' },
-                    ticks: { 
-                        color: '#8892b0',
-                        callback: (val) => val + ':00'
-                    },
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    min: 0,
-                    max: 23
-                },
-                y: {
-                    title: { display: true, text: 'Day of Week', color: '#8892b0' },
-                    ticks: { 
-                        color: '#8892b0',
-                        callback: (val) => days[val]
-                    },
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    min: 0,
-                    max: 6
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'PERFORMANCE HEATMAP (Day vs Hour)',
-                    color: '#00f2ff',
-                    font: { size: 14, weight: 'bold' }
-                },
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: (items) => {
-                            const d = items[0].raw;
-                            return `${days[d.y]} at ${d.x}:00`;
-                        },
-                        label: (item) => {
-                            const d = item.raw;
-                            return [
-                                `Avg P/L: $${d.v.toFixed(2)}`,
-                                `Total P/L: $${d.totalPL.toFixed(2)}`,
-                                `Trades: ${d.count}`
-                            ];
-                        }
+            update() {
+                this.opacity -= 0.02;
+            }
+            draw() {
+                ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
+                ctx.strokeRect(this.x - 2, this.y - 7.5, 4, 15);
+            }
+        }
+
+        function drawNeuralLines() {
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < elements.length; i++) {
+                for (let j = i + 1; j < elements.length; j++) {
+                    let dx = elements[i].x - elements[j].x;
+                    let dy = elements[i].y - elements[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        ctx.strokeStyle = `rgba(118, 75, 162, ${0.1 * (1 - dist/100)})`;
+                        ctx.beginPath();
+                        ctx.moveTo(elements[i].x, elements[i].y);
+                        ctx.lineTo(elements[j].x, elements[j].y);
+                        ctx.stroke();
                     }
                 }
             }
         }
-    });
-}
-	
-    function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
-    function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
-    function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
-	function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
-    
-	
-	function removeInstrument() {
-    const selectedInstrument = document.getElementById('instrument').value;
-    
-    // Check ob das Instrument in Trades verwendet wird
-    const usedInTrades = trades.filter(t => t.instrument === selectedInstrument).length;
-    
-    if (usedInTrades > 0) {
-        if (!confirm(` WARNING!\n\nThis instrument "${selectedInstrument}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the instrument won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) {
-            return;
-        }
-    } else {
-        if (!confirm(`Remove instrument "${selectedInstrument}"?`)) {
-            return;
-        }
-    }
-    
-    // Verhindere dass das letzte Instrument gelöscht wird
-    if (customInstruments.length <= 1) {
-        alert(' Cannot delete the last instrument!\n\nYou need at least one instrument in the list.');
-        return;
-    }
-    
-    customInstruments = customInstruments.filter(i => i !== selectedInstrument);
-    localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
-    populateLists();
-}
 
-function removeStrategy() {
-    const selectedStrategy = document.getElementById('strategy').value;
-    
-    // Check ob die Strategy in Trades verwendet wird
-    const usedInTrades = trades.filter(t => t.strategy === selectedStrategy).length;
-    
-    if (usedInTrades > 0) {
-        if (!confirm(` WARNING!\n\nThis strategy "${selectedStrategy}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the strategy won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) {
-            return;
+        function setupBG() {
+            elements = [
+                ...Array.from({ length: 70 }, () => new FallingElement('candle')),
+                ...Array.from({ length: 25 }, () => new FallingElement('formula'))
+            ];
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawNeuralLines();
+                elements.forEach(e => {
+                    e.update();
+                    e.draw();
+                });
+                mouseTrail.forEach((mc, i) => {
+                    mc.update();
+                    mc.draw();
+                    if (mc.opacity <= 0) mouseTrail.splice(i, 1);
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
         }
-    } else {
-        if (!confirm(`Remove strategy "${selectedStrategy}"?`)) {
-            return;
-        }
-    }
-    
-    // Verhindere dass die letzte Strategy gelöscht wird
-    if (customStrategies.length <= 1) {
-        alert(' Cannot delete the last strategy!\n\nYou need at least one strategy in the list.');
-        return;
-    }
-    
-    customStrategies = customStrategies.filter(s => s !== selectedStrategy);
-    localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
-    populateLists();
-}
-	
-    async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
-    async function deleteAllTrades() { if(confirm('Delete ALL?')) { await _supabase.from('trades').delete().not('id', 'is', null); fetchTrades(); } }
-	
- function exportToCSV() { let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
 
-async function downloadPersonalizedEA() {
-    let userId = "";
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.8) mouseTrail.push(new MouseCandle(e.clientX, e.clientY));
+        });
 
-    // 1. Versuch: Aus der Anzeige lesen
-    const displayElement = document.getElementById('userIdDisplay');
-    if (displayElement) {
-        userId = displayElement.textContent.trim();
-    }
+        initCanvas();
+        setupBG();
 
-    // 2. Versuch: Falls Anzeige noch lädt, interne Variable prüfen
-    if (!userId || userId.includes("Lade") || userId.length < 10) {
-        if (typeof _currentUserId !== 'undefined' && _currentUserId) {
-            userId = _currentUserId;
-        }
-    }
+        /* SUPABASE LOGIC */
+        const SUPABASE_URL = "https://nrmivhzvwqpnwedvkbbz.supabase.co";
+        const SUPABASE_KEY = "your_api_key";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 3. Versuch: Direkt von Supabase Auth
-    if (!userId || userId.length < 10) {
-        try {
+        let currentUser = null;
+        let _currentUserId = null;
+
+        async function checkAuth() {
             const { data: { session } } = await _supabase.auth.getSession();
-            if (session) userId = session.user.id;
-        } catch (e) {}
-    }
+            if (session) {
+                currentUser = session.user;
+                _currentUserId = currentUser.id;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userIdDisplay').value = currentUser.id;
+                document.getElementById('supabaseKeyInput').value = SUPABASE_KEY;
+                fetchTrades();
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            }
+        }
+        checkAuth();
 
-    if (!userId || userId.includes("Lade") || userId.length < 10) {
-        alert("ID noch nicht bereit. Bitte warten Sie kurz, bis das Journal geladen ist.");
-        return;
-    }
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const { data, error } = await _supabase.auth.signInWithPassword({ email: email, password: password });
+            if (error) showError(error.message);
+            else checkAuth();
+        }
 
-    // Das EA Template basierend auf der stabilen Final_EA Version (V5 Logik)
-    const eaCode = `//+------------------------------------------------------------------+
-//|                                     JournalSync_Pro_Connector.mq5|
-//|                                     User-ID: ${userId}            |
-//+------------------------------------------------------------------+
-#property copyright "Trading Journal Pro"
-#property version   "5.60"
-#property strict
-#property description "Automatischer Sync für Ihr Trading Journal"
+        async function handleSignup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+            const { data, error } = await _supabase.auth.signUp({ email: email, password: password });
+            if (error) showError(error.message);
+            else showSuccess('Account created! Please check your email to verify.');
+        }
 
-input string InpUserID      = "${userId}"; 
-input int    InpInterval    = 5; 
+        async function handleLogout() {
+            await _supabase.auth.signOut();
+            currentUser = null;
+            trades = [];
+            checkAuth();
+        }
 
-string InpSupabaseUrl = "https://nrmivhzvwqpnwedvkbbz.supabase.co"; 
-string InpApiKey      = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybWl2aHp2d3FwbndlZHZrYmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjgzMTIsImV4cCI6MjA4NDMwNDMxMn0.DmpCTBurgMHoba3KpsjRCEOqltV4-bL06ezPr7gAbyg";
+        function toggleAuthMode() {
+            const login = document.getElementById('loginForm');
+            const signup = document.getElementById('signupForm');
+            const errorMsg = document.getElementById('errorMessage');
+            const successMsg = document.getElementById('successMessage');
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            if (login.style.display === 'none') {
+                login.style.display = 'block';
+                signup.style.display = 'none';
+            } else {
+                login.style.display = 'none';
+                signup.style.display = 'block';
+            }
+        }
 
-int OnInit() {
-   Print(">>> Auto-Sync PRO Aktiviert für ID: ", InpUserID);
-   EventSetTimer(InpInterval * 60); 
-   SyncNow(); 
-   return(INIT_SUCCEEDED);
-}
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
 
-void OnDeinit(const int reason) { EventKillTimer(); }
-void OnTimer() { SyncNow(); }
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
 
-void SyncNow() {
-   // Synchronisiert die letzten 30 Tage
-   if(!HistorySelect(TimeCurrent() - (30 * 86400), TimeCurrent())) return;
-   
-   int totalDeals = HistoryDealsTotal();
-   for(int i = 0; i < totalDeals; i++) {
-      ulong ticket = HistoryDealGetTicket(i);
-      if(ticket <= 0) continue;
+        let trades = [];
+        let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
+        let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
+        let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
+        let currentViewDate = new Date();
+        let selectedDateFilter = null;
 
-      double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
-      double swap = HistoryDealGetDouble(ticket, DEAL_SWAP);
-      double comm = HistoryDealGetDouble(ticket, DEAL_COMMISSION);
-      double totalPL = profit + swap + comm;
-      
-      // Nur abgeschlossene Trades (Profit != 0)
-      if(totalPL == 0) continue; 
+        function validateNumber(input) {
+            input.value = input.value.replace(/[^0-9.\-]/g, '');
+        }
 
-      string symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
-      datetime time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
-      double exitPrice = HistoryDealGetDouble(ticket, DEAL_PRICE);
-      long type = HistoryDealGetInteger(ticket, DEAL_TYPE);
-      
-      string dateStr = TimeToString(time, TIME_DATE);
-      StringReplace(dateStr, ".", "-");
+        function animateValue(id, start, end, duration, isCurrency = false, isPercent = false, suffix = "") {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                let val = progress * (end - start) + start;
+                if (isCurrency) obj.innerHTML = `$${val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                else if (isPercent) obj.innerHTML = `${val.toFixed(1)}%`;
+                else obj.innerHTML = Math.floor(val) + suffix;
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
 
-      string json = "{\\"p_user_id\\":\\""+InpUserID+"\\","+
-                    "\\"p_date\\":\\""+dateStr+"\\","+
-                    "\\"p_time\\":\\""+TimeToString(time, TIME_MINUTES)+"\\","+
-                    "\\"p_instrument\\":\\""+symbol+"\\","+
-                    "\\"p_strategy\\":\\"Auto-Sync-Pro\\","+
-                    "\\"p_direction\\":\\""+((type==DEAL_TYPE_SELL)?"SHORT":"LONG")+"\\","+
-                    "\\"p_entry\\":"+DoubleToString(exitPrice, 2)+","+
-                    "\\"p_exit\\":"+DoubleToString(exitPrice, 2)+","+
-                    "\\"p_pl\\":"+DoubleToString(totalPL, 2)+","+
-                    "\\"p_result\\":\\""+((totalPL>=0)?"WIN":"LOSS")+"\\","+
-                    "\\"p_notes\\":\\"Automatischer MT5 Import\\","+
-                    "\\"p_mt5_id\\":\\""+IntegerToString(ticket)+"\\","+
-                    "\\"p_status\\":\\"Closed\\"}";
+        async function fetchTrades() {
+            if (!currentUser) return;
+            const { data, error } = await _supabase
+                .from('trades')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('date', { ascending: false });
+            
+            if (error) {
+                console.error('Error fetching trades:', error);
+            } else {
+                trades = data;
+                refreshApp();
+            }
+        }
 
-      char postData[], resultData[]; string resultHeaders;
-      StringToCharArray(json, postData, 0, StringLen(json));
-      
-      WebRequest("POST", InpSupabaseUrl + "/rest/v1/rpc/upload_trade", 
-                 "Content-Type: application/json\\r\\napikey: " + InpApiKey + "\\r\\nAuthorization: Bearer " + InpApiKey + "\\r\\n", 
-                 5000, postData, resultData, resultHeaders);
-   }
-}
-`;
+        // Drop Area for Screenshots
+        const dropArea = document.getElementById('screenshot');
+        if (dropArea) {
+            dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = "#00f2ff"; });
+            dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor = "#3d4651"; });
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.style.borderColor = "#3d4651";
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { dropArea.value = ev.target.result; };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
-    // Download-Vorgang
-    const blob = new Blob([eaCode], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'JournalSync_Pro.mq5';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-}
+        function populateLists() {
+            document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+            document.getElementById('strategy').innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
+            const filter = document.getElementById('historyInstrumentFilter');
+            filter.innerHTML = `<option value="ALL">All Instruments</option>` + customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+        }
 
-</script>
-<div id="flashOverlay" class="flash-overlay"></div>
+        function refreshApp() {
+            renderCalendar();
+            updateStatsAndTable();
+            resetForm();
+        }
 
-</div> <!-- Ende mainApp 
-Ende mainApp 
-Ende mainApp 
-Ende mainApp -->
+        function updateStatsAndTable() {
+            const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+            localStorage.setItem('initialBalance', initialBalance);
+            const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+            
+            let filtered = trades.filter(t => {
+                const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
+                const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
+                return matchesTime && matchesInstrument;
+            });
 
+            let traderAllTrades = trades;
+            const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+            animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
+
+            const wins = filtered.filter(t => t.result === 'WIN');
+            const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
+            const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
+            animateValue('totalTrades', 0, filtered.length, 800);
+            animateValue('winRate', 0, winRateVal, 800, false, true);
+            animateValue('totalPL', 0, viewPL, 800, true);
+
+            const profits = filtered.filter(t => t.pl > 0).reduce((sum, t) => sum + Number(t.pl), 0);
+            const losses = Math.abs(filtered.filter(t => t.pl < 0).reduce((sum, t) => sum + Number(t.pl), 0));
+            const pf = losses > 0 ? profits / losses : profits > 0 ? 10 : 0;
+            animateValue('profitFactor', 0, pf, 800, false, false);
+            
+            const avgRiskVal = filtered.length > 0 ? filtered.reduce((sum, t) => sum + Number(t.risk || 0), 0) / filtered.length : 0;
+            animateValue('avgRisk', 0, avgRiskVal, 800, true);
+
+            const plCard = document.getElementById('totalPLCard');
+            plCard.className = 'stat-card ' + (viewPL >= 0 ? 'glow-win' : 'glow-loss');
+
+            const tbody = document.querySelector('.trades-table tbody');
+            
+            // Reset select all checkbox
+            const selectAll = document.getElementById('selectAllCheckbox');
+            if(selectAll) selectAll.checked = false;
+
+            tbody.innerHTML = filtered.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
+                .map(t => `
+                <tr>
+                    <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
+                    <td>${t.date} ${t.time}</td>
+                    <td>${t.instrument}</td>
+                    <td><span class="badge ${t.direction.toLowerCase()}">${t.direction}</span></td>
+                    <td>${t.entry}</td>
+                    <td>${t.exit}</td>
+                    <td class="${t.pl >= 0 ? 'win' : 'loss'}">${Number(t.pl).toFixed(2)}</td>
+                    <td><span class="badge ${t.result.toLowerCase()}">${t.result}</span></td>
+                    <td><small>${t.notes || ''}</small></td>
+                    <td>${t.screenshot ? `<button class="btn-sm edit-btn" onmouseover="showPreview('${t.screenshot}')" onmouseout="hidePreview()">View</button>` : '-'}</td>
+                    <td>
+                        <button class="btn-sm edit-btn" onclick="editTrade('${t.id}')">Edit</button>
+                        <button class="btn-sm delete-btn" onclick="deleteTrade('${t.id}')">Del</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            updateCharts(filtered, traderAllTrades, initialBalance);
+        }
+
+        function updateCharts(chartTrades, allTrades, initialBalance) {
+            const chrono = [...allTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+            let runningEquity = initialBalance;
+            const equityData = [initialBalance];
+            const drawdownData = [0];
+            let peak = initialBalance;
+
+            chrono.forEach(t => {
+                runningEquity += Number(t.pl);
+                equityData.push(runningEquity);
+                if (runningEquity > peak) peak = runningEquity;
+                drawdownData.push(runningEquity - peak);
+            });
+
+            if (equityChart) equityChart.destroy();
+            equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [0, ...chrono.map((_,i)=>i+1)],
+                    datasets: [{
+                        label: 'Equity',
+                        data: equityData,
+                        borderColor: '#00f2ff',
+                        fill: true,
+                        backgroundColor: 'rgba(0, 242, 255, 0.05)',
+                        tension: 0.3,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} }
+                }
+            });
+
+            if (drawdownChart) drawdownChart.destroy();
+            drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [0, ...chrono.map((_,i)=>i+1)],
+                    datasets: [{
+                        label: 'Drawdown',
+                        data: drawdownData,
+                        borderColor: '#ff4a68',
+                        fill: true,
+                        backgroundColor: 'rgba(255, 74, 104, 0.05)',
+                        tension: 0.3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} }
+                }
+            });
+
+            const stratMap = {};
+            chartTrades.forEach(t => {
+                const s = t.strategy || 'Other';
+                stratMap[s] = (stratMap[s] || 0) + Number(t.pl);
+            });
+
+            if (strategyPLChart) strategyPLChart.destroy();
+            strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stratMap),
+                    datasets: [{
+                        data: Object.values(stratMap),
+                        backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68')
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} }
+                }
+            });
+
+            const dist = { WIN: 0, LOSS: 0, BE: 0 };
+            chartTrades.forEach(t => dist[t.result]++);
+
+            if (distributionChart) distributionChart.destroy();
+            distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Win', 'Loss', 'BE'],
+                    datasets: [{
+                        data: [dist.WIN, dist.LOSS, dist.BE],
+                        backgroundColor: ['#00ffaa', '#ff4a68', '#764ba2'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'WIN/LOSS RATIO', color: '#8892b0' } }
+                }
+            });
+
+            const dayMap = { 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0 };
+            chartTrades.forEach(t => {
+                const day = new Date(t.date).toLocaleDateString('en-US', {weekday:'short'});
+                if (dayMap[day] !== undefined) dayMap[day] += Number(t.pl);
+            });
+
+            if (weekdayChart) weekdayChart.destroy();
+            weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(dayMap),
+                    datasets: [{
+                        data: Object.values(dayMap),
+                        backgroundColor: Object.values(dayMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68')
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'PER WEEKDAY', color: '#8892b0' }, legend: {display:false} }
+                }
+            });
+
+            createHeatmap(chartTrades);
+        }
+
+        document.getElementById('tradeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const result = document.getElementById('result').value;
+            const rawPL = parseFloat(document.getElementById('pl').value);
+
+            const container = document.querySelector('.container');
+            const flashOverlay = document.getElementById('flashOverlay');
+
+            if (result === 'WIN') {
+                flashOverlay.classList.add('flash-win');
+                container.classList.add('shake-win');
+                setTimeout(() => { flashOverlay.classList.remove('flash-win'); container.classList.remove('shake-win'); }, 300);
+            } else if (result === 'LOSS') {
+                flashOverlay.classList.add('flash-loss');
+                container.classList.add('shake-loss');
+                setTimeout(() => { flashOverlay.classList.remove('flash-loss'); container.classList.remove('shake-loss'); }, 300);
+            } else if (result === 'BE') {
+                flashOverlay.classList.add('flash-be');
+                container.classList.add('shake-be');
+                setTimeout(() => { flashOverlay.classList.remove('flash-be'); container.classList.remove('shake-be'); }, 250);
+            }
+
+            const plValue = result === 'LOSS' ? -rawPL : (result === 'BE' ? 0 : rawPL);
+
+            const data = {
+                user_id: currentUser.id,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                instrument: document.getElementById('instrument').value,
+                strategy: document.getElementById('strategy').value,
+                direction: document.getElementById('direction').value,
+                entry: document.getElementById('entry').value,
+                exit: document.getElementById('exit').value,
+                result: result,
+                pl: plValue,
+                risk: document.getElementById('risk').value || "100",
+                mistake: document.getElementById('mistake').value,
+                screenshot: document.getElementById('screenshot').value,
+                notes: document.getElementById('notes').value
+            };
+
+            if (editId) await _supabase.from('trades').update(data).eq('id', editId);
+            else await _supabase.from('trades').insert([data]);
+
+            fetchTrades();
+        });
+
+        function resetForm() {
+            document.getElementById('tradeForm').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('submitBtn').textContent = "Save Trade";
+            const now = new Date();
+            document.getElementById('date').value = now.toISOString().split('T')[0];
+            document.getElementById('time').value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            populateLists();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
+            document.getElementById('calendarMonth').textContent = currentViewDate.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for(let i=0; i< (firstDay === 0 ? 6 : firstDay - 1); i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                const dayTrades = trades.filter(t => t.date === dateStr);
+                const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day' + (dayPL > 0 ? ' day-win' : dayPL < 0 ? ' day-loss' : '');
+                if (selectedDateFilter === dateStr) dayEl.classList.add('selected');
+                
+                dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayTrades.length > 0 ? (dayPL >= 0 ? '+' : '') + dayPL.toFixed(0) : ''}</span>`;
+                dayEl.onclick = () => {
+                    selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr;
+                    renderCalendar();
+                    updateStatsAndTable();
+                };
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function editTrade(id) {
+            const t = trades.find(tr => tr.id === id);
+            if (!t) return;
+            document.getElementById('editId').value = t.id;
+            document.getElementById('date').value = t.date;
+            document.getElementById('time').value = t.time;
+            document.getElementById('instrument').value = t.instrument;
+            document.getElementById('strategy').value = t.strategy;
+            document.getElementById('direction').value = t.direction;
+            document.getElementById('entry').value = t.entry;
+            document.getElementById('exit').value = t.exit;
+            document.getElementById('pl').value = Math.abs(t.pl);
+            document.getElementById('result').value = t.result;
+            document.getElementById('risk').value = t.risk || 100;
+            document.getElementById('mistake').value = t.mistake;
+            document.getElementById('screenshot').value = t.screenshot || '';
+            document.getElementById('notes').value = t.notes || '';
+            document.getElementById('submitBtn').textContent = "Update Trade";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteTrade(id) {
+            if(confirm('Delete this trade?')) {
+                await _supabase.from('trades').delete().eq('id', id);
+                fetchTrades();
+            }
+        }
+
+        async function deleteAllTrades() {
+            if(confirm('Delete ALL trades?')) {
+                await _supabase.from('trades').delete().not('id', 'is', null);
+                fetchTrades();
+            }
+        }
+		
+		function toggleSelectAll(master) {
+            const checkboxes = document.querySelectorAll('.trade-checkbox');
+            checkboxes.forEach(cb => cb.checked = master.checked);
+        }
+
+        async function deleteSelectedTrades() {
+            if (!currentUser) return alert("Please login first!");
+            const selected = Array.from(document.querySelectorAll('.trade-checkbox:checked')).map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                alert("Please select at least one trade to delete.");
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete ${selected.length} selected trades?`)) {
+                const { error } = await _supabase.from('trades').delete().in('id', selected);
+                if (error) {
+                    alert("Error deleting trades: " + error.message);
+                } else {
+                    fetchTrades();
+                }
+            }
+        }
+
+        async function processBulkImport() {
+            if (!currentUser) return alert("Please login first!");
+            const area = document.getElementById('importArea'), raw = area.value.trim();
+            if(!raw) return alert("Please paste data!");
+
+            const lines = raw.split('\n');
+            const newTrades = [];
+
+            const isTradingViewFormat = lines[0].includes('Realized P&L');
+
+            if (isTradingViewFormat) {
+                for(let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const parts = line.split(',');
+                    if (parts.length < 6) continue;
+
+                    const dateTime = parts[0].split(' ');
+                    const date = dateTime[0];
+                    const time = dateTime[1].substring(0, 5);
+                    const pl = parseFloat(parts[3]);
+                    const action = parts.slice(5).join(',');
+                    const isLong = action.toLowerCase().includes('close long');
+                    const direction = isLong ? 'LONG' : 'SHORT';
+                    const symbolMatch = action.match(/symbol\s+(?:\w+:)?(\w+)/i);
+                    const instrument = symbolMatch ? symbolMatch[1] : "UNKNOWN";
+
+                    newTrades.push({
+                        user_id: currentUser.id,
+                        date, time, instrument, direction,
+                        strategy: "Import", entry: "0", exit: "0",
+                        pl, result: pl >= 0 ? "WIN" : "LOSS",
+                        risk: "100", mistake: "PLAN", notes: "Bulk Import"
+                    });
+                }
+            }
+
+            if(newTrades.length > 0) {
+                await _supabase.from('trades').insert(newTrades);
+                area.value = "";
+                alert(`✅ Successfully imported ${newTrades.length} trades!`);
+                fetchTrades();
+            } else {
+                alert("❌ No valid trades found. Please check the format.");
+            }
+        }
+
+        function changeMonth(val) {
+            currentViewDate.setMonth(currentViewDate.getMonth() + val);
+            selectedDateFilter = null;
+            renderCalendar();
+            updateStatsAndTable();
+        }
+
+        function createHeatmap(chartTrades) {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const hours = Array.from({length: 24}, (_, i) => i);
+            const heatmapData = {};
+            days.forEach((_, dayIdx) => { hours.forEach(hour => { heatmapData[`${dayIdx}-${hour}`] = { pl: 0, count: 0 }; }); });
+
+            chartTrades.forEach(t => {
+                if (!t.time) return;
+                const date = new Date(t.date + ' ' + t.time);
+                const dayIdx = date.getDay();
+                const hour = date.getHours();
+                const key = `${dayIdx}-${hour}`;
+                if (heatmapData[key]) { heatmapData[key].pl += Number(t.pl); heatmapData[key].count += 1; }
+            });
+
+            const matrixData = [];
+            days.forEach((_, dayIdx) => {
+                hours.forEach(hour => {
+                    const key = `${dayIdx}-${hour}`;
+                    const cell = heatmapData[key];
+                    if (cell.count > 0) { matrixData.push({ x: hour, y: dayIdx, v: cell.pl / cell.count, count: cell.count, totalPL: cell.pl }); }
+                });
+            });
+
+            const values = matrixData.map(d => d.v);
+            const absMax = Math.max(...values.map(Math.abs), 1);
+
+            if (heatmapChart) heatmapChart.destroy();
+            heatmapChart = new Chart(document.getElementById('heatmapChart').getContext('2d'), {
+                type: 'matrix',
+                data: {
+                    datasets: [{
+                        label: 'Heatmap',
+                        data: matrixData,
+                        backgroundColor(ctx) {
+                            const v = ctx.dataset.data[ctx.dataIndex].v;
+                            const alpha = Math.min(Math.abs(v) / absMax + 0.1, 1);
+                            return v >= 0 ? `rgba(0, 255, 170, ${alpha})` : `rgba(255, 74, 104, ${alpha})`;
+                        },
+                        width: ({chart}) => (chart.chartArea || {}).width / 24 - 1,
+                        height: ({chart}) => (chart.chartArea || {}).height / 7 - 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'category', labels: hours, title: {display: true, text: 'Hour of Day', color: '#8892b0'}, grid: {display: false} },
+                        y: { type: 'category', labels: days, title: {display: true, text: 'Day of Week', color: '#8892b0'}, grid: {display: false} }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'PERFORMANCE HEATMAP (AVG P/L)', color: '#00f2ff', font: {size: 14, weight: 'bold'} },
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => { const d = items[0].raw; return `${days[d.y]} at ${d.x}:00`; },
+                                label: (item) => { const d = item.raw; return [`Avg P/L: $${d.v.toFixed(2)}`, `Total P/L: $${d.totalPL.toFixed(2)}`, `Trades: ${d.count}`]; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showPreview(url) {
+            const p = document.getElementById('screenshot-preview-popup');
+            p.src = url;
+            p.style.display = 'block';
+        }
+
+        function hidePreview() {
+            const p = document.getElementById('screenshot-preview-popup');
+            p.style.display = 'none';
+            p.src = '';
+        }
+
+        function addNewInstrument() {
+            const v = prompt("New Instrument:").toUpperCase();
+            if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); }
+        }
+
+        function addNewStrategy() {
+            const v = prompt("New Strategy:");
+            if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); }
+        }
+
+        function removeInstrument() {
+            const selectedInstrument = document.getElementById('instrument').value;
+            const usedInTrades = trades.filter(t => t.instrument === selectedInstrument).length;
+            if (usedInTrades > 0) {
+                if (!confirm(` WARNING!\n\nThis instrument "${selectedInstrument}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the instrument won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) return;
+            } else {
+                if (!confirm(`Remove instrument "${selectedInstrument}"?`)) return;
+            }
+            if (customInstruments.length <= 1) { alert(' Cannot delete the last instrument!'); return; }
+            customInstruments = customInstruments.filter(i => i !== selectedInstrument);
+            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+            populateLists();
+        }
+
+        function copyToClipboard(id) {
+            const el = document.getElementById(id);
+            el.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+
+        function exportToCSV() {
+            let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + 
+                trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n');
+            const b = new Blob([csv], {type:'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(b);
+            a.download='Journal.csv';
+            a.click();
+        }
+
+        async function downloadPersonalizedEA() {
+            let userId = document.getElementById('userIdDisplay').value;
+            const eaCode = `// MT5 Journal Sync EA Code Omitted for brevity...`;
+            const blob = new Blob([eaCode], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'JournalSync_Pro.mq5';
+            a.click();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
 </body>
 </html>
