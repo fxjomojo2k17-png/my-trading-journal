@@ -793,6 +793,14 @@ tr.row-loss {
         <div class="stat-card" id="card-pl"><h3>P/L ($)</h3><div class="value" id="totalPL">$0.00</div></div>
         <div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
         <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
+		<div class="stat-card">
+    <h3>Avg Win</h3>
+    <p id="avgWin" class="profit-text">$0.00</p>
+</div>
+<div class="stat-card">
+    <h3>Avg Loss</h3>
+    <p id="avgLoss" class="loss-text">$0.00</p>
+</div>
     </div>
 
     <div class="form-section">
@@ -849,6 +857,9 @@ tr.row-loss {
     <div class="chart-box"><canvas id="strategyPLChart"></canvas></div>
     <div class="chart-box"><canvas id="distributionChart"></canvas></div>
     <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
+	
+    <div class="chart-box"><canvas id="avgChart"></canvas></div>
+
     <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
 </div>
 
@@ -1595,6 +1606,25 @@ if (result === 'WIN') {
         } else {
             alert("❌ No valid trades found. Please check the format.");
         }
+		
+		function calculateAverages(trades) {
+    const wins = trades.filter(t => parseFloat(t.pnl) > 0);
+    const losses = trades.filter(t => parseFloat(t.pnl) < 0);
+
+    const avgWin = wins.length > 0 
+        ? wins.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / wins.length 
+        : 0;
+
+    const avgLoss = losses.length > 0 
+        ? losses.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / losses.length 
+        : 0;
+
+    document.getElementById('avgWin').innerText = `$${avgWin.toFixed(2)}`;
+    document.getElementById('avgLoss').innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
+    
+    return { avgWin, avgLoss };
+}
+		
     }
 
     function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
@@ -1950,6 +1980,35 @@ function changePage(delta) {
         });
     }
 }
+
+
+let avgChart;
+function renderAvgChart(avgWin, avgLoss) {
+    const ctx = document.getElementById('avgChart').getContext('2d');
+    
+    if (avgChart) avgChart.destroy(); // Prevent duplicates
+
+    avgChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Avg Win', 'Avg Loss'],
+            datasets: [{
+                label: 'Amount in $',
+                data: [avgWin, Math.abs(avgLoss)],
+                backgroundColor: ['#00ff88', '#ff4444'],
+                borderColor: ['#ffffff', '#ffffff'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
