@@ -1297,94 +1297,93 @@ async function fetchTrades() {
 
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
-   function updateStatsAndTable() {
-    // 1. Grundlegende Daten laden
-    const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-    localStorage.setItem('initialBalance', initialBalance);
+  function updateStatsAndTable() {
+    // 1. Filter trades based on instrument and search term
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
+    const searchTerm = document.getElementById('historySearch').value.toLowerCase();
 
-    // 2. Filtern der Trades
-    let filtered = trades.filter(t => {
-        const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
-        const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
-        return matchesTime && matchesInstrument;
+    let filteredTrades = allTrades.filter(t => {
+        const matchesInstrument = instrumentFilter === 'all' || t.instrument === instrumentFilter;
+        const matchesSearch = t.instrument.toLowerCase().includes(searchTerm) || 
+                             (t.notes && t.notes.toLowerCase().includes(searchTerm));
+        return matchesInstrument && matchesSearch;
     });
 
-    let traderAllTrades = trades;
-    const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-    
-    // 3. Stats & Profit Factor Berechnung
-    animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
-    
-    const wins = filtered.filter(t => t.result === 'WIN');
-    const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
-    const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
-    
-    const totalWinAmount = filtered.filter(t => Number(t.pl) > 0).reduce((sum, t) => sum + Number(t.pl), 0);
-    const totalLossAmount = Math.abs(filtered.filter(t => Number(t.pl) < 0).reduce((sum, t) => sum + Number(t.pl), 0));
-    let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
+    // 2. Separate Wins and Losses for Average calculations
+    const wins = filteredTrades.filter(t => parseFloat(t.pnl) > 0);
+    const losses = filteredTrades.filter(t => parseFloat(t.pnl) < 0);
 
-    animateValue('totalTrades', 0, filtered.length, 800);
-    animateValue('winRate', 0, winRateVal, 800, false, true);
-    animateValue('totalPL', 0, viewPL, 800, true);
-    if(document.getElementById('profitFactor')) animateValue('profitFactor', 0, pf, 800);
+    // 3. Calculate Averages
+    const avgWin = wins.length > 0 
+        ? wins.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / wins.length 
+        : 0;
 
-    // 4. Glow Effekt für die Karte
-    const plCard = document.getElementById('card-pl');
-    if (plCard) {
-        plCard.classList.remove('glow-win', 'glow-loss');
-        if (viewPL > 0) plCard.classList.add('glow-win');
-        else if (viewPL < 0) plCard.classList.add('glow-loss');
+    const avgLoss = losses.length > 0 
+        ? losses.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / losses.length 
+        : 0;
+
+    // 4. Update the UI Text Elements
+    // Ensure you have elements with these IDs in your HTML
+    const avgWinElem = document.getElementById('avgWin');
+    const avgLossElem = document.getElementById('avgLoss');
+    
+    if (avgWinElem) avgWinElem.innerText = `$${avgWin.toFixed(2)}`;
+    if (avgLossElem) avgLossElem.innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
+
+    // 5. Update the Comparison Chart
+    if (typeof renderAvgChart === "function") {
+        renderAvgChart(avgWin, avgLoss);
     }
 
-    // 5. Durchschnittlicher R-Multiplikator
-    const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
-    const avgRElement = document.getElementById('avgR');
-    if (avgRElement) avgRElement.textContent = (filtered.length > 0 ? (totalR / filtered.length).toFixed(2) : '0.0') + 'R';
-    
-    // 6. SORTIERUNG & PAGINATION
-    const sorted = filtered.sort((a,b) => new Date(b.date + ' ' + (b.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00')));
-    
-    const totalPages = Math.ceil(sorted.length / tradesPerPage) || 1;
-    if (currentPage > totalPages) currentPage = totalPages;
+    // 6. Existing Stats Calculations (Total Profit, Winrate, etc.)
+    const totalPnL = filteredTrades.reduce((sum, t) => sum + parseFloat(t.pnl), 0);
+    const winCount = wins.length;
+    const winRate = filteredTrades.length > 0 ? (winCount / filteredTrades.length) * 100 : 0;
 
-    const start = (currentPage - 1) * tradesPerPage;
-    const paginatedTrades = sorted.slice(start, start + tradesPerPage);
+    // Update main stat cards
+    document.getElementById('totalPnL').innerText = `$${totalPnL.toFixed(2)}`;
+    document.getElementById('totalPnL').className = 'value ' + (totalPnL >= 0 ? 'win' : 'loss');
+    document.getElementById('winRate').innerText = `${winRate.toFixed(1)}%`;
 
-    // Pagination UI Updates (Text-Anzeigen)
-    const countStart = sorted.length > 0 ? start + 1 : 0;
-    const countEnd = Math.min(start + tradesPerPage, sorted.length);
+    // 7. Pagination and Table Rendering Logic
+    const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
+    if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
     
-    if(document.getElementById('pageInfo')) document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-    if(document.getElementById('tradeCounter')) document.getElementById('tradeCounter').textContent = `Showing ${countStart}-${countEnd} of ${sorted.length} Trades`;
-    
-    if(document.getElementById('prevPage')) document.getElementById('prevPage').disabled = (currentPage === 1);
-    if(document.getElementById('nextPage')) document.getElementById('nextPage').disabled = (currentPage === totalPages || sorted.length === 0);
+    const start = (currentPage - 1) * itemsPerPage;
+    const paginatedTrades = filteredTrades.slice(start, start + itemsPerPage);
 
-    // 7. Tabelle rendern
-    document.getElementById('tradesBody').innerHTML = paginatedTrades.map(t => {
-        const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-        const rowClass = Number(t.pl) >= 0 ? 'row-win' : 'row-loss'; // Klasse bestimmen
+    // Update Pagination UI
+    document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+    document.getElementById('tradeCounter').innerText = `${filteredTrades.length} Trades found`;
+
+    // Render the Table Rows
+    const tbody = document.getElementById('tradeLog');
+    tbody.innerHTML = '';
+
+    paginatedTrades.forEach(t => {
+        const pnl = parseFloat(t.pnl);
+        const row = document.createElement('tr');
+        row.className = pnl > 0 ? 'row-win' : (pnl < 0 ? 'row-row-loss' : '');
         
-        return `<tr class="${rowClass}">
-            <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
-            <td>${t.date}</td>
-            <td>${t.instrument}</td>
-            <td>${t.strategy || '-'}</td>
-            <td>${t.direction}</td>
-            <td>${t.entry}/${t.exit}</td>
-            <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
-            <td class="${Number(rMult) >= 0 ? 'win' : 'loss'}">${rMult}R</td>
-            <td title="${t.notes || ''}" style="cursor:help; font-weight:bold;">${t.mistake}</td>
-            <td>${t.screenshot ? `<a href="#" onclick="showPreview('${t.screenshot}'); return false;">🖼️</a>` : '-'}</td>
-            <td>
-                <button class="btn-sm edit-btn" onclick="prepareEdit('${t.id}')">Edit</button>
-                <button class="btn-sm del-btn" onclick="deleteTradeDB('${t.id}')">Del</button>
+        row.innerHTML = `
+            <td><input type="checkbox" class="trade-checkbox" data-id="${t.id}"></td>
+            <td data-label="Date">${new Date(t.created_at).toLocaleDateString()}</td>
+            <td data-label="Instrument"><b>${t.instrument}</b></td>
+            <td data-label="Side">${t.side}</td>
+            <td data-label="PnL" class="${pnl >= 0 ? 'win' : 'loss'} font-bold">$${pnl.toFixed(2)}</td>
+            <td data-label="Status">${t.status}</td>
+            <td data-label="Actions">
+                <button class="btn-sm edit-btn" onclick="editTrade('${t.id}')">Edit</button>
+                <button class="btn-sm del-btn" onclick="deleteTrade('${t.id}')">Del</button>
             </td>
-        </tr>`;
-    }).join('');
+        `;
+        tbody.appendChild(row);
+    });
 
-    if (typeof updateCharts === "function") updateCharts(traderAllTrades);
+    // Update the main PnL Equity Chart
+    updateChart(filteredTrades);
 }
 
     function updateCharts(chartTrades) {
