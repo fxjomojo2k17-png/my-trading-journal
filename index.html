@@ -795,11 +795,11 @@ tr.row-loss {
         <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
 		<div class="stat-card">
     <h3>Avg Win</h3>
-    <p id="avgWin" class="profit-text">$0.00</p>
+    <div id="avgWin" class="value win">$0.00</div>
 </div>
 <div class="stat-card">
     <h3>Avg Loss</h3>
-    <p id="avgLoss" class="loss-text">$0.00</p>
+    <div id="avgLoss" class="value loss">$0.00</div>
 </div>
     </div>
 
@@ -857,10 +857,10 @@ tr.row-loss {
     <div class="chart-box"><canvas id="strategyPLChart"></canvas></div>
     <div class="chart-box"><canvas id="distributionChart"></canvas></div>
     <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
-	
-    <div class="chart-box"><canvas id="avgChart"></canvas></div>
-
     <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
+	<div class="chart-box">
+    <canvas id="avgChart"></canvas>
+</div>
 </div>
 
     <div class="section-divider"></div>
@@ -1297,8 +1297,7 @@ async function fetchTrades() {
 
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
-  function updateStatsAndTable() {
-    // 1. Filter trades based on instrument and search term
+   function updateStatsAndTable() {
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
     const searchTerm = document.getElementById('historySearch').value.toLowerCase();
 
@@ -1309,11 +1308,10 @@ async function fetchTrades() {
         return matchesInstrument && matchesSearch;
     });
 
-    // 2. Separate Wins and Losses for Average calculations
+    // --- NEU: DURCHSCHNITTE BERECHNEN ---
     const wins = filteredTrades.filter(t => parseFloat(t.pnl) > 0);
     const losses = filteredTrades.filter(t => parseFloat(t.pnl) < 0);
 
-    // 3. Calculate Averages
     const avgWin = wins.length > 0 
         ? wins.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / wins.length 
         : 0;
@@ -1322,59 +1320,47 @@ async function fetchTrades() {
         ? losses.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / losses.length 
         : 0;
 
-    // 4. Update the UI Text Elements
-    // Ensure you have elements with these IDs in your HTML
-    const avgWinElem = document.getElementById('avgWin');
-    const avgLossElem = document.getElementById('avgLoss');
-    
-    if (avgWinElem) avgWinElem.innerText = `$${avgWin.toFixed(2)}`;
-    if (avgLossElem) avgLossElem.innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
+    // UI Aktualisieren
+    document.getElementById('avgWin').innerText = `$${avgWin.toFixed(2)}`;
+    document.getElementById('avgLoss').innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
 
-    // 5. Update the Comparison Chart
-    if (typeof renderAvgChart === "function") {
-        renderAvgChart(avgWin, avgLoss);
-    }
+    // Diagramm aktualisieren
+    renderAvgChart(avgWin, avgLoss);
+    // ------------------------------------
 
-    // 6. Existing Stats Calculations (Total Profit, Winrate, etc.)
     const totalPnL = filteredTrades.reduce((sum, t) => sum + parseFloat(t.pnl), 0);
     const winCount = wins.length;
     const winRate = filteredTrades.length > 0 ? (winCount / filteredTrades.length) * 100 : 0;
 
-    // Update main stat cards
     document.getElementById('totalPnL').innerText = `$${totalPnL.toFixed(2)}`;
     document.getElementById('totalPnL').className = 'value ' + (totalPnL >= 0 ? 'win' : 'loss');
     document.getElementById('winRate').innerText = `${winRate.toFixed(1)}%`;
 
-    // 7. Pagination and Table Rendering Logic
     const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
     if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-    
     const start = (currentPage - 1) * itemsPerPage;
     const paginatedTrades = filteredTrades.slice(start, start + itemsPerPage);
 
-    // Update Pagination UI
-    document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
+    document.getElementById('pageInfo').innerText = `Seite ${currentPage} von ${Math.max(1, totalPages)}`;
     document.getElementById('prevPage').disabled = currentPage === 1;
     document.getElementById('nextPage').disabled = currentPage >= totalPages;
-    document.getElementById('tradeCounter').innerText = `${filteredTrades.length} Trades found`;
+    document.getElementById('tradeCounter').innerText = `${filteredTrades.length} Trades gefunden`;
 
-    // Render the Table Rows
     const tbody = document.getElementById('tradeLog');
     tbody.innerHTML = '';
 
     paginatedTrades.forEach(t => {
         const pnl = parseFloat(t.pnl);
         const row = document.createElement('tr');
-        row.className = pnl > 0 ? 'row-win' : (pnl < 0 ? 'row-row-loss' : '');
-        
+        row.className = pnl > 0 ? 'row-win' : (pnl < 0 ? 'row-loss' : '');
         row.innerHTML = `
             <td><input type="checkbox" class="trade-checkbox" data-id="${t.id}"></td>
-            <td data-label="Date">${new Date(t.created_at).toLocaleDateString()}</td>
+            <td data-label="Datum">${new Date(t.created_at).toLocaleDateString()}</td>
             <td data-label="Instrument"><b>${t.instrument}</b></td>
-            <td data-label="Side">${t.side}</td>
+            <td data-label="Seite">${t.side}</td>
             <td data-label="PnL" class="${pnl >= 0 ? 'win' : 'loss'} font-bold">$${pnl.toFixed(2)}</td>
             <td data-label="Status">${t.status}</td>
-            <td data-label="Actions">
+            <td data-label="Aktionen">
                 <button class="btn-sm edit-btn" onclick="editTrade('${t.id}')">Edit</button>
                 <button class="btn-sm del-btn" onclick="deleteTrade('${t.id}')">Del</button>
             </td>
@@ -1382,7 +1368,6 @@ async function fetchTrades() {
         tbody.appendChild(row);
     });
 
-    // Update the main PnL Equity Chart
     updateChart(filteredTrades);
 }
 
@@ -1605,25 +1590,6 @@ if (result === 'WIN') {
         } else {
             alert("❌ No valid trades found. Please check the format.");
         }
-		
-		function calculateAverages(trades) {
-    const wins = trades.filter(t => parseFloat(t.pnl) > 0);
-    const losses = trades.filter(t => parseFloat(t.pnl) < 0);
-
-    const avgWin = wins.length > 0 
-        ? wins.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / wins.length 
-        : 0;
-
-    const avgLoss = losses.length > 0 
-        ? losses.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / losses.length 
-        : 0;
-
-    document.getElementById('avgWin').innerText = `$${avgWin.toFixed(2)}`;
-    document.getElementById('avgLoss').innerText = `$${Math.abs(avgLoss).toFixed(2)}`;
-    
-    return { avgWin, avgLoss };
-}
-		
     }
 
     function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
@@ -1980,34 +1946,32 @@ function changePage(delta) {
     }
 }
 
-
-let avgChart;
+let avgChartInstance = null;
 function renderAvgChart(avgWin, avgLoss) {
     const ctx = document.getElementById('avgChart').getContext('2d');
-    
-    if (avgChart) avgChart.destroy(); // Prevent duplicates
+    if (avgChartInstance) avgChartInstance.destroy();
 
-    avgChart = new Chart(ctx, {
+    avgChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Avg Win', 'Avg Loss'],
+            labels: ['Durchschnittlicher Gewinn', 'Durchschnittlicher Verlust'],
             datasets: [{
-                label: 'Amount in $',
                 data: [avgWin, Math.abs(avgLoss)],
-                backgroundColor: ['#00ff88', '#ff4444'],
-                borderColor: ['#ffffff', '#ffffff'],
+                backgroundColor: ['#00ffaa', '#ff4a68'],
+                borderColor: ['#00f2ff', '#00f2ff'],
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: { display: false }
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } }
             }
         }
     });
 }
-
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
