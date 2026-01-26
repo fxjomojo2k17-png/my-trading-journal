@@ -1460,42 +1460,32 @@ function updateRecentTradesList(filteredTrades) {
     const listContainer = document.getElementById('recentTradesList');
     if (!listContainer) return;
 
-    // Die letzten 5 Trades (nach Datum sortiert)
+    // Die letzten 5 geschlossenen Trades
     const lastFive = [...filteredTrades]
-        .sort((a, b) => new Date(b.date + ' ' + (b.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00')))
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5);
 
     listContainer.innerHTML = lastFive.map(t => {
         const pnl = parseFloat(t.pl);
-        const asset = t.instrument.toUpperCase().replace('/', ''); // Entfernt Slashes wie in EUR/USD
+        const asset = t.instrument.toUpperCase();
         
-        // Logik für die Symbole:
-        let logoUrl = '';
-        
-        if (asset.includes('BTC')) logoUrl = 'https://img.icons8.com/color/48/bitcoin.png';
-        else if (asset.includes('ETH')) logoUrl = 'https://img.icons8.com/fluency/48/ethereum.png';
-        else if (asset.includes('GOLD') || asset.includes('XAU')) logoUrl = 'https://img.icons8.com/color/48/gold-bars.png';
-        else if (asset.includes('USD')) logoUrl = 'https://img.icons8.com/color/48/usa-circular.png';
-        else if (asset.includes('EUR')) logoUrl = 'https://img.icons8.com/color/48/euro-precision.png';
-        else if (asset.includes('GBP')) logoUrl = 'https://img.icons8.com/color/48/great-britain-circular.png';
-        else if (asset.includes('JPY')) logoUrl = 'https://img.icons8.com/color/48/japan-circular.png';
-        else {
-            // Fallback: Wenn kein Icon da ist, erzeuge einen farbigen Kreis mit dem ersten Buchstaben
-            logoUrl = `https://ui-avatars.com/api/?name=${asset}&background=2a2e39&color=fff&rounded=true`;
-        }
+        // Dynamische Logo-URL (Beispiel für Krypto)
+        // Für Gold/Forex nutzen wir einen Platzhalter-Kreis mit Text
+        const logoUrl = asset.includes('BTC') ? 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' :
+                        asset.includes('ETH') ? 'https://cryptologos.cc/logos/ethereum-eth-logo.png' : null;
 
         return `
-            <div class="mini-trade-item" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 8px; border-radius: 8px;">
-                <div class="asset-info" style="display: flex; align-items: center; gap: 12px;">
-                    <img src="${logoUrl}" style="width: 28px; height: 28px; border-radius: 50%;">
-                    <div>
-                        <div style="font-weight: bold; font-size: 14px;">${t.instrument}</div>
-                        <div style="font-size: 11px; color: #888;">${t.date}</div>
-                    </div>
+            <div class="mini-trade-item">
+                <div class="asset-info">
+                    ${logoUrl 
+                        ? `<img src="${logoUrl}" class="asset-logo">` 
+                        : `<div class="asset-logo">${asset.substring(0, 2)}</div>`
+                    }
+                    <span class="asset-name">${asset}</span>
                 </div>
-                <div class="trade-res ${pnl >= 0 ? 'win' : 'loss'}" style="font-weight: bold; font-family: monospace;">
+                <span class="trade-res ${pnl >= 0 ? 'win' : 'loss'}">
                     ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}
-                </div>
+                </span>
             </div>
         `;
     }).join('');
