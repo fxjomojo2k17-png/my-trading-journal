@@ -821,19 +821,16 @@ tr.row-loss {
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
                 <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
-				
-                <div class="input-group">
-    <label>Tag</label>
-    <div class="combo-container">
-        <select id="tradeTag"></select>
-        <button type="button" class="btn-action btn-add" onclick="addNewTag()">+</button>
-        <button type="button" class="btn-action btn-del" onclick="removeTag()">–</button>
-    </div>
-</div>
-				
-				
-				
-				
+                <div class="form-group"><label>Tag</label>
+                    <select id="mistake">
+                        <option value="PLAN">Per Plan</option>
+                        <option value="FOMO">FOMO</option>
+                        <option value="EARLY_EXIT">Early Exit</option>
+                        <option value="REVENGE">Revenge</option>
+                        <option value="LATE_ENTRY">Late Entry</option>
+                        <option value="MISTAKE">Mistake</option>
+                    </select>
+                </div>
                 <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
                 <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
@@ -1229,7 +1226,6 @@ function copyToClip(id) {
     let trades = [];
     let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
     let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
-	let customTags = JSON.parse(localStorage.getItem('customTags')) || ['High Conviction', 'FOMO', 'A-Setup'];
     let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
@@ -1281,39 +1277,12 @@ async function fetchTrades() {
         });
     }
 
-function populateLists() {
-    // 1. INSTRUMENTE (Eingabe & Filter)
-    const instrumentSelect = document.getElementById('instrument');
-    const historyInstrumentFilter = document.getElementById('historyInstrumentFilter');
-    
-    if (instrumentSelect) {
-        instrumentSelect.innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+    function populateLists() {
+        document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+        document.getElementById('strategy').innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
+        const filter = document.getElementById('historyInstrumentFilter');
+        filter.innerHTML = `<option value="ALL">All Instruments</option>` + customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
     }
-    if (historyInstrumentFilter) {
-        // Behält "ALL" als erste Option im Filter
-        historyInstrumentFilter.innerHTML = '<option value="ALL">ALL Instruments</option>' + 
-            customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
-    }
-
-    // 2. STRATEGIEN (Eingabe)
-    const strategySelect = document.getElementById('strategy');
-    if (strategySelect) {
-        strategySelect.innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-
-    // 3. TAGS (Eingabe & Filter)
-    const tagSelect = document.getElementById('tradeTag');
-    const historyTagFilter = document.getElementById('historyTagFilter');
-
-    if (tagSelect) {
-        tagSelect.innerHTML = customTags.map(t => `<option value="${t}">${t}</option>`).join('');
-    }
-    if (historyTagFilter) {
-        // Behält "ALL" als erste Option im Filter
-        historyTagFilter.innerHTML = '<option value="ALL">All Tags</option>' + 
-            customTags.map(t => `<option value="${t}">${t}</option>`).join('');
-    }
-}
 
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
@@ -1391,7 +1360,6 @@ function populateLists() {
             <td>${t.date}</td>
             <td>${t.instrument}</td>
             <td>${t.strategy || '-'}</td>
-			<td style="font-size: 0.85em; color: #b388ff; font-style: italic;">${t.tag || '-'}</td>
             <td>${t.direction}</td>
             <td>${t.entry}/${t.exit}</td>
             <td class="${Number(t.pl) >= 0 ? 'win' : 'loss'}">$${Number(t.pl).toFixed(2)}</td>
@@ -1758,27 +1726,6 @@ if (result === 'WIN') {
     function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
 	function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
     
-	// Liste für die Tags (wird aus LocalStorage geladen oder Standardwerte)
-let customTags = JSON.parse(localStorage.getItem('customTags')) || ['High Conviction', 'News', 'A-Setup', 'FOMO', 'Early Exit', 'Fail', 'Per Plan'];
-
-function addNewTag() {
-    const v = prompt("New Tag:");
-    if(v) {
-        customTags.push(v);
-        localStorage.setItem('customTags', JSON.stringify(customTags));
-        populateLists(); // Aktualisiert alle Dropdowns
-    }
-}
-
-function removeTag() {
-    const s = document.getElementById('tradeTag');
-    const val = s.value;
-    if(val && confirm(`Delete Tag "${val}"?`)) {
-        customTags = customTags.filter(x => x !== val);
-        localStorage.setItem('customTags', JSON.stringify(customTags));
-        populateLists();
-    }
-}
 	
 	function removeInstrument() {
     const selectedInstrument = document.getElementById('instrument').value;
