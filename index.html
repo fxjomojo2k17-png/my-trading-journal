@@ -24,6 +24,10 @@
             position: relative;
         }
 		
+		/* Checkbox Styling */
+.trade-checkbox { cursor: pointer; width: 16px; height: 16px; accent-color: #00f2ff; }
+.btn-delete-selected { background: #ffa726; color: white; border: none; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; cursor: pointer; margin-right: 10px; }
+		
 		
 		/* AUTO SYNC STYLES */
 .mt-integration-box {
@@ -748,13 +752,18 @@
     <div class="history-controls">
         <label>Filter Instrument:</label>
         <select id="historyInstrumentFilter" onchange="updateStatsAndTable()"><option value="ALL">All Instruments</option></select>
-        <button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
+        <button type="button" onclick="deleteSelectedTrades()" class="btn-delete-selected">Delete Selected</button>
+		<button type="button" class="btn-export" onclick="exportToCSV()">Export CSV</button>
         <button type="button" onclick="deleteAllTrades()" class="btn-delete-all">Delete All Trades</button>
     </div>
 
     <div class="trades-table">
         <table>
-            <thead><tr><th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
+            <thead><tr>
+			
+			<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+			
+			<th>Date</th><th>Inst.</th><th>Strategy</th><th>Dir</th><th>Entry/Exit</th><th>P/L ($)</th><th>R</th><th>Tag</th><th>IMG</th><th>Action</th></tr></thead>
             <tbody id="tradesBody"></tbody>
         </table>
     </div>
@@ -1189,6 +1198,8 @@ async function fetchTrades() {
         document.getElementById('tradesBody').innerHTML = sorted.map(t => {
             const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
             return `<tr>
+			
+			<td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
                 <td>${t.date}</td><td>${t.instrument}</td>
 				
 				<td>${t.strategy || '-'}</td><td>${t.direction}</td><td>${t.entry}/${t.exit}</td>
@@ -1726,6 +1737,32 @@ void SyncNow() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+}
+
+function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll('.trade-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+}
+
+async function deleteSelectedTrades() {
+    const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
+    const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (idsToDelete.length === 0) {
+        alert("Bitte wähle zuerst Trades aus.");
+        return;
+    }
+    
+    if (confirm(`${idsToDelete.length} Trades wirklich löschen?`)) {
+        const { error } = await _supabase.from('trades').delete().in('id', idsToDelete);
+        if (error) {
+            alert("Fehler beim Löschen: " + error.message);
+        } else {
+            // Checkbox "Alle auswählen" wieder zurücksetzen
+            document.getElementById('selectAll').checked = false;
+            fetchTrades(); // Tabelle neu laden
+        }
+    }
 }
 
 </script>
