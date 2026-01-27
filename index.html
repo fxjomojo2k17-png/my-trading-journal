@@ -2277,67 +2277,42 @@ window.addEventListener('load', () => {
 });
 
 
+
 function updateSessions() {
-    const hour = new Date().getUTCHours();
+    const now = new Date();
+    const hour = now.getHours();
+    const min = now.getMinutes();
     
-    // Einfache Logik für UTC-Zeiten (muss ggf. für Sommerzeit angepasst werden)
-    document.getElementById('session-london').style.color = (hour >= 8 && hour <= 16) ? '#00f2ff' : '#444';
-    document.getElementById('session-newyork').style.color = (hour >= 13 && hour <= 21) ? '#00f2ff' : '#444';
-    document.getElementById('session-tokyo').style.color = (hour >= 0 && hour <= 8) ? '#00f2ff' : '#444';
-}
-setInterval(updateSessions, 60000);
-updateSessions();
-
-
-function updateSessions() {
-    const hour = new Date().getUTCHours();
+    // Berechnet die Zeit als Dezimalzahl (z.B. 17:30 = 17.5)
+    const currentTime = hour + min / 60;
     
     const londonEl = document.getElementById('session-london');
     const newyorkEl = document.getElementById('session-newyork');
     const tokyoEl = document.getElementById('session-tokyo');
     
-    const isLondonActive = (hour >= 8 && hour <= 16);
-    const isNewyorkActive = (hour >= 13 && hour <= 21);
-    const isTokyoActive = (hour >= 0 && hour <= 8);
+    // Präzise Logik für MEZ (Deutschland)
+    const isLondonActive = (currentTime >= 9 && currentTime < 17.5); // 09:00 - 17:30
+    const isNewyorkActive = (currentTime >= 15.5 && currentTime < 22); // 15:30 - 22:00
+    const isTokyoActive = (currentTime >= 1 && currentTime < 9);      // 01:00 - 09:00
     
-    // London Session
-    if (isLondonActive) {
-        londonEl.style.color = '#00f2ff';
-        londonEl.style.textShadow = '0 0 15px rgba(0, 242, 255, 0.8), 0 0 30px rgba(0, 242, 255, 0.5)';
-        londonEl.style.fontWeight = 'bold';
-        londonEl.style.animation = 'pulse 2s ease-in-out infinite';
-    } else {
-        londonEl.style.color = '#444';
-        londonEl.style.textShadow = 'none';
-        londonEl.style.fontWeight = 'normal';
-        londonEl.style.animation = 'none';
-    }
-    
-    // New York Session
-    if (isNewyorkActive) {
-        newyorkEl.style.color = '#00f2ff';
-        newyorkEl.style.textShadow = '0 0 15px rgba(0, 242, 255, 0.8), 0 0 30px rgba(0, 242, 255, 0.5)';
-        newyorkEl.style.fontWeight = 'bold';
-        newyorkEl.style.animation = 'pulse 2s ease-in-out infinite';
-    } else {
-        newyorkEl.style.color = '#444';
-        newyorkEl.style.textShadow = 'none';
-        newyorkEl.style.fontWeight = 'normal';
-        newyorkEl.style.animation = 'none';
-    }
-    
-    // Tokyo Session
-    if (isTokyoActive) {
-        tokyoEl.style.color = '#00f2ff';
-        tokyoEl.style.textShadow = '0 0 15px rgba(0, 242, 255, 0.8), 0 0 30px rgba(0, 242, 255, 0.5)';
-        tokyoEl.style.fontWeight = 'bold';
-        tokyoEl.style.animation = 'pulse 2s ease-in-out infinite';
-    } else {
-        tokyoEl.style.color = '#444';
-        tokyoEl.style.textShadow = 'none';
-        tokyoEl.style.fontWeight = 'normal';
-        tokyoEl.style.animation = 'none';
-    }
+    // Hilfsfunktion, um dein Design anzuwenden
+    const applyStyle = (el, isActive) => {
+        if (isActive) {
+            el.style.color = '#00f2ff';
+            el.style.textShadow = '0 0 15px rgba(0, 242, 255, 0.8), 0 0 30px rgba(0, 242, 255, 0.5)';
+            el.style.fontWeight = 'bold';
+            el.style.animation = 'pulse 2s ease-in-out infinite';
+        } else {
+            el.style.color = '#444';
+            el.style.textShadow = 'none';
+            el.style.fontWeight = 'normal';
+            el.style.animation = 'none';
+        }
+    };
+
+    applyStyle(londonEl, isLondonActive);
+    applyStyle(newyorkEl, isNewyorkActive);
+    applyStyle(tokyoEl, isTokyoActive);
 }
 
 
