@@ -2278,6 +2278,10 @@ window.addEventListener('load', () => {
 
 
 
+setInterval(updateSessions, 60000);
+updateSessions();
+
+
 function updateSessions() {
     const now = new Date();
     const hour = now.getHours();
