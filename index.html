@@ -463,15 +463,26 @@
 
         .header h1 { font-size: 1.5em; letter-spacing: 1px; text-transform: uppercase; color: #00f2ff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
 
- /* MOCKUP 5: Animated Candle Chart */
-        .candle-chart-text {
-            position: relative;
-            font-size: 2em;
-            font-weight: bold;
-            letter-spacing: 8px;
-            color: #00f2ff;
-            text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
-        }
+.candle-chart-text {
+    position: relative;
+    font-size: 2.5em; /* Etwas größer für mehr Impact */
+    font-weight: bold;
+    letter-spacing: 8px;
+    color: #00f2ff;
+    text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
+    animation: glow 3s infinite alternate; /* Sanftes Pulsieren */
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0 20px rgba(0, 242, 255, 0.3);
+        opacity: 0.8;
+    }
+    to {
+        text-shadow: 0 0 25px rgba(0, 242, 255, 1), 0 0 40px rgba(0, 242, 255, 0.6);
+        opacity: 1;
+    }
+}
 
         .chart-overlay {
             position: absolute;
@@ -879,6 +890,11 @@ tr.row-loss {
                         <div class="mini-candle" style="height: 68px;"></div>
                     </div>
             <div class="candle-chart-text">TRADING JOURNAL</div>
+			<div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.8em; font-family: monospace;">
+    <span id="session-london" style="color: #444;"> LONDON</span>
+    <span id="session-newyork" style="color: #444;"> NEW YORK</span>
+    <span id="session-tokyo" style="color: #444;"> TOKYO</span>
+</div>
                 </div>
             </div></div>
 	</div>
@@ -2232,6 +2248,18 @@ window.addEventListener('load', () => {
     // Danach jede Minute aktualisieren (reicht für type="time" völlig aus)
     setInterval(updateLiveTime, 10000); 
 });
+
+
+function updateSessions() {
+    const hour = new Date().getUTCHours();
+    
+    // Einfache Logik für UTC-Zeiten (muss ggf. für Sommerzeit angepasst werden)
+    document.getElementById('session-london').style.color = (hour >= 8 && hour <= 16) ? '#00f2ff' : '#444';
+    document.getElementById('session-newyork').style.color = (hour >= 13 && hour <= 21) ? '#00f2ff' : '#444';
+    document.getElementById('session-tokyo').style.color = (hour >= 0 && hour <= 8) ? '#00f2ff' : '#444';
+}
+setInterval(updateSessions, 60000);
+updateSessions();
 
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
