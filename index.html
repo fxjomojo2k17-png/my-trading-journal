@@ -2211,6 +2211,28 @@ function updateRecentTrades(currentTrades) {
         </div>`;
     }).join('');
 }
+
+function updateLiveTime() {
+    const timeInput = document.getElementById('time');
+    
+    // Falls das Feld nicht existiert oder der User gerade selbst etwas eingibt, nicht überschreiben
+    if (!timeInput || document.activeElement === timeInput) return;
+
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    // Setzt die Zeit im Format HH:MM
+    timeInput.value = `${hours}:${minutes}`;
+}
+
+// Initial beim Laden einmal setzen
+window.addEventListener('load', () => {
+    updateLiveTime();
+    // Danach jede Minute aktualisieren (reicht für type="time" völlig aus)
+    setInterval(updateLiveTime, 10000); 
+});
+
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
