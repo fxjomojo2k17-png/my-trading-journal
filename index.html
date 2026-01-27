@@ -1377,7 +1377,7 @@ async function fetchTrades() {
         const rowClass = Number(t.pl) >= 0 ? 'row-win' : 'row-loss';
         return `<tr class="${rowClass}">
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
-            <td>${t.date}</td>
+            <td title="Time: ${t.time || '--:--'}" style="cursor: help; text-decoration: underline dotted rgba(255,255,255,0.3);">${t.date}</td>
             <td>${t.instrument}</td>
             <td>${t.strategy || '-'}</td>
             <td>${t.direction}</td>
