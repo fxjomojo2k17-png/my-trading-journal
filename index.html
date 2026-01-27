@@ -960,6 +960,25 @@ tr.row-loss {
     <div class="chart-box"><canvas id="weekdayChart"></canvas></div>
 	<!--	<div class="chart-box" ><canvas id="avgChart"></canvas></div> -->
 	
+	
+	<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+    
+    <div class="recent-trades-container" style="flex: 1; min-width: 300px;">
+        <h3 ...>Recent Activity</h3>
+        <div id="recentTradesList" class="recent-trades-list"></div>
+    </div>
+
+    <div class="calendar-container">
+        <h3 ...>Economic Calendar</h3>
+        <div class="tradingview-widget-container">...</div>
+    </div>
+
+</div>
+	
+	
+	
+	
+	
 	<div class="chart-box" style="display:flex; flex-direction:column;">
     <h3 style="color:#8892b0; font-size:0.7em; text-transform:uppercase; margin-bottom:15px; font-weight:bold;">Recent Activity</h3>
     <div id="recentTradesList" class="recent-trades-list">
@@ -975,7 +994,7 @@ tr.row-loss {
           "colorTheme": "dark",
           "isTransparent": true,
           "width": "100%",
-          "height": "30",
+          "height": "320",
           "locale": "de_DE",
           "importanceFilter": "0,1", 
           "currencyFilter": "USD,EUR,GBP,JPY,AUD,CAD,CHF"
