@@ -784,27 +784,19 @@ tr.row-loss {
 }
 
 .calendar-container {
-    flex: 1.2;
-    min-width: 300px;
-    background: rgba(30, 34, 45, 0.7);
+    flex: 1;
+    min-width: 500px;
+    background: rgba(30, 34, 45, 0.4); /* Etwas dunkler */
     border-radius: 12px;
     padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    height: 380px; 
-    overflow: hidden !important; /* Hier wird alles abgeschnitten */
-    position: relative;
+    border: 1px solid rgba(255, 74, 104, 0.2); /* Dezent roter Rand für News */
+    height: 380px;
+    overflow: hidden;
 }
 
+/* Scrollbar innerhalb des Widgets stylen (falls nötig) */
 .tradingview-widget-container {
-    /* Wir machen den Container absichtlich etwas kleiner als das Widget */
-    height: 315px !important; 
-    overflow: hidden !important;
-    position: relative;
-}
-
-/* Wir setzen das Widget ein Stück nach oben, falls der Link oben stört */
-.tradingview-widget-container__widget {
-    margin-top: -2px;
+    filter: grayscale(0.2); /* Macht die Farben etwas dezenter für dein Design */
 }
 
 
