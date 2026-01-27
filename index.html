@@ -1484,8 +1484,9 @@ async function fetchTrades() {
     }).join('');
 
     if (typeof updateCharts === "function") updateCharts(traderAllTrades);
-	if (typeof updateRecentTrades === "function") updateRecentTrades(traderAllTrades);
-
+if (typeof updateRecentTrades === "function") {
+        updateRecentTrades(filtered); 
+    }
 }
 
     function updateCharts(chartTrades) {
@@ -2115,31 +2116,38 @@ function updateRecentTrades(currentTrades) {
     const container = document.getElementById('recentTradesList');
     if (!container) return;
 
-    // 1. Sicheres Sortieren (Wir drehen einfach das Array um, falls das Datum Probleme macht)
-    // So sind die neuesten (zuletzt hinzugefügten) oben
-    const last5 = [...currentTrades].reverse().slice(0, 5);
+    // Wir kopieren das Array und sortieren es so, dass 
+    // die neuesten Einträge (höchster Index/Datum) oben stehen
+    const sorted = [...currentTrades].sort((a, b) => {
+        // Falls ein Zeitstempel da ist, nutzen wir den, sonst die ID/Position
+        const timeA = new Date(a.date + ' ' + (a.time || '00:00'));
+        const timeB = new Date(b.date + ' ' + (b.time || '00:00'));
+        return timeB - timeA;
+    });
+
+    const last5 = sorted.slice(0, 5);
 
     if (last5.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">No trades yet</div>';
+        container.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">No activity yet</div>';
         return;
     }
 
-    // 2. HTML generieren
     container.innerHTML = last5.map(t => {
         const pl = parseFloat(t.pl) || 0;
         const plClass = pl >= 0 ? 'win' : 'loss';
-        const logoHTML = getSymbolLogo(t.instrument);
-
+        
         return `
         <div class="rt-item">
             <div style="display:flex; align-items:center; gap:12px;">
-                <div class="rt-icon">${logoHTML}</div>
+                <div class="rt-icon">${getSymbolLogo(t.instrument)}</div>
                 <div style="display:flex; flex-direction:column;">
                     <span class="rt-symbol">${t.instrument}</span>
-                    <span class="rt-time">${t.date}</span>
+                    <span class="rt-time">${t.date} ${t.time || ''}</span>
                 </div>
             </div>
-            <div class="${plClass}" style="font-weight:bold;">${pl >= 0 ? '+' : ''}$${pl.toFixed(2)}</div>
+            <div class="${plClass}" style="font-weight:bold;">
+                ${pl >= 0 ? '+' : ''}$${pl.toFixed(2)}
+            </div>
         </div>`;
     }).join('');
 }
