@@ -2091,52 +2091,26 @@ function renderAvgChart(win, loss) {
 
 // --- NEUE FUNKTIONEN FÜR RECENT TRADES ---
 
-// Versucht ein Logo zu finden (funktioniert gut für Crypto)
-// Verbesserte Logo Funktion (Forex Flags + Crypto)
 function getSymbolLogo(symbol) {
-    if (!symbol) return '';
-    
+    if (!symbol) return '？';
     let s = symbol.toUpperCase().replace('/', '').trim();
-    let imgSrc = '';
-
-    // 1. Logik für Forex / Indizes (Länderflaggen)
-    // Wir prüfen die ersten 2-3 Buchstaben oder bekannte Index-Namen
     
-    // US Indizes & Dollar
-    if (s.startsWith('US') || s.startsWith('NAS') || s.startsWith('SPX') || s.startsWith('DOW') || s === 'USD') {
-        imgSrc = 'https://flagcdn.com/w80/us.png';
-    } 
-    // Deutsche Indizes (DAX, GER40)
-    else if (s.startsWith('GER') || s.startsWith('DAX') || s.includes('DE30') || s.includes('DE40')) {
-        imgSrc = 'https://flagcdn.com/w80/de.png';
-    }
-    // Euro Paare
-    else if (s.startsWith('EUR')) {
-        imgSrc = 'https://flagcdn.com/w80/eu.png';
-    }
-    // Great British Pound
-    else if (s.startsWith('GBP') || s.startsWith('UK')) {
-        imgSrc = 'https://flagcdn.com/w80/gb.png';
-    }
-    // Japan Yen
-    else if (s.startsWith('JPY') || s.endsWith('JPY')) { // JPY ist oft Quote currency, daher auch endsWith prüfen wenn Base unbekannt
-        imgSrc = 'https://flagcdn.com/w80/jp.png';
-    }
-    // Gold (XAU)
-    else if (s.includes('XAU') || s.includes('GOLD')) {
-        // Gold Icon fallback
-        return `<div style="background:#ffd700; color:#000; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:9px;">XAU</div>`;
-    }
-    // 2. Logik für Krypto (CoinCap API)
-    else {
-        // Versuche Krypto Symbol zu bereinigen (z.B. BTCUSD -> btc)
-        const cleanCrypto = s.replace('USD', '').replace('USDT', '').toLowerCase();
-        imgSrc = `https://assets.coincap.io/assets/icons/${cleanCrypto}@2x.png`;
+    // Einfache Weiche für Flaggen
+    let flagCode = "";
+    if (s.includes("USD") || s.includes("NAS") || s.includes("US30") || s.includes("SPX")) flagCode = "us";
+    else if (s.includes("EUR")) flagCode = "eu";
+    else if (s.includes("GBP")) flagCode = "gb";
+    else if (s.includes("JPY")) flagCode = "jp";
+    else if (s.includes("GER") || s.includes("DE40") || s.includes("DAX")) flagCode = "de";
+
+    if (flagCode) {
+        return `<img src="https://flagcdn.com/w80/${flagCode}.png" onerror="this.style.display='none'">`;
     }
 
-    // Das Bild zurückgeben mit einem Fallback auf den ersten Buchstaben
-    return `<img src="${imgSrc}" 
-            onerror="this.onerror=null; this.parentNode.innerHTML='${s.substring(0,1)}'">`;
+    // Krypto Fallback
+    const cleanCrypto = s.replace('USDT', '').replace('USD', '').toLowerCase();
+    return `<img src="https://assets.coincap.io/assets/icons/${cleanCrypto}@2x.png" 
+            onerror="this.parentNode.innerHTML='${s.substring(0,1)}'">`;
 }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
