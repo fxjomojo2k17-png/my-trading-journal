@@ -904,9 +904,9 @@ tr.row-loss {
 
                 </div>
 							<div style="display: flex; gap: 15px; margin-top: 10px; font-size: 1.0em; font-family: monospace;">
-    <span id="session-london" style="color: #444;"> LONDON session</span>
-    <span id="session-newyork" style="color: #444;"> NEW YORK session</span>
-    <span id="session-tokyo" style="color: #444;"> TOKYO session</span>
+<span id="session-london" style="color: #444; transition: all 0.3s ease;"> LONDON session</span>
+    <span id="session-newyork" style="color: #444; transition: all 0.3s ease;"> NEW YORK session</span>
+    <span id="session-tokyo" style="color: #444; transition: all 0.3s ease;"> TOKYO session</span>
 </div>
             </div></div>
 	</div>
@@ -2240,6 +2240,10 @@ function updateRecentTrades(currentTrades) {
     }).join('');
 }
 
+
+
+
+
 function updateLiveTime() {
     const timeInput = document.getElementById('time');
     
@@ -2272,6 +2276,74 @@ function updateSessions() {
 }
 setInterval(updateSessions, 60000);
 updateSessions();
+
+
+function updateSessions() {
+    const hour = new Date().getUTCHours();
+    
+    const londonEl = document.getElementById('session-london');
+    const newyorkEl = document.getElementById('session-newyork');
+    const tokyoEl = document.getElementById('session-tokyo');
+    
+    const isLondonActive = (hour >= 8 && hour <= 16);
+    const isNewyorkActive = (hour >= 13 && hour <= 21);
+    const isTokyoActive = (hour >= 0 && hour <= 8);
+    
+    // London Session
+    if (isLondonActive) {
+        londonEl.style.color = '#00f2ff';
+        londonEl.style.textShadow = '0 0 10px rgba(0, 242, 255, 0.8), 0 0 20px rgba(0, 242, 255, 0.4)';
+        londonEl.style.fontWeight = 'bold';
+        londonEl.style.transform = 'scale(1.1)';
+        londonEl.style.background = 'rgba(0, 242, 255, 0.1)';
+        londonEl.style.padding = '5px 10px';
+        londonEl.style.borderRadius = '4px';
+    } else {
+        londonEl.style.color = '#444';
+        londonEl.style.textShadow = 'none';
+        londonEl.style.fontWeight = 'normal';
+        londonEl.style.transform = 'scale(1)';
+        londonEl.style.background = 'transparent';
+        londonEl.style.padding = '0';
+    }
+    
+    // New York Session
+    if (isNewyorkActive) {
+        newyorkEl.style.color = '#00f2ff';
+        newyorkEl.style.textShadow = '0 0 10px rgba(0, 242, 255, 0.8), 0 0 20px rgba(0, 242, 255, 0.4)';
+        newyorkEl.style.fontWeight = 'bold';
+        newyorkEl.style.transform = 'scale(1.1)';
+        newyorkEl.style.background = 'rgba(0, 242, 255, 0.1)';
+        newyorkEl.style.padding = '5px 10px';
+        newyorkEl.style.borderRadius = '4px';
+    } else {
+        newyorkEl.style.color = '#444';
+        newyorkEl.style.textShadow = 'none';
+        newyorkEl.style.fontWeight = 'normal';
+        newyorkEl.style.transform = 'scale(1)';
+        newyorkEl.style.background = 'transparent';
+        newyorkEl.style.padding = '0';
+    }
+    
+    // Tokyo Session
+    if (isTokyoActive) {
+        tokyoEl.style.color = '#00f2ff';
+        tokyoEl.style.textShadow = '0 0 10px rgba(0, 242, 255, 0.8), 0 0 20px rgba(0, 242, 255, 0.4)';
+        tokyoEl.style.fontWeight = 'bold';
+        tokyoEl.style.transform = 'scale(1.1)';
+        tokyoEl.style.background = 'rgba(0, 242, 255, 0.1)';
+        tokyoEl.style.padding = '5px 10px';
+        tokyoEl.style.borderRadius = '4px';
+    } else {
+        tokyoEl.style.color = '#444';
+        tokyoEl.style.textShadow = 'none';
+        tokyoEl.style.fontWeight = 'normal';
+        tokyoEl.style.transform = 'scale(1)';
+        tokyoEl.style.background = 'transparent';
+        tokyoEl.style.padding = '0';
+    }
+}
+
 
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
