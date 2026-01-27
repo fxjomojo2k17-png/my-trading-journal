@@ -706,7 +706,15 @@ tr.row-loss {
     flex-direction: column;
     gap: 8px;
     height: 100%;
-    overflow-y: auto;
+    overflow-y: auto; /* Scrollen erlauben */
+    scrollbar-width: none; /* Firefox: Scrollbar ausblenden */
+    -ms-overflow-style: none; /* IE/Edge: Scrollbar ausblenden */
+    padding-right: 2px; /* Kleiner Puffer */
+}
+
+/* Chrome, Safari, Opera: Scrollbar ausblenden */
+.recent-trades-list::-webkit-scrollbar {
+    display: none;
 }
 
 .rt-item {
@@ -2084,53 +2092,51 @@ function renderAvgChart(win, loss) {
 // --- NEUE FUNKTIONEN FÜR RECENT TRADES ---
 
 // Versucht ein Logo zu finden (funktioniert gut für Crypto)
+// Verbesserte Logo Funktion (Forex Flags + Crypto)
 function getSymbolLogo(symbol) {
-    // Bereinigen (z.B. "BTCUSD" -> "btc")
-    const cleanSym = symbol.toLowerCase().replace('usd', '').replace('usdt', '');
+    if (!symbol) return '';
     
-    // Wir nutzen CoinCap assets für Krypto Logos, da sie sehr vollständig sind
-    // Fallback auf einen generierten Buchstaben-Avatar, wenn Bild nicht lädt
-    return `<img src="https://assets.coincap.io/assets/icons/${cleanSym}@2x.png" 
-            onerror="this.onerror=null; this.parentNode.innerHTML='${symbol.substring(0,1)}'">`;
-}
+    let s = symbol.toUpperCase().replace('/', '').trim();
+    let imgSrc = '';
 
-function updateRecentTrades(currentTrades) {
-    const container = document.getElementById('recentTradesList');
-    if (!container) return;
-
-    // 1. Sortieren nach Datum & Zeit (Neueste zuerst)
-    const sorted = [...currentTrades].sort((a,b) => 
-        new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time)
-    );
-
-    // 2. Nur die letzten 5 nehmen
-    const last5 = sorted.slice(0, 5);
-
-    if (last5.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#555; margin-top:20px; font-size:0.8em;">No trades yet</div>';
-        return;
+    // 1. Logik für Forex / Indizes (Länderflaggen)
+    // Wir prüfen die ersten 2-3 Buchstaben oder bekannte Index-Namen
+    
+    // US Indizes & Dollar
+    if (s.startsWith('US') || s.startsWith('NAS') || s.startsWith('SPX') || s.startsWith('DOW') || s === 'USD') {
+        imgSrc = 'https://flagcdn.com/w80/us.png';
+    } 
+    // Deutsche Indizes (DAX, GER40)
+    else if (s.startsWith('GER') || s.startsWith('DAX') || s.includes('DE30') || s.includes('DE40')) {
+        imgSrc = 'https://flagcdn.com/w80/de.png';
+    }
+    // Euro Paare
+    else if (s.startsWith('EUR')) {
+        imgSrc = 'https://flagcdn.com/w80/eu.png';
+    }
+    // Great British Pound
+    else if (s.startsWith('GBP') || s.startsWith('UK')) {
+        imgSrc = 'https://flagcdn.com/w80/gb.png';
+    }
+    // Japan Yen
+    else if (s.startsWith('JPY') || s.endsWith('JPY')) { // JPY ist oft Quote currency, daher auch endsWith prüfen wenn Base unbekannt
+        imgSrc = 'https://flagcdn.com/w80/jp.png';
+    }
+    // Gold (XAU)
+    else if (s.includes('XAU') || s.includes('GOLD')) {
+        // Gold Icon fallback
+        return `<div style="background:#ffd700; color:#000; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:9px;">XAU</div>`;
+    }
+    // 2. Logik für Krypto (CoinCap API)
+    else {
+        // Versuche Krypto Symbol zu bereinigen (z.B. BTCUSD -> btc)
+        const cleanCrypto = s.replace('USD', '').replace('USDT', '').toLowerCase();
+        imgSrc = `https://assets.coincap.io/assets/icons/${cleanCrypto}@2x.png`;
     }
 
-    // 3. HTML generieren
-    container.innerHTML = last5.map(t => {
-        const isWin = Number(t.pl) >= 0;
-        const plSign = isWin ? '+' : '';
-        const plClass = isWin ? 'win' : 'loss'; // Deine bestehenden Klassen
-        const logoHTML = getSymbolLogo(t.instrument);
-
-        return `
-        <div class="rt-item">
-            <div class="rt-left">
-                <div class="rt-icon">${logoHTML}</div>
-                <div class="rt-info">
-                    <span class="rt-symbol">${t.instrument}</span>
-                    <span class="rt-time">${t.date}</span>
-                </div>
-            </div>
-            <div class="rt-pl ${plClass}">${plSign}$${Number(t.pl).toFixed(2)}</div>
-        </div>
-        `;
-    }).join('');
+    // Das Bild zurückgeben mit einem Fallback auf den ersten Buchstaben
+    return `<img src="${imgSrc}" 
+            onerror="this.onerror=null; this.parentNode.innerHTML='${s.substring(0,1)}'">`;
 }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
