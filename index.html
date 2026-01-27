@@ -799,19 +799,22 @@ tr.row-loss {
     filter: grayscale(0.2); /* Macht die Farben etwas dezenter für dein Design */
 }
 
-/* Versteckt den TradingView Copyright Link unter dem Widget */
-.tradingview-widget-copyright {
+/* Versteckt den spezifischen TradingView-Link anhand der Klasse oder des Attributs */
+[class^="label__link-"], 
+[class*="label__link-"],
+.tradingview-widget-copyright,
+.tradingview-widget-container > a {
     display: none !important;
     visibility: hidden !important;
-    opacity: 0 !important;
     height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+    pointer-events: none !important;
 }
 
-/* Falls TradingView eine andere Klasse nutzt, fangen wir auch den Link direkt ab */
-.tradingview-widget-container a {
+/* Falls das Widget in einem Iframe ist und der Link darunter liegt */
+.tradingview-widget-container div:last-child {
+    display: none !important;
+}
+a[href*="tradingview.com"] {
     display: none !important;
 }
 
