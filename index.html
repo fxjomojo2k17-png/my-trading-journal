@@ -621,15 +621,9 @@
         .import-textarea { width: 100%; height: 120px; background: #0b0e11 !important; border: 1px solid #3d4651; color: #00ffaa !important; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 8px; resize: none; margin-bottom: 15px; }
 
         #screenshot-preview-popup {
-           display: none; /* Standardmäßig aus */
-    position: fixed; /* Folgt der Maus über das gesamte Fenster */
-    z-index: 10000; /* Höher als alles andere auf der Seite */
-    max-width: 450px;
-    border: 3px solid #3b82f6;
-    border-radius: 8px;
-    box-shadow: 0 15px 50px rgba(0,0,0,0.9);
-    background: #000;
-    pointer-events: none; /* Maus kann durch das Bild "hindurchschauen" */
+            position: fixed; display: none; z-index: 10000; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            max-width: 90vw; max-height: 85vh; border: 3px solid #764ba2; border-radius: 12px; box-shadow: 0 0 100px rgba(0,0,0,0.9);
+            pointer-events: none; object-fit: contain; background: #0b0e11;
         }
 
         @media (max-width: 768px) {
@@ -1840,8 +1834,37 @@ if (result === 'WIN') {
     });
 }
 	
-    function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
-    function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
+    function showPreview(url, event) {
+    const preview = document.getElementById('screenshotPreview');
+    if (!preview || !url || url === 'undefined') return;
+
+    preview.src = url;
+    preview.style.display = 'block';
+    
+    // Dynamische Positionierung
+    let x = event.clientX + 15;
+    let y = event.clientY + 15;
+
+    // Check: Rechts aus dem Bild?
+    if (x + 450 > window.innerWidth) {
+        x = event.clientX - 470;
+    }
+    // Check: Unten aus dem Bild?
+    if (y + 300 > window.innerHeight) {
+        y = event.clientY - 320;
+    }
+
+    preview.style.left = x + 'px';
+    preview.style.top = y + 'px';
+}
+
+function hidePreview() {
+    const preview = document.getElementById('screenshotPreview');
+    if (preview) {
+        preview.style.display = 'none';
+        preview.src = '';
+    }
+}
     function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
 	function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
     
