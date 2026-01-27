@@ -2091,54 +2091,39 @@ function renderAvgChart(win, loss) {
 
 // --- NEUE FUNKTIONEN FÜR RECENT TRADES ---
 
-// Versucht ein Logo zu finden (funktioniert gut für Crypto)
 function getSymbolLogo(symbol) {
-    // Bereinigen (z.B. "BTCUSD" -> "btc")
-    const cleanSym = symbol.toLowerCase().replace('usd', '').replace('usdt', '');
+    if (!symbol) return '';
+    const s = symbol.toUpperCase().replace('/', '').replace('-', '').trim();
     
-    // Wir nutzen CoinCap assets für Krypto Logos, da sie sehr vollständig sind
-    // Fallback auf einen generierten Buchstaben-Avatar, wenn Bild nicht lädt
-    return `<img src="https://assets.coincap.io/assets/icons/${cleanSym}@2x.png" 
-            onerror="this.onerror=null; this.parentNode.innerHTML='${symbol.substring(0,1)}'">`;
-}
-
-function updateRecentTrades(currentTrades) {
-    const container = document.getElementById('recentTradesList');
-    if (!container) return;
-
-    // 1. Sortieren nach Datum & Zeit (Neueste zuerst)
-    const sorted = [...currentTrades].sort((a,b) => 
-        new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time)
-    );
-
-    // 2. Nur die letzten 5 nehmen
-    const last5 = sorted.slice(0, 5);
-
-    if (last5.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#555; margin-top:20px; font-size:0.8em;">No trades yet</div>';
-        return;
+    // 1. GOLD (XAU) - Original TradingView Style (Fest eingebettetes SVG)
+    if (s.includes('XAU') || s.includes('GOLD')) {
+        return `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="16" fill="url(#goldGradient)"/>
+            <path d="M12 22L15.2 10H16.8L20 22H18.3L17.5 18.8H14.5L13.7 22H12ZM14.8 17.5H17.2L16 12.8L14.8 17.5Z" fill="white"/>
+            <defs>
+                <linearGradient id="goldGradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F7B500"/><stop offset="1" stop-color="#B47F00"/>
+                </linearGradient>
+            </defs>
+        </svg>`;
     }
 
-    // 3. HTML generieren
-    container.innerHTML = last5.map(t => {
-        const isWin = Number(t.pl) >= 0;
-        const plSign = isWin ? '+' : '';
-        const plClass = isWin ? 'win' : 'loss'; // Deine bestehenden Klassen
-        const logoHTML = getSymbolLogo(t.instrument);
+    // 2. FOREX (Flaggen) - Diese URLs sind extrem stabil
+    const forexMap = {
+        'EUR': 'eu', 'USD': 'us', 'GBP': 'gb', 'JPY': 'jp', 'AUD': 'au', 
+        'CAD': 'ca', 'CHF': 'ch', 'NZD': 'nz', 'GER': 'de', 'DAX': 'de', 'DE40': 'de'
+    };
 
-        return `
-        <div class="rt-item">
-            <div class="rt-left">
-                <div class="rt-icon">${logoHTML}</div>
-                <div class="rt-info">
-                    <span class="rt-symbol">${t.instrument}</span>
-                    <span class="rt-time">${t.date}</span>
-                </div>
-            </div>
-            <div class="rt-pl ${plClass}">${plSign}$${Number(t.pl).toFixed(2)}</div>
-        </div>
-        `;
-    }).join('');
+    for (let key in forexMap) {
+        if (s.startsWith(key)) {
+            return `<img src="https://flagcdn.com/w80/${forexMap[key]}.png" style="width:100%; height:100%; object-fit:cover;">`;
+        }
+    }
+
+    // 3. KRYPTO (Pro-Quelle)
+    const cryptoSym = s.replace('USDT', '').replace('USD', '').toLowerCase();
+    return `<img src="https://coinicons-api.vercel.app/api/icon/${cryptoSym}" 
+            onerror="this.onerror=null; this.parentNode.innerHTML='<div style=font-size:12px;color:#888>${s.substring(0,1)}</div>'">`;
 }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
