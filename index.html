@@ -784,39 +784,30 @@ tr.row-loss {
 }
 
 .calendar-container {
-    flex: 1;
-    min-width: 500px;
-    background: rgba(30, 34, 45, 0.4); /* Etwas dunkler */
+    flex: 1.2;
+    min-width: 300px;
+    background: rgba(30, 34, 45, 0.7);
     border-radius: 12px;
     padding: 15px;
-    border: 1px solid rgba(255, 74, 104, 0.2); /* Dezent roter Rand für News */
-    height: 380px;
-    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 380px; 
+    overflow: hidden !important; /* Hier wird alles abgeschnitten */
+    position: relative;
 }
 
-/* Scrollbar innerhalb des Widgets stylen (falls nötig) */
 .tradingview-widget-container {
-    filter: grayscale(0.2); /* Macht die Farben etwas dezenter für dein Design */
+    /* Wir machen den Container absichtlich etwas kleiner als das Widget */
+    height: 315px !important; 
+    overflow: hidden !important;
+    position: relative;
 }
 
-/* Versteckt den spezifischen TradingView-Link anhand der Klasse oder des Attributs */
-[class^="label__link-"], 
-[class*="label__link-"],
-.tradingview-widget-copyright,
-.tradingview-widget-container > a {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    pointer-events: none !important;
+/* Wir setzen das Widget ein Stück nach oben, falls der Link oben stört */
+.tradingview-widget-container__widget {
+    margin-top: -2px;
 }
 
-/* Falls das Widget in einem Iframe ist und der Link darunter liegt */
-.tradingview-widget-container div:last-child {
-    display: none !important;
-}
-a[href*="tradingview.com"] {
-    display: none !important;
-}
+
 
     </style>
 </head>
