@@ -1999,7 +1999,18 @@ if (result === 'WIN') {
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
     function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
-	function addNewStrategy() { const v = prompt("New Strategy:"); if(v) { customStrategies.push(v); localStorage.setItem('customStrategies', JSON.stringify(customStrategies)); populateLists(); } }
+	
+	async function addNewStrategy() {
+    // Der Code "wartet" hier, ohne die ganze Seite einzufrieren
+    const v = await showCustomPrompt("Enter New Strategy Name:"); 
+    
+    if(v && v.trim() !== "") { // v ist null, wenn "Abbrechen" geklickt wurde
+        customStrategies.push(v.trim());
+        localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
+        populateLists();
+        showToast("Strategy added!"); // Optional: Direkt Feedback geben
+    }
+}
     
 	
 	function removeInstrument() {
