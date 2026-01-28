@@ -994,6 +994,39 @@ tr.row-loss {
     background: rgba(0, 242, 255, 0.1);
 }
 
+/* Der Glitch-Effekt */
+.glitch-active {
+    animation: glitch-anim 0.3s ease;
+    position: relative;
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0);
+        text-shadow: -2px 0 #ff4a68, 2px 0 #00f2ff;
+    }
+    20% {
+        transform: translate(-3px, 2px);
+        text-shadow: 2px 0 #ff4a68, -2px 0 #00f2ff;
+    }
+    40% {
+        transform: translate(3px, -2px);
+        filter: hue-rotate(90deg);
+    }
+    60% {
+        transform: translate(-1px, 1px);
+        text-shadow: -1px 0 #ff4a68, 1px 0 #00f2ff;
+    }
+    80% {
+        transform: translate(2px, -1px);
+    }
+    100% {
+        transform: translate(0);
+        text-shadow: none;
+    }
+}
+
+
     </style>
 </head>
 <body>
@@ -2751,37 +2784,7 @@ function showCustomPrompt(message, isConfirmOnly = false) {
     });
 }
 
-/* Der Glitch-Effekt */
-.glitch-active {
-    animation: glitch-anim 0.3s ease;
-    position: relative;
-}
 
-@keyframes glitch-anim {
-    0% {
-        transform: translate(0);
-        text-shadow: -2px 0 #ff4a68, 2px 0 #00f2ff;
-    }
-    20% {
-        transform: translate(-3px, 2px);
-        text-shadow: 2px 0 #ff4a68, -2px 0 #00f2ff;
-    }
-    40% {
-        transform: translate(3px, -2px);
-        filter: hue-rotate(90deg);
-    }
-    60% {
-        transform: translate(-1px, 1px);
-        text-shadow: -1px 0 #ff4a68, 1px 0 #00f2ff;
-    }
-    80% {
-        transform: translate(2px, -1px);
-    }
-    100% {
-        transform: translate(0);
-        text-shadow: none;
-    }
-}
 
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
