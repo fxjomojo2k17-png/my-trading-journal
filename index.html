@@ -2109,7 +2109,7 @@ if (result === 'WIN') {
         customStrategies.push(v.trim());
         localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
         populateLists();
-        showToast("Strategy added!"); // Optional: Direkt Feedback geben
+        showToast(`Strategy [${cleanV}] successfully initialized in core.`); // Optional: Direkt Feedback geben
     }
 }
     
@@ -2176,7 +2176,7 @@ async function removeStrategy() {
         populateLists();
         showToast(`Strategy "${selectedStrategy}" deleted.`);
     } else {
-        showToast("Deletions aborted.");
+        showToast("Operation cancelled.", "error");
     }
 }
 	
