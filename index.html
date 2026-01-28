@@ -2191,10 +2191,10 @@ async function deleteSelectedTrades() {
         return;
     }
     
-    if (confirm(`${idsToDelete.length} Trades wirklich löschen?`)) {
+    if (confirm(`${idsToDelete.length} Trade to delete`)) {
         const { error } = await _supabase.from('trades').delete().in('id', idsToDelete);
         if (error) {
-			showToast("Fehler beim Löschen: " + error.message, "error");
+			showToast("Error while deleting: " + error.message, "error");
         } else {
             // Checkbox "Alle auswählen" wieder zurücksetzen
             document.getElementById('selectAll').checked = false;
