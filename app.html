@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trading Journal PRO</title>
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2305070a'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='%2300f2ff' font-family='monospace' font-weight='bold' font-size='60'>TJ</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2305070a'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='%2300f2ff' font-family='monospace' font-weight='bold' font-size='60'>TJ</text></svg>">
 	
 	<link rel="icon" type="image/x-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -1482,18 +1482,25 @@ function setupBG() {
 function togglePerformanceMode() {
     isBgActive = !isBgActive;
     
-    // Einstellung dauerhaft speichern
+    // Klasse für den Glitch-Effekt hinzufügen
+    const btn = document.getElementById('perfToggleBtn');
+    if (btn) {
+        btn.classList.add('glitch-active');
+        // Nach der Animation (300ms) wieder entfernen
+        setTimeout(() => {
+            btn.classList.remove('glitch-active');
+        }, 300);
+    }
+
+    // Speichern & UI Update
     localStorage.setItem('tj_performance_mode', isBgActive);
-    
     updatePerfButtonUI();
 
     if (isBgActive) {
-        showToast("System FX: Optimized");
         runBgAnimation();
     } else {
-        showToast("Low Power Mode: Active");
         cancelAnimationFrame(bgAnimationId);
-        bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+        if (bgCtx) bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     }
 }
 
@@ -2737,6 +2744,38 @@ function showCustomPrompt(message, isConfirmOnly = false) {
             if (e.target === overlay) close(null);
         };
     });
+}
+
+/* Der Glitch-Effekt */
+.glitch-active {
+    animation: glitch-anim 0.3s ease;
+    position: relative;
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0);
+        text-shadow: -2px 0 #ff4a68, 2px 0 #00f2ff;
+    }
+    20% {
+        transform: translate(-3px, 2px);
+        text-shadow: 2px 0 #ff4a68, -2px 0 #00f2ff;
+    }
+    40% {
+        transform: translate(3px, -2px);
+        filter: hue-rotate(90deg);
+    }
+    60% {
+        transform: translate(-1px, 1px);
+        text-shadow: -1px 0 #ff4a68, 1px 0 #00f2ff;
+    }
+    80% {
+        transform: translate(2px, -1px);
+    }
+    100% {
+        transform: translate(0);
+        text-shadow: none;
+    }
 }
 
 </script>
