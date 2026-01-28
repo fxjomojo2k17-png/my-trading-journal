@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trading Journal PRO</title>
     
-   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2305070a'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='%2300f2ff' font-family='monospace' font-weight='bold' font-size='60'>TJ</text></svg>">
-	
-	<link rel="icon" type="image/x-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -1033,6 +1031,12 @@ tr.row-loss {
 		<button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
         <i class="fa-brands fa-telegram"></i> CONTACT DEV
     </button>
+	<button onclick="togglePerformanceMode()" id="perfToggleBtn" class="terminal-btn" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">
+    Disable Animations
+</button>
+
+
+
     </div>
 
     <div class="header">
@@ -1345,119 +1349,94 @@ let currentPage = 1;
 const tradesPerPage = 25;
 
 
-    /* ANIMATED CYBER BACKGROUND */
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    let elements = [];
-    let mouseTrail = [];
-    let mouse = { x: -100, y: -100 };
+/* ANIMATED CYBER BACKGROUND - OPTIMIZED */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let elements = [];
+let mouseTrail = [];
+let mouse = { x: -100, y: -100 };
+let isBgActive = true; // Der Schalter für die Performance
 
-    const formulas = [
-        "RR = (Exit - Entry) / (Entry - SL)", "P/L = Lot × (pips × value)", 
-        "0.618 (Golden Ratio)", "0.618 Retracement", "EV = (W% × AvgW) - (L% × AvgL)", "Market Profile", 
-        "Value Area", "Fair Value", "Volume", "Breakout", "Smart Money Concepts", "Engulfing", "∑(x - μ)²",
-        "Profit", "Margin Call", "Candlestick Pattern"
-    ];
+const formulas = [
+    "RR = (Exit - Entry) / (Entry - SL)", "P/L = Lot × (pips × value)", 
+    "0.618 (Golden Ratio)", "0.618 Retracement", "EV = (W% × AvgW) - (L% × AvgL)", "Market Profile", 
+    "Value Area", "Fair Value", "Volume", "Breakout", "Smart Money Concepts", "Engulfing", "∑(x - μ)²",
+    "Profit", "Margin Call", "Candlestick Pattern"
+];
 
-    function initCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
+function initCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
-    class FallingElement {
-        constructor(type) {
-            this.type = type; 
-            this.reset();
-        }
-        reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * -canvas.height;
-            this.speed = 0.4 + Math.random() * 1.2;
-            
-            if (this.type === 'candle') {
-                this.opacity = 0.2 + Math.random() * 0.15;
-                this.width = 3 + Math.random() * 5;
-                this.height = 10 + Math.random() * 30;
-                this.isBullish = Math.random() > 0.5;
-            } else {
-                this.opacity = 1.2 + Math.random() * 0.4;
-                this.text = formulas[Math.floor(Math.random() * formulas.length)];
-                this.fontSize = 11 + Math.random() * 7;
-            }
-        }
-        update() {
-            this.y += this.speed;
-            if (this.y > canvas.height) this.reset();
-        }
-        draw() {
-            if (this.type === 'candle') {
-                ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
-                ctx.fillStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity * 0.3})` : `rgba(255, 74, 104, ${this.opacity * 0.3})`;
-                ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(this.x + this.width/2, this.y - 4); ctx.lineTo(this.x + this.width/2, this.y + this.height + 4); ctx.stroke();
-                ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
-            } else {
-                ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
-                ctx.font = `bold ${this.fontSize}px 'Courier New', monospace`;
-                ctx.fillText(this.text, this.x, this.y);
+// ... (Deine Klassen FallingElement und MouseCandle bleiben exakt gleich) ...
+
+function drawNeuralLines() {
+    if (!isBgActive) return;
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < elements.length; i++) {
+        for (let j = i + 1; j < elements.length; j++) {
+            let dx = elements[i].x - elements[j].x;
+            let dy = elements[i].y - elements[j].y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 100) {
+                ctx.strokeStyle = `rgba(118, 75, 162, ${0.1 * (1 - dist/100)})`;
+                ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y); ctx.stroke();
             }
         }
     }
+}
 
-    class MouseCandle {
-        constructor(x, y) {
-            this.x = x; this.y = y;
-            this.opacity = 0.6;
-            this.isBullish = Math.random() > 0.5;
-        }
-        update() { this.opacity -= 0.02; }
-        draw() {
-            ctx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
-            ctx.strokeRect(this.x - 2, this.y - 7.5, 4, 15);
-        }
+// Die Kern-Animation als eigene Funktion, damit wir sie neu starten können
+function animate() {
+    if (!isBgActive) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return; // Stoppt den Loop komplett
     }
 
-    function drawNeuralLines() {
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i < elements.length; i++) {
-            for (let j = i + 1; j < elements.length; j++) {
-                let dx = elements[i].x - elements[j].x;
-                let dy = elements[i].y - elements[j].y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 100) {
-                    ctx.strokeStyle = `rgba(118, 75, 162, ${0.1 * (1 - dist/100)})`;
-                    ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y); ctx.stroke();
-                }
-            }
-        }
-    }
-
-    function setupBG() {
-        elements = [
-            ...Array.from({ length: 70 }, () => new FallingElement('candle')),
-            ...Array.from({ length: 25 }, () => new FallingElement('formula'))
-        ];
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawNeuralLines();
-            elements.forEach(e => { e.update(); e.draw(); });
-            mouseTrail.forEach((mc, i) => {
-                mc.update(); mc.draw();
-                if (mc.opacity <= 0) mouseTrail.splice(i, 1);
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-    }
-
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX; mouse.y = e.clientY;
-        if (Math.random() > 0.7) mouseTrail.push(new MouseCandle(mouse.x, mouse.y));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawNeuralLines();
+    elements.forEach(e => { e.update(); e.draw(); });
+    
+    mouseTrail.forEach((mc, i) => {
+        mc.update(); mc.draw();
+        if (mc.opacity <= 0) mouseTrail.splice(i, 1);
     });
 
-    window.addEventListener('resize', initCanvas);
-    initCanvas();
-    setupBG();
+    requestAnimationFrame(animate);
+}
+
+function setupBG() {
+    elements = [
+        ...Array.from({ length: 70 }, () => new FallingElement('candle')),
+        ...Array.from({ length: 25 }, () => new FallingElement('formula'))
+    ];
+    animate(); // Startet den ersten Loop
+}
+
+// NEU: Die Funktion für deinen Toggle-Button
+function togglePerformanceMode() {
+    isBgActive = !isBgActive;
+    const btn = document.getElementById('perfToggleBtn'); // Falls du dem Button diese ID gibst
+    
+    if (isBgActive) {
+        if (btn) btn.innerText = "FX: ON";
+        animate(); // Loop neu starten
+    } else {
+        if (btn) btn.innerText = "FX: OFF";
+        // Der Loop stoppt beim nächsten Durchlauf von selbst durch das 'if (!isBgActive) return'
+    }
+}
+
+window.addEventListener('mousemove', (e) => {
+    if (!isBgActive) return; // Spart CPU: Keine Mouse-Berechnungen wenn aus
+    mouse.x = e.clientX; mouse.y = e.clientY;
+    if (Math.random() > 0.7) mouseTrail.push(new MouseCandle(mouse.x, mouse.y));
+});
+
+window.addEventListener('resize', initCanvas);
+initCanvas();
+setupBG();
 
     /* LOGIC */
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
