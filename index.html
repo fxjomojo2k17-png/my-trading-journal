@@ -24,6 +24,52 @@
             position: relative;
         }
 		
+		/* Toast Notification System */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+.toast {
+    background: rgba(11, 14, 17, 0.95);
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    border-left: 4px solid #00f2ff;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+    margin-bottom: 10px;
+    font-size: 14px;
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+.toast.error { border-left-color: #ff4d4d; box-shadow: 0 0 15px rgba(255, 77, 77, 0.3); }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Custom Prompt Modal */
+#custom-prompt-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 10001;
+}
+
+.prompt-card {
+    background: #1a1e23; border: 1px solid #00f2ff; padding: 25px; border-radius: 12px;
+    width: 90%; max-width: 400px; text-align: center;
+}
+
+.prompt-card input {
+    width: 100%; background: #0b0e11; border: 1px solid #333; color: white;
+    padding: 10px; margin: 15px 0; border-radius: 5px; outline: none;
+}
+
+.prompt-buttons { display: flex; gap: 10px; justify-content: center; }
+		
+		
 /* Custom Neon Checkbox */
 .trade-checkbox, #selectAll {
     appearance: none; /* Entfernt den Standard-Browser-Look */
@@ -871,6 +917,20 @@ tr.row-loss {
 </div>
 
 <!-- MAIN APP (versteckt bis Login) -->
+<div id="toast-container"></div>
+<div id="custom-prompt-overlay">
+    <div class="prompt-card">
+        <h3 id="prompt-message">Input</h3>
+        <input type="text" id="prompt-input">
+        <div class="prompt-buttons">
+            <button id="prompt-confirm" class="login-btn" style="padding: 8px 20px;">OK</button>
+            <button id="prompt-cancel" class="login-btn" style="padding: 8px 20px; background: #333;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+
 <div id="mainApp" style="display:none;">
 
 <div class="container">
@@ -1334,7 +1394,7 @@ function copyToClip(id) {
     el.select();
     el.setSelectionRange(0, 99999); // Für Mobile
     navigator.clipboard.writeText(el.value).then(() => {
-        alert("Copied!");
+        showToast("Copied!");
     });
 }
 
@@ -1614,7 +1674,9 @@ if (typeof updateRecentTrades === "function") {
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const editId = document.getElementById('editId').value;
-        if (!currentUser) return alert("Please login first!");
+        if (!currentUser) return showToast("Please login first!", "error");
+		
+		
         let rawPL = Math.abs(parseFloat(document.getElementById('pl').value)) || 0;
         const result = document.getElementById('result').value;
         
@@ -1705,10 +1767,10 @@ if (result === 'WIN') {
     }
 
  async function processBulkImport() {
-    if (!currentUser) return alert("Please login first!");
+    if (!currentUser) return showToast("Please login first!", "error");
 	
         const area = document.getElementById('importArea'), raw = area.value.trim(); 
-        if(!raw) return alert("Please paste data!");
+        if(!raw) return showToast("Please paste data!", "error");
         
         const lines = raw.split('\n');
         const newTrades = [];
@@ -1802,10 +1864,11 @@ if (result === 'WIN') {
         if(newTrades.length > 0) { 
             await _supabase.from('trades').insert(newTrades); 
             area.value = ""; 
-            alert(`✅ Successfully imported ${newTrades.length} trades!`);
+            showToast(`✅ Successfully imported ${newTrades.length} trades!`);
+			
             fetchTrades(); 
         } else {
-            alert("❌ No valid trades found. Please check the format.");
+            showToast("❌ No valid trades found. Please check the format.", "error");
         }
     }
 
@@ -1957,7 +2020,7 @@ if (result === 'WIN') {
     
     // Verhindere dass das letzte Instrument gelöscht wird
     if (customInstruments.length <= 1) {
-        alert(' Cannot delete the last instrument!\n\nYou need at least one instrument in the list.');
+        showToast("Cannot delete the last instrument!\n\nYou need at least one instrument in the list", "error");
         return;
     }
     
@@ -1984,7 +2047,7 @@ function removeStrategy() {
     
     // Verhindere dass die letzte Strategy gelöscht wird
     if (customStrategies.length <= 1) {
-        alert(' Cannot delete the last strategy!\n\nYou need at least one strategy in the list.');
+        showToast("Cannot delete the last strategy!\n\nYou need at least one strategy in the list.", "error");
         return;
     }
     
@@ -2023,7 +2086,7 @@ async function downloadPersonalizedEA() {
     }
 
     if (!userId || userId.includes("Lade") || userId.length < 10) {
-        alert("ID noch nicht bereit. Bitte warten Sie kurz, bis das Journal geladen ist.");
+        showToast("ID not ready wait few seconds..", "error");
         return;
     }
 
@@ -2124,14 +2187,14 @@ async function deleteSelectedTrades() {
     const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
     
     if (idsToDelete.length === 0) {
-        alert("Bitte wähle zuerst Trades aus.");
+        showToast("Choose trades first", "error");
         return;
     }
     
     if (confirm(`${idsToDelete.length} Trades wirklich löschen?`)) {
         const { error } = await _supabase.from('trades').delete().in('id', idsToDelete);
         if (error) {
-            alert("Fehler beim Löschen: " + error.message);
+			showToast("Fehler beim Löschen: " + error.message, "error");
         } else {
             // Checkbox "Alle auswählen" wieder zurücksetzen
             document.getElementById('selectAll').checked = false;
@@ -2277,10 +2340,9 @@ window.addEventListener('load', () => {
 });
 
 
-
+// different Sessions 
 setInterval(updateSessions, 60000);
 updateSessions();
-
 
 function updateSessions() {
     const now = new Date();
@@ -2319,6 +2381,48 @@ function updateSessions() {
     applyStyle(tokyoEl, isTokyoActive);
 }
 
+
+// 1. Ersatz für alert() -> Toast Notification
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+    toast.innerText = message;
+    
+    container.appendChild(toast);
+    
+    // Nach 4 Sekunden automatisch entfernen
+    setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-in reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// 2. Ersatz für prompt() -> Custom Async Prompt
+function showCustomPrompt(message) {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('custom-prompt-overlay');
+        const input = document.getElementById('prompt-input');
+        const confirmBtn = document.getElementById('prompt-confirm');
+        const cancelBtn = document.getElementById('prompt-cancel');
+        
+        document.getElementById('prompt-message').innerText = message;
+        input.value = "";
+        overlay.style.display = 'flex';
+        input.focus();
+
+        const close = (value) => {
+            overlay.style.display = 'none';
+            resolve(value);
+        };
+
+        confirmBtn.onclick = () => close(input.value);
+        cancelBtn.onclick = () => close(null);
+        
+        // Enter-Taste unterstützen
+        input.onkeydown = (e) => { if(e.key === 'Enter') close(input.value); };
+    });
+}
 
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
