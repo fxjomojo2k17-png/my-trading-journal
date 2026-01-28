@@ -2072,7 +2072,34 @@ if (result === 'WIN') {
 	
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
-    function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
+	
+	
+    async function addNewInstrument() {
+    // Ruft das Terminal-Prompt mit Eingabefeld auf
+    const v = await showCustomPrompt("System: Enter New Instrument Symbol (e.g. BTCUSD)");
+
+    // Prüfung: Wurde etwas eingegeben und nicht nur Leerzeichen?
+    if (v && v.trim() !== "") {
+        const upperV = v.trim().toUpperCase();
+        
+        // Prüfen, ob das Instrument bereits in der Liste ist
+        if (!customInstruments.includes(upperV)) {
+            customInstruments.push(upperV);
+            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+            
+            // Listen in den Dropdowns aktualisieren
+            populateLists();
+            
+            // Erfolgsmeldung über dein neues Toast-System
+            showToast(`Instrument ${upperV} initialized and saved.`);
+        } else {
+            showToast("Symbol already exists in database.", "error");
+        }
+    } else if (v === "") {
+        // Falls der User EXECUTE drückt ohne etwas einzugeben
+        showToast("Error: Input cannot be empty.", "error");
+    }
+}
 	
 	async function addNewStrategy() {
     // Der Code "wartet" hier, ohne die ganze Seite einzufrieren
