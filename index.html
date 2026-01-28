@@ -2471,29 +2471,49 @@ function showToast(message, type = 'success') {
     }, 4000);
 }
 
-// 2. Ersatz für prompt() -> Custom Async Prompt
+/**
+ * Modern Terminal-Style Replacement for prompt()
+ * Usage: const result = await showCustomPrompt("New Strategy Name:");
+ */
 function showCustomPrompt(message) {
     return new Promise((resolve) => {
         const overlay = document.getElementById('custom-prompt-overlay');
         const input = document.getElementById('prompt-input');
         const confirmBtn = document.getElementById('prompt-confirm');
         const cancelBtn = document.getElementById('prompt-cancel');
+        const msgLabel = document.getElementById('prompt-message');
         
-        document.getElementById('prompt-message').innerText = message;
+        // Setup
+        msgLabel.innerText = message;
         input.value = "";
         overlay.style.display = 'flex';
-        input.focus();
+        
+        // Fokus nach einer kurzen Verzögerung setzen (wegen Display-Animation)
+        setTimeout(() => input.focus(), 50);
 
         const close = (value) => {
             overlay.style.display = 'none';
+            // Cleanup events to prevent memory leaks
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+            input.onkeydown = null;
             resolve(value);
         };
 
-        confirmBtn.onclick = () => close(input.value);
+        // Click Events
+        confirmBtn.onclick = () => close(input.value.trim());
         cancelBtn.onclick = () => close(null);
         
-        // Enter-Taste unterstützen
-        input.onkeydown = (e) => { if(e.key === 'Enter') close(input.value); };
+        // Keyboard Events
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') close(input.value.trim());
+            if (e.key === 'Escape') close(null);
+        };
+        
+        // Schließen wenn man außerhalb klickt
+        overlay.onclick = (e) => {
+            if (e.target === overlay) close(null);
+        };
     });
 }
 
