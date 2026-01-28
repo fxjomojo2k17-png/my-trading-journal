@@ -2114,31 +2114,31 @@ if (result === 'WIN') {
     populateLists();
 }
 
-function removeStrategy() {
+async function removeStrategy() {
     const selectedStrategy = document.getElementById('strategy').value;
     
-    // Check ob die Strategy in Trades verwendet wird
-    const usedInTrades = trades.filter(t => t.strategy === selectedStrategy).length;
-    
-    if (usedInTrades > 0) {
-        if (!confirm(` WARNING!\n\nThis strategy "${selectedStrategy}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the strategy won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) {
-            return;
-        }
-    } else {
-        if (!confirm(`Remove strategy "${selectedStrategy}"?`)) {
-            return;
-        }
-    }
-    
-    // Verhindere dass die letzte Strategy gelöscht wird
     if (customStrategies.length <= 1) {
-        showToast("Cannot delete the last strategy!\n\nYou need at least one strategy in the list.", "error");
+        showToast("Access Denied: Minimum 1 strategy required!", "error");
         return;
     }
+
+    const usedInTrades = trades.filter(t => t.strategy === selectedStrategy).length;
     
-    customStrategies = customStrategies.filter(s => s !== selectedStrategy);
-    localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
-    populateLists();
+    // Hier nutzen wir das neue "isConfirmOnly = true"
+    let message = usedInTrades > 0 
+        ? `WARNING: Strategy "${selectedStrategy}" is used in ${usedInTrades} trades. Delete anyway?` 
+        : `System: Remove strategy "${selectedStrategy}"?`;
+
+    const confirmed = await showCustomPrompt(message, true); // true = kein Tippen nötig
+
+    if (confirmed) {
+        customStrategies = customStrategies.filter(s => s !== selectedStrategy);
+        localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
+        populateLists();
+        showToast(`Strategy "${selectedStrategy}" deleted.`);
+    } else {
+        showToast("Deletions aborted.");
+    }
 }
 	
     async function deleteTradeDB(id) { if(confirm('Delete?')) { await _supabase.from('trades').delete().eq('id', id); fetchTrades(); } }
@@ -2487,9 +2487,10 @@ function showToast(message, type = 'success') {
  * Modern Terminal-Style Replacement for prompt()
  * Usage: const result = await showCustomPrompt("New Strategy Name:");
  */
-function showCustomPrompt(message) {
+function showCustomPrompt(message, isConfirmOnly = false) {
     return new Promise((resolve) => {
         const overlay = document.getElementById('custom-prompt-overlay');
+        const inputWrapper = document.querySelector('.terminal-input-wrapper');
         const input = document.getElementById('prompt-input');
         const confirmBtn = document.getElementById('prompt-confirm');
         const cancelBtn = document.getElementById('prompt-cancel');
@@ -2498,31 +2499,44 @@ function showCustomPrompt(message) {
         // Setup
         msgLabel.innerText = message;
         input.value = "";
-        overlay.style.display = 'flex';
         
-        // Fokus nach einer kurzen Verzögerung setzen (wegen Display-Animation)
-        setTimeout(() => input.focus(), 50);
+        // Modus-Umschaltung: Input zeigen oder verstecken
+        if (isConfirmOnly) {
+            inputWrapper.style.display = 'none';
+            confirmBtn.innerText = 'YES / EXECUTE';
+        } else {
+            inputWrapper.style.display = 'flex';
+            confirmBtn.innerText = 'EXECUTE';
+        }
+        
+        overlay.style.display = 'flex';
+        if (!isConfirmOnly) setTimeout(() => input.focus(), 50);
 
+        // Zentrale Close-Funktion
         const close = (value) => {
             overlay.style.display = 'none';
-            // Cleanup events to prevent memory leaks
+            // Listener entfernen, um Memory Leaks zu vermeiden
             confirmBtn.onclick = null;
             cancelBtn.onclick = null;
             input.onkeydown = null;
+            overlay.onclick = null;
             resolve(value);
         };
 
-        // Click Events
-        confirmBtn.onclick = () => close(input.value.trim());
-        cancelBtn.onclick = () => close(null);
+        // Klick auf Buttons
+        confirmBtn.onclick = () => {
+            close(isConfirmOnly ? true : input.value.trim());
+        };
         
-        // Keyboard Events
+        cancelBtn.onclick = () => close(null);
+
+        // Keyboard Events (Enter/Esc)
         input.onkeydown = (e) => {
-            if (e.key === 'Enter') close(input.value.trim());
+            if (e.key === 'Enter') close(isConfirmOnly ? true : input.value.trim());
             if (e.key === 'Escape') close(null);
         };
         
-        // Schließen wenn man außerhalb klickt
+        // Schließen beim Klick auf den dunklen Hintergrund
         overlay.onclick = (e) => {
             if (e.target === overlay) close(null);
         };
