@@ -950,9 +950,9 @@ tr.row-loss {
 
 /* Styling für den Performance-Toggle */
 .perf-btn {
-    background: rgba(26, 30, 35, 0.6);
-    border: 1px solid var(--text-muted);
-    color: var(--text-muted);
+    background: rgba(26, 30, 35, 0.8);
+    border: 1px solid #444;
+    color: #8b9bb4;
     padding: 8px 15px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -960,27 +960,32 @@ tr.row-loss {
     transition: all 0.3s;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     letter-spacing: 1px;
+    border-radius: 4px;
 }
 
+/* Der LED Punkt */
 .perf-btn .led {
-    width: 6px;
-    height: 6px;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: #333; /* Aus-Zustand */
-    box-shadow: none;
+    background-color: #222; /* Aus-Zustand: Dunkel */
+    transition: all 0.3s shadow;
 }
 
-/* Wenn FX an sind, leuchtet der Button cyan */
+/* Aktiv-Zustand für den Button */
 .perf-btn.active {
-    border-color: var(--neon-cyan);
-    color: var(--neon-cyan);
+    border-color: #00f2ff;
+    color: #fff;
+    background: rgba(0, 242, 255, 0.05);
 }
 
+/* Aktiv-Zustand für die LED (Das Leuchten) */
 .perf-btn.active .led {
-    background: var(--neon-cyan);
-    box-shadow: 0 0 8px var(--neon-cyan);
+    background-color: #00f2ff !important;
+    box-shadow: 0 0 8px #00f2ff, 0 0 15px rgba(0, 242, 255, 0.6);
 }
 
 .perf-btn:hover {
@@ -1496,10 +1501,10 @@ function updatePerfButtonUI() {
     if (!btn) return;
     
     if (isBgActive) {
-        btn.classList.add('active');
+        btn.classList.add('active'); // WICHTIG: Fügt die Klasse hinzu
         btn.innerHTML = '<div class="led"></div> FX_RENDER: ON';
     } else {
-        btn.classList.remove('active');
+        btn.classList.remove('active'); // Entfernt die Klasse
         btn.innerHTML = '<div class="led"></div> FX_RENDER: OFF';
     }
 }
