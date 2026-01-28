@@ -948,6 +948,45 @@ tr.row-loss {
     box-shadow: 0 0 15px rgba(0, 136, 204, 0.4);
 }
 
+/* Styling für den Performance-Toggle */
+.perf-btn {
+    background: rgba(26, 30, 35, 0.6);
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    padding: 8px 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+}
+
+.perf-btn .led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #333; /* Aus-Zustand */
+    box-shadow: none;
+}
+
+/* Wenn FX an sind, leuchtet der Button cyan */
+.perf-btn.active {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.perf-btn.active .led {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
+}
+
+.perf-btn:hover {
+    background: rgba(0, 242, 255, 0.1);
+}
+
     </style>
 </head>
 <body>
@@ -1031,11 +1070,11 @@ tr.row-loss {
 		<button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
         <i class="fa-brands fa-telegram"></i> CONTACT DEV
     </button>
-	<button onclick="togglePerformanceMode()" id="perfToggleBtn" class="terminal-btn" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">
-    Disable Animations
+
+
+<button id="perfToggleBtn" onclick="togglePerformanceMode()" class="perf-btn">
+    <div class="led"></div> FX_RENDER: ON
 </button>
-
-
 
     </div>
 
@@ -1414,26 +1453,57 @@ function runBgAnimation() {
 
 function setupBG() {
     initBgCanvas();
+    
+    // Einstellung aus dem Speicher laden
+    const savedSetting = localStorage.getItem('tj_performance_mode');
+    if (savedSetting !== null) {
+        isBgActive = (savedSetting === 'true');
+    }
+
+    // Button-Aussehen beim Start anpassen
+    updatePerfButtonUI();
+
     bgElements = [
         ...Array.from({ length: 50 }, () => new BgElement('candle')),
         ...Array.from({ length: 15 }, () => new BgElement('formula'))
     ];
-    runBgAnimation();
+    
+    if (isBgActive) runBgAnimation();
 }
 
 // Der Toggle
 function togglePerformanceMode() {
     isBgActive = !isBgActive;
-    const btn = document.getElementById('perfToggleBtn');
+    
+    // Einstellung dauerhaft speichern
+    localStorage.setItem('tj_performance_mode', isBgActive);
+    
+    updatePerfButtonUI();
+
     if (isBgActive) {
-        if (btn) btn.innerText = "FX: ON";
+        showToast("System FX: Optimized");
         runBgAnimation();
     } else {
-        if (btn) btn.innerText = "FX: OFF";
+        showToast("Low Power Mode: Active");
         cancelAnimationFrame(bgAnimationId);
         bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     }
 }
+
+// Hilfsfunktion für das Button-Design
+function updatePerfButtonUI() {
+    const btn = document.getElementById('perfToggleBtn');
+    if (!btn) return;
+    
+    if (isBgActive) {
+        btn.classList.add('active');
+        btn.innerHTML = '<div class="led"></div> FX_RENDER: ON';
+    } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '<div class="led"></div> FX_RENDER: OFF';
+    }
+}
+
 
 /* Event Listeners */
 window.addEventListener('resize', () => {
