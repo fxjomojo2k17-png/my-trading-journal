@@ -2310,20 +2310,36 @@ async function deleteSelectedTrades() {
     const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
     const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
     
+    // Prüfen, ob überhaupt etwas ausgewählt wurde
     if (idsToDelete.length === 0) {
-        showToast("Choose trades first", "error");
+        showToast("System: No trades selected for deletion.", "error");
         return;
     }
     
-    if (confirm(`${idsToDelete.length} Trade to delete`)) {
+    // Terminal-Abfrage mit der Anzahl der Trades
+    const message = `CRITICAL: Delete ${idsToDelete.length} selected trade(s) permanently from database?`;
+    const confirmed = await showCustomPrompt(message, true); // true = Klick-Modus (kein Tippen)
+
+    if (confirmed === true) {
+        // Löschvorgang in Supabase
         const { error } = await _supabase.from('trades').delete().in('id', idsToDelete);
+        
         if (error) {
-			showToast("Error while deleting: " + error.message, "error");
+            showToast("DATA_ERROR: " + error.message, "error");
         } else {
             // Checkbox "Alle auswählen" wieder zurücksetzen
-            document.getElementById('selectAll').checked = false;
+            const selectAllBox = document.getElementById('selectAll');
+            if (selectAllBox) selectAllBox.checked = false;
+            
+            // UI aktualisieren
             fetchTrades(); // Tabelle neu laden
+            
+            // Dynamisches Feedback
+            showToast(`${idsToDelete.length} trade(s) successfully purged.`);
         }
+    } else {
+        // Abbruch durch den User
+        showToast("Purge sequence aborted.", "error");
     }
 }
 
