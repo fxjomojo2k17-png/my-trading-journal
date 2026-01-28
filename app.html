@@ -1026,7 +1026,6 @@ tr.row-loss {
     }
 }
 
-
     </style>
 </head>
 <body>
@@ -1513,45 +1512,40 @@ function setupBG() {
 
 // Der Toggle
 function togglePerformanceMode() {
-    tj_isBgActive = !tj_isBgActive;
+    isBgActive = !isBgActive;
     
-    // Einstellung speichern
-    localStorage.setItem('tj_performance_mode', tj_isBgActive);
-    
-    // Glitch-Effekt sicher auslösen
-    var btn = document.getElementById('perfToggleBtn');
+    // Klasse für den Glitch-Effekt hinzufügen
+    const btn = document.getElementById('perfToggleBtn');
     if (btn) {
         btn.classList.add('glitch-active');
-        setTimeout(function() {
-            if (btn) {
-                btn.classList.remove('glitch-active');
-            }
+        // Nach der Animation (300ms) wieder entfernen
+        setTimeout(() => {
+            btn.classList.remove('glitch-active');
         }, 300);
     }
 
+    // Speichern & UI Update
+    localStorage.setItem('tj_performance_mode', isBgActive);
     updatePerfButtonUI();
 
-    if (tj_isBgActive) {
-        animateBG();
+    if (isBgActive) {
+        runBgAnimation();
     } else {
-        if (typeof tj_animationId !== 'undefined') {
-            cancelAnimationFrame(tj_animationId);
-        }
-        if (tj_ctx) {
-            tj_ctx.clearRect(0, 0, tj_canvas.width, tj_canvas.height);
-        }
+        cancelAnimationFrame(bgAnimationId);
+        if (bgCtx) bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     }
 }
 
+// Hilfsfunktion für das Button-Design
 function updatePerfButtonUI() {
-    var btn = document.getElementById('perfToggleBtn');
+    const btn = document.getElementById('perfToggleBtn');
     if (!btn) return;
     
-    if (tj_isBgActive) {
-        btn.classList.add('active');
+    if (isBgActive) {
+        btn.classList.add('active'); // WICHTIG: Fügt die Klasse hinzu
         btn.innerHTML = '<div class="led"></div> FX_RENDER: ON';
     } else {
-        btn.classList.remove('active');
+        btn.classList.remove('active'); // Entfernt die Klasse
         btn.innerHTML = '<div class="led"></div> FX_RENDER: OFF';
     }
 }
@@ -2783,8 +2777,6 @@ function showCustomPrompt(message, isConfirmOnly = false) {
         };
     });
 }
-
-
 
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
