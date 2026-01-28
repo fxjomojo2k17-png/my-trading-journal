@@ -979,22 +979,14 @@ tr.row-loss {
 </div>
 
 <!-- MAIN APP (versteckt bis Login) -->
+<div id="toast-container"></div>
 <div id="custom-prompt-overlay">
-    <div class="terminal-card">
-        <div class="terminal-header">
-            <span>TERMINAL_INPUT_v1.0</span>
-            <span style="color: #ff4d4d;">● ● ●</span>
-        </div>
-        <div class="terminal-body">
-            <label id="prompt-message">Execute Command:</label>
-            <div class="terminal-input-wrapper">
-                <span class="terminal-prefix">></span>
-                <input type="text" id="prompt-input" spellcheck="false" autocomplete="off">
-            </div>
-        </div>
-        <div class="terminal-buttons">
-            <button id="prompt-cancel" class="terminal-btn">CANCEL</button>
-            <button id="prompt-confirm" class="terminal-btn confirm">EXECUTE</button>
+    <div class="prompt-card">
+        <h3 id="prompt-message">Input</h3>
+        <input type="text" id="prompt-input">
+        <div class="prompt-buttons">
+            <button id="prompt-confirm" class="login-btn" style="padding: 8px 20px;">OK</button>
+            <button id="prompt-cancel" class="login-btn" style="padding: 8px 20px; background: #333;">Cancel</button>
         </div>
     </div>
 </div>
@@ -2068,27 +2060,7 @@ if (result === 'WIN') {
 	
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
-    
-	async function addNewInstrument() {
-    // Ruft das Terminal-Prompt auf
-    const v = await showCustomPrompt("System: Enter Trading Instrument (e.g. BTCUSD)");
-
-    if (v && v.trim() !== "") {
-        const upperV = v.trim().toUpperCase();
-        
-        // Prüfen, ob das Instrument bereits existiert (optional, aber sauberer)
-        if (!customInstruments.includes(upperV)) {
-            customInstruments.push(upperV);
-            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
-            populateLists();
-            
-            // Nutzt das neue Toast-System für Feedback
-            showToast(`Instrument ${upperV} registered in database.`);
-        } else {
-            showToast("Instrument already exists.", "error");
-        }
-    }
-}
+    function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
 	
 	async function addNewStrategy() {
     // Der Code "wartet" hier, ohne die ganze Seite einzufrieren
@@ -2500,49 +2472,28 @@ function showToast(message, type = 'success') {
 }
 
 // 2. Ersatz für prompt() -> Custom Async Prompt
-/**
- * Modern Terminal-Style Replacement for prompt()
- * Usage: const result = await showCustomPrompt("New Strategy Name:");
- */
 function showCustomPrompt(message) {
     return new Promise((resolve) => {
         const overlay = document.getElementById('custom-prompt-overlay');
         const input = document.getElementById('prompt-input');
         const confirmBtn = document.getElementById('prompt-confirm');
         const cancelBtn = document.getElementById('prompt-cancel');
-        const msgLabel = document.getElementById('prompt-message');
         
-        // Setup
-        msgLabel.innerText = message;
+        document.getElementById('prompt-message').innerText = message;
         input.value = "";
         overlay.style.display = 'flex';
-        
-        // Fokus nach einer kurzen Verzögerung setzen (wegen Display-Animation)
-        setTimeout(() => input.focus(), 50);
+        input.focus();
 
         const close = (value) => {
             overlay.style.display = 'none';
-            // Cleanup events to prevent memory leaks
-            confirmBtn.onclick = null;
-            cancelBtn.onclick = null;
-            input.onkeydown = null;
             resolve(value);
         };
 
-        // Click Events
-        confirmBtn.onclick = () => close(input.value.trim());
+        confirmBtn.onclick = () => close(input.value);
         cancelBtn.onclick = () => close(null);
         
-        // Keyboard Events
-        input.onkeydown = (e) => {
-            if (e.key === 'Enter') close(input.value.trim());
-            if (e.key === 'Escape') close(null);
-        };
-        
-        // Schließen wenn man außerhalb klickt
-        overlay.onclick = (e) => {
-            if (e.target === overlay) close(null);
-        };
+        // Enter-Taste unterstützen
+        input.onkeydown = (e) => { if(e.key === 'Enter') close(input.value); };
     });
 }
 
