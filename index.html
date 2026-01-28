@@ -2212,7 +2212,28 @@ async function removeStrategy() {
 }
 	
 	
- function exportToCSV() { let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='Journal.csv'; a.click(); }
+function exportToCSV() {
+    // 1. Prüfen, ob überhaupt Daten zum Exportieren da sind
+    if (trades.length === 0) {
+        showToast("Export failed: No data available.", "error");
+        return;
+    }
+
+    // 2. CSV Inhalt erstellen
+    let csv = 'Date,Instrument,Strategy,Direction,Entry,Exit,PL,Result\n' + 
+              trades.map(t => `${t.date},${t.instrument},${t.strategy},${t.direction},${t.entry},${t.exit},${t.pl},${t.result}`).join('\n');
+    
+    // 3. Download-Prozess
+    const b = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = `Trading_Journal_${new Date().toISOString().split('T')[0]}.csv`; // Mit Datum im Dateinamen
+    a.click();
+
+    // 4. Feedback an den User
+    showToast(`SUCCESS: ${trades.length} trades exported to CSV.`);
+}
+
 
 async function downloadPersonalizedEA() {
     let userId = "";
