@@ -1349,96 +1349,104 @@ let currentPage = 1;
 const tradesPerPage = 25;
 
 
-/* ANIMATED CYBER BACKGROUND - OPTIMIZED */
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
-let elements = [];
-let mouseTrail = [];
-let mouse = { x: -100, y: -100 };
-let isBgActive = true; // Der Schalter für die Performance
+/* --- BACKGROUND SYSTEM --- */
+let bgCanvas, bgCtx;
+let bgElements = [];
+let bgMouseTrail = [];
+let isBgActive = true; 
+let bgAnimationId;
 
-const formulas = [
-    "RR = (Exit - Entry) / (Entry - SL)", "P/L = Lot × (pips × value)", 
-    "0.618 (Golden Ratio)", "0.618 Retracement", "EV = (W% × AvgW) - (L% × AvgL)", "Market Profile", 
-    "Value Area", "Fair Value", "Volume", "Breakout", "Smart Money Concepts", "Engulfing", "∑(x - μ)²",
-    "Profit", "Margin Call", "Candlestick Pattern"
-];
-
-function initCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function initBgCanvas() {
+    bgCanvas = document.getElementById('bgCanvas');
+    if (!bgCanvas) return;
+    bgCtx = bgCanvas.getContext('2d');
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
 }
 
-// ... (Deine Klassen FallingElement und MouseCandle bleiben exakt gleich) ...
-
-function drawNeuralLines() {
-    if (!isBgActive) return;
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < elements.length; i++) {
-        for (let j = i + 1; j < elements.length; j++) {
-            let dx = elements[i].x - elements[j].x;
-            let dy = elements[i].y - elements[j].y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 100) {
-                ctx.strokeStyle = `rgba(118, 75, 162, ${0.1 * (1 - dist/100)})`;
-                ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y); ctx.stroke();
-            }
+// Die FallingElement Klasse (leicht umbenannt zur Sicherheit)
+class BgElement {
+    constructor(type) {
+        this.type = type;
+        this.reset();
+    }
+    reset() {
+        this.x = Math.random() * bgCanvas.width;
+        this.y = Math.random() * -bgCanvas.height;
+        this.speed = 0.4 + Math.random() * 1.2;
+        if (this.type === 'candle') {
+            this.opacity = 0.2 + Math.random() * 0.15;
+            this.width = 3 + Math.random() * 5;
+            this.height = 10 + Math.random() * 30;
+            this.isBullish = Math.random() > 0.5;
+        } else {
+            this.opacity = 0.8 + Math.random() * 0.4;
+            const formulas = ["RR = (Exit-Entry)/(Entry-SL)", "P/L = Lot×(pips×val)", "0.618 Ratio", "EV = (W%×AvgW)-(L%×AvgL)", "SMC", "Fair Value"];
+            this.text = formulas[Math.floor(Math.random() * formulas.length)];
+            this.fontSize = 11 + Math.random() * 7;
+        }
+    }
+    update() {
+        this.y += this.speed;
+        if (this.y > bgCanvas.height) this.reset();
+    }
+    draw() {
+        if (this.type === 'candle') {
+            bgCtx.strokeStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity})` : `rgba(255, 74, 104, ${this.opacity})`;
+            bgCtx.fillStyle = this.isBullish ? `rgba(0, 255, 170, ${this.opacity * 0.3})` : `rgba(255, 74, 104, ${this.opacity * 0.3})`;
+            bgCtx.fillRect(this.x, this.y, this.width, this.height);
+            bgCtx.strokeRect(this.x, this.y, this.width, this.height);
+        } else {
+            bgCtx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
+            bgCtx.font = `bold ${this.fontSize}px monospace`;
+            bgCtx.fillText(this.text, this.x, this.y);
         }
     }
 }
 
-// Die Kern-Animation als eigene Funktion, damit wir sie neu starten können
-function animate() {
-    if (!isBgActive) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        return; // Stoppt den Loop komplett
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawNeuralLines();
-    elements.forEach(e => { e.update(); e.draw(); });
+function runBgAnimation() {
+    if (!isBgActive) return;
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     
-    mouseTrail.forEach((mc, i) => {
-        mc.update(); mc.draw();
-        if (mc.opacity <= 0) mouseTrail.splice(i, 1);
-    });
-
-    requestAnimationFrame(animate);
+    bgElements.forEach(e => { e.update(); e.draw(); });
+    bgAnimationId = requestAnimationFrame(runBgAnimation);
 }
 
 function setupBG() {
-    elements = [
-        ...Array.from({ length: 70 }, () => new FallingElement('candle')),
-        ...Array.from({ length: 25 }, () => new FallingElement('formula'))
+    initBgCanvas();
+    bgElements = [
+        ...Array.from({ length: 50 }, () => new BgElement('candle')),
+        ...Array.from({ length: 15 }, () => new BgElement('formula'))
     ];
-    animate(); // Startet den ersten Loop
+    runBgAnimation();
 }
 
-// NEU: Die Funktion für deinen Toggle-Button
+// Der Toggle
 function togglePerformanceMode() {
     isBgActive = !isBgActive;
-    const btn = document.getElementById('perfToggleBtn'); // Falls du dem Button diese ID gibst
-    
+    const btn = document.getElementById('perfToggleBtn');
     if (isBgActive) {
         if (btn) btn.innerText = "FX: ON";
-        animate(); // Loop neu starten
+        runBgAnimation();
     } else {
         if (btn) btn.innerText = "FX: OFF";
-        // Der Loop stoppt beim nächsten Durchlauf von selbst durch das 'if (!isBgActive) return'
+        cancelAnimationFrame(bgAnimationId);
+        bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     }
 }
 
-window.addEventListener('mousemove', (e) => {
-    if (!isBgActive) return; // Spart CPU: Keine Mouse-Berechnungen wenn aus
-    mouse.x = e.clientX; mouse.y = e.clientY;
-    if (Math.random() > 0.7) mouseTrail.push(new MouseCandle(mouse.x, mouse.y));
+/* Event Listeners */
+window.addEventListener('resize', () => {
+    if (bgCanvas) {
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+    }
 });
 
-window.addEventListener('resize', initCanvas);
-initCanvas();
-setupBG();
+// Initialisierung beim Laden
+document.addEventListener('DOMContentLoaded', setupBG);
 
-}
+
 
     /* LOGIC */
     const SUPABASE_URL = 'https://nrmivhzvwqpnwedvkbbz.supabase.co'; 
