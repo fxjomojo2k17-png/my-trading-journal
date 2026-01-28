@@ -930,6 +930,23 @@ tr.row-loss {
     background: #00f2ff; color: #0b0e11; box-shadow: 0 0 10px #00f2ff;
 }
 
+.contact-btn {
+    background: transparent;
+    border: 1px solid #0088cc;
+    color: #0088cc;
+    padding: 8px 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contact-btn:hover {
+    background: rgba(0, 136, 204, 0.1);
+    box-shadow: 0 0 15px rgba(0, 136, 204, 0.4);
+}
 
     </style>
 </head>
@@ -1011,6 +1028,9 @@ tr.row-loss {
    <div class="user-info">
         <span id="userEmail"></span>
         <button class="btn-logout" onclick="handleLogout()">Logout</button>
+		<button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
+        <i class="fa-brands fa-telegram"></i> CONTACT DEV
+    </button>
     </div>
 
     <div class="header">
