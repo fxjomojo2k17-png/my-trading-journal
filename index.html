@@ -2087,31 +2087,43 @@ if (result === 'WIN') {
 }
     
 	
-	function removeInstrument() {
+async function removeInstrument() {
     const selectedInstrument = document.getElementById('instrument').value;
-    
-    // Check ob das Instrument in Trades verwendet wird
-    const usedInTrades = trades.filter(t => t.instrument === selectedInstrument).length;
-    
-    if (usedInTrades > 0) {
-        if (!confirm(` WARNING!\n\nThis instrument "${selectedInstrument}" is used in ${usedInTrades} trade(s).\n\nDeleting it will NOT delete your trades, but the instrument won't appear in the dropdown anymore.\n\nAre you sure you want to remove it?`)) {
-            return;
-        }
-    } else {
-        if (!confirm(`Remove instrument "${selectedInstrument}"?`)) {
-            return;
-        }
-    }
     
     // Verhindere dass das letzte Instrument gelöscht wird
     if (customInstruments.length <= 1) {
-        showToast("Cannot delete the last instrument!\n\nYou need at least one instrument in the list", "error");
+        showToast("Access Denied: Minimum 1 instrument required!", "error");
         return;
     }
+
+    // Check ob das Instrument in Trades verwendet wird
+    const usedInTrades = trades.filter(t => t.instrument === selectedInstrument).length;
     
-    customInstruments = customInstruments.filter(i => i !== selectedInstrument);
-    localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
-    populateLists();
+    let message;
+    if (usedInTrades > 0) {
+        // Warnung im Hacker-Stil, wenn bereits Trades mit diesem Instrument existieren
+        message = `CRITICAL: "${selectedInstrument}" is linked to ${usedInTrades} trades! Remove from active list?`;
+    } else {
+        // Einfache Bestätigung
+        message = `System: Purge instrument "${selectedInstrument}"?`;
+    }
+
+    // Aufruf des Terminals mit isConfirmOnly = true (kein Tippen nötig)
+    const confirmed = await showCustomPrompt(message, true);
+
+    if (confirmed === true) {
+        // Filtert das Instrument aus der Liste
+        customInstruments = customInstruments.filter(i => i !== selectedInstrument);
+        
+        // Speichern und UI aktualisieren
+        localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+        populateLists();
+        
+        showToast(`Instrument "${selectedInstrument}" removed from terminal.`);
+    } else {
+        // Abgebrochen
+        showToast("Operation cancelled.", "error");
+    }
 }
 
 async function removeStrategy() {
