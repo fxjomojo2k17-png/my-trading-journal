@@ -1480,40 +1480,45 @@ function setupBG() {
 
 // Der Toggle
 function togglePerformanceMode() {
-    isBgActive = !isBgActive;
+    tj_isBgActive = !tj_isBgActive;
     
-    // Klasse für den Glitch-Effekt hinzufügen
-    const btn = document.getElementById('perfToggleBtn');
+    // Einstellung speichern
+    localStorage.setItem('tj_performance_mode', tj_isBgActive);
+    
+    // Glitch-Effekt sicher auslösen
+    var btn = document.getElementById('perfToggleBtn');
     if (btn) {
         btn.classList.add('glitch-active');
-        // Nach der Animation (300ms) wieder entfernen
-        setTimeout(() => {
-            btn.classList.remove('glitch-active');
+        setTimeout(function() {
+            if (btn) {
+                btn.classList.remove('glitch-active');
+            }
         }, 300);
     }
 
-    // Speichern & UI Update
-    localStorage.setItem('tj_performance_mode', isBgActive);
     updatePerfButtonUI();
 
-    if (isBgActive) {
-        runBgAnimation();
+    if (tj_isBgActive) {
+        animateBG();
     } else {
-        cancelAnimationFrame(bgAnimationId);
-        if (bgCtx) bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+        if (typeof tj_animationId !== 'undefined') {
+            cancelAnimationFrame(tj_animationId);
+        }
+        if (tj_ctx) {
+            tj_ctx.clearRect(0, 0, tj_canvas.width, tj_canvas.height);
+        }
     }
 }
 
-// Hilfsfunktion für das Button-Design
 function updatePerfButtonUI() {
-    const btn = document.getElementById('perfToggleBtn');
+    var btn = document.getElementById('perfToggleBtn');
     if (!btn) return;
     
-    if (isBgActive) {
-        btn.classList.add('active'); // WICHTIG: Fügt die Klasse hinzu
+    if (tj_isBgActive) {
+        btn.classList.add('active');
         btn.innerHTML = '<div class="led"></div> FX_RENDER: ON';
     } else {
-        btn.classList.remove('active'); // Entfernt die Klasse
+        btn.classList.remove('active');
         btn.innerHTML = '<div class="led"></div> FX_RENDER: OFF';
     }
 }
