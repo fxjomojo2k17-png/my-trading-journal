@@ -2068,7 +2068,27 @@ if (result === 'WIN') {
 	
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
-    function addNewInstrument() { const v = prompt("New Instrument:").toUpperCase(); if(v) { customInstruments.push(v); localStorage.setItem('customInstruments', JSON.stringify(customInstruments)); populateLists(); } }
+    
+	async function addNewInstrument() {
+    // Ruft das Terminal-Prompt auf
+    const v = await showCustomPrompt("System: Enter Trading Instrument (e.g. BTCUSD)");
+
+    if (v && v.trim() !== "") {
+        const upperV = v.trim().toUpperCase();
+        
+        // Prüfen, ob das Instrument bereits existiert (optional, aber sauberer)
+        if (!customInstruments.includes(upperV)) {
+            customInstruments.push(upperV);
+            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+            populateLists();
+            
+            // Nutzt das neue Toast-System für Feedback
+            showToast(`Instrument ${upperV} registered in database.`);
+        } else {
+            showToast("Instrument already exists.", "error");
+        }
+    }
+}
 	
 	async function addNewStrategy() {
     // Der Code "wartet" hier, ohne die ganze Seite einzufrieren
