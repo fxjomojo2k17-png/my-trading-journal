@@ -1860,12 +1860,13 @@ async function fetchTrades() {
 			
             
 			
-			<td onclick="showTradeChart('${t.instrument}', ${trade.entry_price}, ${trade.exit_price}, '${trade.type}')" 
+
+			
+		// This version handles missing (null/undefined) prices safely
+<td onclick="showTradeChart('${t.instrument}', ${trade.entry_price || 0}, ${trade.exit_price || 0}, '${trade.type || 'buy'}')" 
     style="cursor:pointer; color: #00f2ff; font-weight: bold; text-decoration: underline;">
     ${t.instrument}
-</td>
-			
-			
+</td>	
 			
 			
             <td>${t.strategy || '-'}</td>
