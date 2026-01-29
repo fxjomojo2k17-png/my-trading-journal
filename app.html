@@ -1402,7 +1402,8 @@ tr.row-loss {
         <li><strong>Download:</strong> Click the button above to get your personalized <code>.mq5</code> file. Your User-ID is already included.</li>
         <li><strong>Locate Folder:</strong> Open MetaTrader 5, go to <code>File > Open Data Folder</code>, then navigate to <code>MQL5 > Experts</code>.</li>
         <li><strong>Copy File:</strong> Paste the downloaded file into the <code>Experts</code> folder.</li>
-        <li><strong>Enable WebRequest:</strong> Go to <code>Tools > Options > Expert Advisors</code>.
+		<li><strong>Open the File with Meta-editor</strong> compile the file <code> press F7 </code></li>
+        <li><strong>In MetaTrader enable WebRequest:</strong> Go to <code>Tools > Options > Expert Advisors</code>.
             <ul style="list-style-type: circle; padding-left: 20px; margin-top: 5px; color: #8b949e;">
                 <li>Check "Allow WebRequest for listed URL"</li>
                 <li>Add: <code>https://nrmivhzvwqpnwedvkbbz.supabase.co</code></li>
@@ -2588,6 +2589,8 @@ function getSymbolLogo(symbol) {
     if (s.includes('SPX') || s.includes('500')) return `<img src="${baseUrl}s-and-p-500--big.svg">`;
     if (s.includes('XAG') || s.includes('SILVER')) return `<img src="${baseUrl}silver--big.svg">`;
     if (s.includes('UK100')) return `<img src="${baseUrl}uk-100--big.svg">`;
+	if (s.includes('EURGBP')) return `<img src="${baseUrl}EUGBP--big.svg">`;
+	if (s.includes('EURUSD')) return `<img src="${baseUrl}EURUS--big.svg">`;
 
     // Krypto Fallback
     const cleanSym = s.toLowerCase().replace('usd', '').replace('usdt', '');
