@@ -2572,7 +2572,7 @@ function renderAvgChart(win, loss) {
         }
     });
 }
-
+<!--
 // --- NEUE FUNKTIONEN FÜR RECENT TRADES ---
 
 // Versucht ein Logo zu finden (funktioniert gut für Crypto)
@@ -2595,7 +2595,42 @@ function getSymbolLogo(symbol) {
     // Krypto Fallback
     const cleanSym = s.toLowerCase().replace('usd', '').replace('usdt', '');
     return `<img src="https://assets.coincap.io/assets/icons/${cleanSym}@2x.png" onerror="this.style.display='none'; this.parentNode.innerHTML='${s.substring(0,1)}'">`;
+} -->
+
+// Versucht ein Logo zu finden (Nutzt Lightcharts für Forex/Aktien & Coincap für Krypto)
+function getSymbolLogo(symbol) {
+    if (!symbol) return '';
+    
+    // 1. Symbol bereinigen (Großbuchstaben, Suffixe wie .m oder .fx entfernen)
+    // Entfernt alles nach einem Punkt und Raute-Zeichen
+    let s = symbol.toUpperCase().split('.')[0].replace('#', '').trim();
+
+    // 2. KRYPTO-LOGIK (Behalten wir bei, wie gewünscht)
+    // Liste der gängigsten Krypto-Kürzel zur Erkennung
+    const cryptoCoins = ['BTC', 'ETH', 'LTC', 'XRP', 'SOL', 'BNB', 'DOGE', 'ADA', 'DOT', 'MATIC', 'LINK'];
+    
+    // Check: Ist es Krypto? (Entweder in der Liste oder enthält "USD" aber ist kein Forex-Paar wie EURUSD)
+    // Einfache Heuristik: Wenn es in der Liste ist ODER "BITCOIN" im Namen hat
+    const isCrypto = cryptoCoins.some(c => s.includes(c)) || s.includes('BITCOIN');
+
+    if (isCrypto) {
+        const cleanSym = s.toLowerCase().replace('usd', '').replace('usdt', '');
+        return `<img src="https://assets.coincap.io/assets/icons/${cleanSym}@2x.png" 
+                     style="width:100%; height:100%; object-fit:contain;"
+                     onerror="this.style.display='none'; this.parentNode.innerHTML='${s.substring(0,1)}'">`;
+    }
+
+    // 3. NEUE LOGIK: Lightcharts für ALLES andere (Forex, Aktien, Indizes, Metalle)
+    // URL-Struktur: https://lightcharts.ifxdb.com/quotes-icons/[SYMBOL].svg
+    const iconUrl = `https://lightcharts.ifxdb.com/quotes-icons/${s}.svg`;
+
+    // Wir geben das SVG zurück. Falls es nicht existiert (onerror), zeigen wir die ersten 2 Buchstaben.
+    return `<img src="${iconUrl}" 
+                 style="width:100%; height:100%; object-fit:cover;" 
+                 onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerText='${s.substring(0,2)}'">`;
 }
+
+
 
 function updateRecentTrades(currentTrades) {
     const container = document.getElementById('recentTradesList');
