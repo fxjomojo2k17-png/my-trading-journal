@@ -2572,30 +2572,7 @@ function renderAvgChart(win, loss) {
         }
     });
 }
-<!--
-// --- NEUE FUNKTIONEN FÜR RECENT TRADES ---
 
-// Versucht ein Logo zu finden (funktioniert gut für Crypto)
-function getSymbolLogo(symbol) {
-    if (!symbol) return '';
-    const s = symbol.toUpperCase().replace('/', '').trim();
-    const baseUrl = 'https://my-trading-journal.pages.dev/';
-
-    // Deine neuen SVGs
-    if (s.includes('WTI') || s.includes('CRUDE')) return `<img src="${baseUrl}crude-oil--big.svg">`;
-    if (s.includes('GER40') || s.includes('DAX') || s.includes('DE40')) return `<img src="${baseUrl}dax--big.svg">`;
-    if (s.includes('XAU') || s.includes('GOLD')) return `<img src="${baseUrl}gold--big.svg">`;
-    if (s.includes('NAS') || s.includes('100')) return `<img src="${baseUrl}nasdaq--big.svg">`;
-    if (s.includes('SPX') || s.includes('500')) return `<img src="${baseUrl}s-and-p-500--big.svg">`;
-    if (s.includes('XAG') || s.includes('SILVER')) return `<img src="${baseUrl}silver--big.svg">`;
-    if (s.includes('UK100')) return `<img src="${baseUrl}uk-100--big.svg">`;
-	if (s.includes('EURGBP')) return `<img src="${baseUrl}EUGBP--big.svg">`;
-	if (s.includes('EURUSD')) return `<img src="${baseUrl}EURUS--big.svg">`;
-
-    // Krypto Fallback
-    const cleanSym = s.toLowerCase().replace('usd', '').replace('usdt', '');
-    return `<img src="https://assets.coincap.io/assets/icons/${cleanSym}@2x.png" onerror="this.style.display='none'; this.parentNode.innerHTML='${s.substring(0,1)}'">`;
-} -->
 
 // Versucht ein Logo zu finden (Nutzt Lightcharts für Forex/Aktien & Coincap für Krypto)
 function getSymbolLogo(symbol) {
