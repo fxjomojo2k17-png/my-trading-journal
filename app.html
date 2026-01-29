@@ -1858,12 +1858,9 @@ async function fetchTrades() {
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
             <td title="Time: ${t.time || '--:--'}" style="cursor: help; text-decoration: underline dotted rgba(255,255,255,0.3);">${t.date}</td>
 			
-           <!-- <td>${t.instrument}</td> -->
+            <td>${t.instrument}</td>
 			
-			<td onclick="showTradeChart('${t.instrument}', ${trade.entry_price}, ${trade.exit_price}, '${trade.type}')" 
-    style="cursor:pointer; color: #00f2ff; font-weight: bold; text-decoration: underline;">
-    ${t.instrument}
-</td>
+			
 			
 			
 			
