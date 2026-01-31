@@ -2849,29 +2849,84 @@ let currentChart = null;
 
 async function showChartTooltip(e, symbol, entry, exit, type) {
     const tooltip = document.getElementById('chartTooltip');
+    
+    // 1. Positionierung & Anzeige
     tooltip.style.display = 'block';
     
-    // Positionierung (neben dem Mauszeiger)
-    tooltip.style.left = (e.clientX + 20) + 'px';
-    tooltip.style.top = (e.clientY - 150) + 'px';
-
-    // Chart nur neu zeichnen, wenn es ein anderes Symbol ist
+    // Intelligente Positionierung (damit es nicht aus dem Bild rutscht)
+    let leftPos = e.clientX + 20;
+    if (leftPos + 400 > window.innerWidth) leftPos = e.clientX - 420;
+    
+    let topPos = e.clientY - 150;
+    if (topPos < 10) topPos = 10;
+    if (topPos + 300 > window.innerHeight) topPos = window.innerHeight - 310;
+    
+    tooltip.style.left = leftPos + 'px';
+    tooltip.style.top = topPos + 'px';
     tooltip.innerHTML = ''; 
+
+    // 2. Chart initialisieren
     const chart = LightweightCharts.createChart(tooltip, {
-        width: 380, height: 280,
+        width: 360, height: 280,
         layout: { backgroundColor: 'transparent', textColor: '#d1d4dc' },
-        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
-        timeScale: { visible: false }
+        grid: { 
+            vertLines: { color: 'rgba(255,255,255,0.05)' }, 
+            horzLines: { color: 'rgba(255,255,255,0.05)' } 
+        },
+        timeScale: { visible: false },
+        rightPriceScale: { borderVisible: false }
     });
 
-    const s = symbol.toUpperCase().split('.')[0].replace('#', '');
-    
+    // 3. SYMBOL-ÜBERSETZUNG (Mapping)
+    // Hier übersetzen wir deine Broker-Namen in InstaForex-Namen
+    let s = symbol.toUpperCase().split('.')[0].replace('/', '').replace('#', '').trim();
+
+    const symbolMap = {
+        'GER40': 'DAX30', 'DE40': 'DAX30', 'DAX': 'DAX30', 'DE30': 'DAX30',
+        'NAS100': '#NDX', 'US100': '#NDX', 'NAS': '#NDX', 'NASDAQ': '#NDX',
+        'SPX': '#SPX', 'SPX500': '#SPX', 'US500': '#SPX',
+        'UK100': 'FTSE100', 'GB100': 'FTSE100',
+        'XAUUSD': 'GOLD', 'XAU': 'GOLD',
+        'XAGUSD': 'SILVER', 'XAG': 'SILVER',
+        'WTI': '#CL', 'USOIL': '#CL', 'CRUDE': '#CL', 'OIL': '#CL',
+        'BTCUSD': 'BITCOIN', 'BTC': 'BITCOIN',
+        'ETHUSD': 'ETHEREUM', 'ETH': 'ETHEREUM',
+        'LTCUSD': 'LITECOIN'
+    };
+
+    // Wenn wir eine Übersetzung haben, nutzen wir sie. Sonst probieren wir das Original.
+    if (symbolMap[s]) {
+        s = symbolMap[s];
+    }
+
+    // Lade-Hinweis
+    const loadingDiv = document.createElement('div');
+    loadingDiv.innerText = `Lade ${s}...`;
+    loadingDiv.style.cssText = 'color:#888; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:12px;';
+    tooltip.appendChild(loadingDiv);
+
     try {
-        const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://quotes.instaforex.com/api/chart?m=json&q=${s}&limit=100&type=h1`)}`);
+        // 4. Daten abrufen
+        // Wir nutzen 'api.allorigins.win', um die Daten von InstaForex zu holen
+        const apiUrl = `https://quotes.instaforex.com/api/chart?m=json&q=${s}&limit=100&type=h1`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+        
+        const resp = await fetch(proxyUrl);
         const json = await resp.json();
-        const data = JSON.parse(json.contents).map(d => ({
+        
+        // Prüfen ob 'contents' existiert und valide ist
+        if (!json.contents) throw new Error("Leere Antwort");
+        
+        const rawData = JSON.parse(json.contents);
+        
+        // Falls InstaForex "null" zurückgibt (Symbol nicht gefunden)
+        if (!rawData || rawData.length === 0) throw new Error("Keine Daten");
+
+        const data = rawData.map(d => ({
             time: d.t, open: d.o, high: d.h, low: d.l, close: d.c
         })).sort((a,b) => a.time - b.time);
+
+        if(loadingDiv) loadingDiv.remove();
 
         const candleSeries = chart.addCandlestickSeries({
             upColor: '#00ff88', downColor: '#ff3b3b', borderVisible: false,
@@ -2879,19 +2934,31 @@ async function showChartTooltip(e, symbol, entry, exit, type) {
         });
         candleSeries.setData(data);
 
-        // Entry & Exit Linien
-        [entry, exit].forEach((price, i) => {
+        // 5. Entry & Exit Linien zeichnen
+        if(entry && entry > 0) {
             candleSeries.createPriceLine({
-                price: parseFloat(price),
-                color: i === 0 ? '#3179ff' : (type === 'buy' ? (exit > entry ? '#00ff88' : '#ff3b3b') : (entry > exit ? '#00ff88' : '#ff3b3b')),
-                lineWidth: 2,
-                lineStyle: i === 0 ? 2 : 0,
-                title: i === 0 ? 'ENTRY' : 'EXIT'
+                price: parseFloat(entry), color: '#3179ff', lineWidth: 2,
+                lineStyle: 2, title: 'ENTRY'
             });
-        });
+        }
+
+        if(exit && exit > 0) {
+            const isWin = type.toLowerCase().includes('buy') ? (exit > entry) : (entry > exit);
+            candleSeries.createPriceLine({
+                price: parseFloat(exit), 
+                color: isWin ? '#00ff88' : '#ff3b3b', 
+                lineWidth: 2, lineStyle: 0, title: 'EXIT'
+            });
+        }
+        
         chart.timeScale().fitContent();
+
     } catch (err) {
-        tooltip.innerHTML = '<div style="color:gray; padding:20px;">No Chart Data</div>';
+        if(loadingDiv) loadingDiv.remove();
+        tooltip.innerHTML = `<div style="color:#ff3b3b; display:flex; height:100%; align-items:center; justify-content:center; text-align:center;">
+            Keine Chart-Daten für<br><b style="color:white; font-size:1.2em;">${s}</b><br>gefunden.
+        </div>`;
+        console.error("Chart Error:", err);
     }
 }
 
