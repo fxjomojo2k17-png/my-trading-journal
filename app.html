@@ -1026,6 +1026,14 @@ tr.row-loss {
     }
 }
 
+.row-be {
+    background: rgba(100, 100, 100, 0.1) !important;
+    border-left: 3px solid #888 !important;
+}
+.row-be td {
+    color: #ccc !important;
+}
+
     </style>
 </head>
 <body>
@@ -1821,7 +1829,7 @@ async function fetchTrades() {
     // 7. Tabelle rendern
     document.getElementById('tradesBody').innerHTML = paginatedTrades.map(t => {
         const rMult = (Number(t.pl) / (parseFloat(t.risk) || 1)).toFixed(2);
-        const rowClass = Number(t.pl) >= 0 ? 'row-win' : 'row-loss';
+        const rowClass = Number(t.pl) > 0 ? 'row-win' : (Number(t.pl) < 0 ? 'row-loss' : 'row-be');
         return `<tr class="${rowClass}">
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
             <td title="Time: ${t.time || '--:--'}" style="cursor: help; text-decoration: underline dotted rgba(255,255,255,0.3);">${t.date}</td>
