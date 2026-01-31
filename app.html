@@ -1840,8 +1840,12 @@ async function fetchTrades() {
             <td title="Time: ${t.time || '--:--'}" style="cursor: help; text-decoration: underline dotted rgba(255,255,255,0.3);">${t.date}</td>
 			
 			
-            <td>${t.instrument}</td>
-			
+            <!-- <td>${t.instrument}</td> -->
+			<td onmousemove="showChartTooltip(event, '${t.instrument}', ${t.entry_price || 0}, ${t.exit_price || 0}, '${t.type}')" 
+    onmouseleave="hideChartTooltip()"
+    style="cursor:help; color: #00f2ff; font-weight: bold;">
+    ${t.instrument}
+</td>
 			
 			
 			
