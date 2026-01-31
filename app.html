@@ -2854,7 +2854,47 @@ function showCustomPrompt(message, isConfirmOnly = false) {
         };
     });
 }
+async function loadUserSettings() {
+    if (!currentUser) return;
+    
+    // Settings aus Supabase laden
+    const { data, error } = await _supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .single();
+    
+    if (data) {
+        // Settings gefunden - verwenden
+        customInstruments = data.custom_instruments || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
+        customStrategies = data.custom_strategies || ["Breakout", "Retest", "Trend", "Scalp"];
+        document.getElementById('initialBalanceInput').value = data.initial_balance || 10000;
+    } else {
+        // Keine Settings gefunden - Defaults erstellen
+        await _supabase.from('user_settings').insert([{
+            user_id: currentUser.id,
+            custom_instruments: ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"],
+            custom_strategies: ["Breakout", "Retest", "Trend", "Scalp"],
+            initial_balance: 10000
+        }]);
+    }
+    
+    populateLists();
+}
 
+async function saveUserSettings() {
+    if (!currentUser) return;
+    
+    await _supabase
+        .from('user_settings')
+        .update({
+            custom_instruments: customInstruments,
+            custom_strategies: customStrategies,
+            initial_balance: parseFloat(document.getElementById('initialBalanceInput').value) || 10000,
+            updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentUser.id);
+}
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
