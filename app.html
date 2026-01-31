@@ -1681,8 +1681,8 @@ function copyToClip(id) {
     }
 
     let trades = [];
-    let customInstruments = JSON.parse(localStorage.getItem('customInstruments')) || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
-    let customStrategies = JSON.parse(localStorage.getItem('customStrategies')) || ["Breakout", "Retest", "Trend", "Scalp"];
+   let customInstruments = ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
+let customStrategies = ["Breakout", "Retest", "Trend", "Scalp"];
     let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
@@ -1704,13 +1704,16 @@ function copyToClip(id) {
         };
         window.requestAnimationFrame(step);
     }
-
 async function fetchTrades() {
-        if (!currentUser) return;
-        const { data, error } = await _supabase.from('trades').select('*').eq('user_id', currentUser.id);
-        if (error) console.error('Error:', error);
-        else { trades = data || []; refreshApp(); }
+    if (!currentUser) return;
+    const { data, error } = await _supabase.from('trades').select('*').eq('user_id', currentUser.id);
+    if (error) console.error('Error:', error);
+    else { 
+        trades = data || []; 
+        await loadUserSettings(); // <-- NEU HINZUFÜGEN
+        refreshApp(); 
     }
+}
 
  window.addEventListener('load', () => {
         checkAuth();
@@ -1746,7 +1749,7 @@ async function fetchTrades() {
   function updateStatsAndTable() {
     // 1. Grundlegende Daten laden
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-    localStorage.setItem('initialBalance', initialBalance);
+    await saveUserSettings();
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
     // 2. Filtern der Trades
@@ -2249,7 +2252,7 @@ if (result === 'WIN') {
         // Prüfen, ob das Instrument bereits in der Liste ist
         if (!customInstruments.includes(upperV)) {
             customInstruments.push(upperV);
-            localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+            await saveUserSettings();
             
             // Listen in den Dropdowns aktualisieren
             populateLists();
@@ -2271,7 +2274,7 @@ if (result === 'WIN') {
     
     if(v && v.trim() !== "") { // v ist null, wenn "Abbrechen" geklickt wurde
         customStrategies.push(v.trim());
-        localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
+        await saveUserSettings();
         populateLists();
         showToast(`Strategy [${cleanV}] successfully initialized in core.`); // Optional: Direkt Feedback geben
     }
@@ -2307,7 +2310,7 @@ async function removeInstrument() {
         customInstruments = customInstruments.filter(i => i !== selectedInstrument);
         
         // Speichern und UI aktualisieren
-        localStorage.setItem('customInstruments', JSON.stringify(customInstruments));
+        await saveUserSettings();
         populateLists();
         
         showToast(`Instrument "${selectedInstrument}" removed from terminal.`);
@@ -2336,7 +2339,7 @@ async function removeStrategy() {
 
     if (confirmed) {
         customStrategies = customStrategies.filter(s => s !== selectedStrategy);
-        localStorage.setItem('customStrategies', JSON.stringify(customStrategies));
+        await saveUserSettings();
         populateLists();
         showToast(`Strategy "${selectedStrategy}" deleted.`);
     } else {
