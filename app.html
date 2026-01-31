@@ -11,6 +11,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+	
     <style>
         /* BASE DESIGN */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -1026,6 +1028,20 @@ tr.row-loss {
     }
 }
 
+#chartTooltip {
+    position: fixed;
+    display: none;
+    width: 400px;
+    height: 300px;
+    background: #0b0e14;
+    border: 1px solid #1e222d;
+    border-radius: 8px;
+    z-index: 99999;
+    pointer-events: none; /* Verhindert Flackern beim Hover */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    padding: 10px;
+}
+
     </style>
 </head>
 <body>
@@ -1822,7 +1838,17 @@ async function fetchTrades() {
         return `<tr class="${rowClass}">
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
             <td title="Time: ${t.time || '--:--'}" style="cursor: help; text-decoration: underline dotted rgba(255,255,255,0.3);">${t.date}</td>
-            <td>${t.instrument}</td>
+			
+			
+            <!-- <td>${t.instrument}</td> -->
+			<td onmousemove="showChartTooltip(event, '${t.instrument}', ${trade.entry_price || 0}, ${trade.exit_price || 0}, '${trade.type}')" 
+    onmouseleave="hideChartTooltip()"
+    style="cursor:help; color: #00f2ff; font-weight: bold;">
+    ${t.instrument}
+</td>
+			
+			
+			
             <td>${t.strategy || '-'}</td>
             <td>${t.direction}</td>
             <td>${t.entry}/${t.exit}</td>
@@ -2818,6 +2844,61 @@ function showCustomPrompt(message, isConfirmOnly = false) {
     });
 }
 
+
+let currentChart = null;
+
+async function showChartTooltip(e, symbol, entry, exit, type) {
+    const tooltip = document.getElementById('chartTooltip');
+    tooltip.style.display = 'block';
+    
+    // Positionierung (neben dem Mauszeiger)
+    tooltip.style.left = (e.clientX + 20) + 'px';
+    tooltip.style.top = (e.clientY - 150) + 'px';
+
+    // Chart nur neu zeichnen, wenn es ein anderes Symbol ist
+    tooltip.innerHTML = ''; 
+    const chart = LightweightCharts.createChart(tooltip, {
+        width: 380, height: 280,
+        layout: { backgroundColor: 'transparent', textColor: '#d1d4dc' },
+        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
+        timeScale: { visible: false }
+    });
+
+    const s = symbol.toUpperCase().split('.')[0].replace('#', '');
+    
+    try {
+        const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://quotes.instaforex.com/api/chart?m=json&q=${s}&limit=100&type=h1`)}`);
+        const json = await resp.json();
+        const data = JSON.parse(json.contents).map(d => ({
+            time: d.t, open: d.o, high: d.h, low: d.l, close: d.c
+        })).sort((a,b) => a.time - b.time);
+
+        const candleSeries = chart.addCandlestickSeries({
+            upColor: '#00ff88', downColor: '#ff3b3b', borderVisible: false,
+            wickUpColor: '#00ff88', wickDownColor: '#ff3b3b'
+        });
+        candleSeries.setData(data);
+
+        // Entry & Exit Linien
+        [entry, exit].forEach((price, i) => {
+            candleSeries.createPriceLine({
+                price: parseFloat(price),
+                color: i === 0 ? '#3179ff' : (type === 'buy' ? (exit > entry ? '#00ff88' : '#ff3b3b') : (entry > exit ? '#00ff88' : '#ff3b3b')),
+                lineWidth: 2,
+                lineStyle: i === 0 ? 2 : 0,
+                title: i === 0 ? 'ENTRY' : 'EXIT'
+            });
+        });
+        chart.timeScale().fitContent();
+    } catch (err) {
+        tooltip.innerHTML = '<div style="color:gray; padding:20px;">No Chart Data</div>';
+    }
+}
+
+function hideChartTooltip() {
+    document.getElementById('chartTooltip').style.display = 'none';
+}
+
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
@@ -2825,6 +2906,6 @@ function showCustomPrompt(message, isConfirmOnly = false) {
 Ende mainApp 
 Ende mainApp 
 Ende mainApp -->
-
+<div id="chartTooltip"></div>
 </body>
 </html>
