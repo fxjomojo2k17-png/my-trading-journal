@@ -1163,7 +1163,7 @@ tr.row-loss {
     <div class="stats-grid">
         <div class="stat-card" id="card-balance">
             <h3>Initial Balance</h3>
-            <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
+          <input type="text" id="initialBalanceInput" onchange="handleBalanceChange()" value="300"
                    style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.1em; font-weight: bold; text-align: center; height: auto; padding: 0;">
         </div>
         <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
@@ -2854,7 +2854,10 @@ function showCustomPrompt(message, isConfirmOnly = false) {
         };
     });
 }
-
+async function handleBalanceChange() {
+    updateStatsAndTable();
+    await saveUserSettings();
+}
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
