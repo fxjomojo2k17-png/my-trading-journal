@@ -11,8 +11,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-	
     <style>
         /* BASE DESIGN */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -1028,20 +1026,6 @@ tr.row-loss {
     }
 }
 
-#chartTooltip {
-    position: fixed;
-    display: none;
-    width: 400px;
-    height: 300px;
-    background: #0b0e14;
-    border: 1px solid #1e222d;
-    border-radius: 8px;
-    z-index: 99999;
-    pointer-events: none; /* Verhindert Flackern beim Hover */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    padding: 10px;
-}
-
     </style>
 </head>
 <body>
@@ -1838,17 +1822,7 @@ async function fetchTrades() {
         return `<tr class="${rowClass}">
             <td><input type="checkbox" class="trade-checkbox" value="${t.id}"></td>
             <td title="Time: ${t.time || '--:--'}" style="cursor: help; text-decoration: underline dotted rgba(255,255,255,0.3);">${t.date}</td>
-			
-			
-            <!-- <td>${t.instrument}</td> -->
-			<td onmousemove="showChartTooltip(event, '${t.instrument}', ${t.entry_price || 0}, ${t.exit_price || 0}, '${t.type}')" 
-    onmouseleave="hideChartTooltip()"
-    style="cursor:help; color: #00f2ff; font-weight: bold;">
-    ${t.instrument}
-</td>
-			
-			
-			
+            <td>${t.instrument}</td>
             <td>${t.strategy || '-'}</td>
             <td>${t.direction}</td>
             <td>${t.entry}/${t.exit}</td>
@@ -2844,138 +2818,6 @@ function showCustomPrompt(message, isConfirmOnly = false) {
     });
 }
 
-
-let currentChart = null;
-
-async function showChartTooltip(e, symbol, entry, exit, type) {
-    const tooltip = document.getElementById('chartTooltip');
-    
-    // 1. Positionierung
-    tooltip.style.display = 'block';
-    
-    let leftPos = e.clientX + 20;
-    if (leftPos + 400 > window.innerWidth) leftPos = e.clientX - 420;
-    
-    let topPos = e.clientY - 150;
-    if (topPos < 10) topPos = 10;
-    if (topPos + 300 > window.innerHeight) topPos = window.innerHeight - 310;
-    
-    tooltip.style.left = leftPos + 'px';
-    tooltip.style.top = topPos + 'px';
-    tooltip.innerHTML = ''; 
-
-    // 2. Chart initialisieren
-    const chart = LightweightCharts.createChart(tooltip, {
-        width: 360, height: 280,
-        layout: { backgroundColor: 'transparent', textColor: '#d1d4dc' },
-        grid: { 
-            vertLines: { color: 'rgba(255,255,255,0.05)' }, 
-            horzLines: { color: 'rgba(255,255,255,0.05)' } 
-        },
-        timeScale: { visible: false },
-        rightPriceScale: { borderVisible: false }
-    });
-
-    // 3. KORRIGIERTE SYMBOL-ÜBERSETZUNG (Mit Hashtags!)
-    let s = symbol.toUpperCase().split('.')[0].replace('/', '').replace('#', '').trim();
-
-    const symbolMap = {
-        // Indizes (Brauchen oft ein #)
-        'GER40': '#DAX30', 'DE40': '#DAX30', 'DAX': '#DAX30', 'DE30': '#DAX30', 'DAX30': '#DAX30',
-        'NAS100': '#NDX', 'US100': '#NDX', 'NAS': '#NDX', 'NASDAQ': '#NDX',
-        'SPX': '#SPX', 'SPX500': '#SPX', 'US500': '#SPX',
-        'US30': '#INDU', 'DOW': '#INDU', 'DJI': '#INDU', // Dow Jones heißt oft #INDU
-        'UK100': '#FTSE100', 'GB100': '#FTSE100', 'FTSE': '#FTSE100',
-        
-        // Metalle & Rohstoffe
-        'XAUUSD': 'GOLD', 'XAU': 'GOLD',
-        'XAGUSD': 'SILVER', 'XAG': 'SILVER',
-        'WTI': '#CL', 'USOIL': '#CL', 'CRUDE': '#CL', 'OIL': '#CL',
-        'BRENT': '#BRENT',
-        
-        // Krypto (InstaForex Schreibweise)
-        'BTCUSD': 'BITCOIN', 'BTC': 'BITCOIN',
-        'ETHUSD': 'ETHEREUM', 'ETH': 'ETHEREUM',
-        'LTCUSD': 'LITECOIN', 'LTC': 'LITECOIN',
-        'XRPUSD': 'RIPPLE', 'XRP': 'RIPPLE'
-    };
-
-    // Mapping anwenden
-    if (symbolMap[s]) {
-        s = symbolMap[s];
-    } else {
-        // Fallback: Wenn es ein Forex Paar ist (z.B. EURUSD), lassen wir es so.
-        // Wenn es aber nach Index aussieht, fügen wir testweise ein # hinzu
-        if (!['EUR','USD','GBP','JPY','AUD','CAD','NZD','CHF'].some(curr => s.includes(curr))) {
-             // Wenn es keine Währung ist, probieren wir es mit #
-             // s = '#' + s; // (Optional, falls Mapping fehlt)
-        }
-    }
-
-    // Lade-Hinweis
-    const loadingDiv = document.createElement('div');
-    loadingDiv.innerText = `Lade ${s}...`;
-    loadingDiv.style.cssText = 'color:#888; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:12px;';
-    tooltip.appendChild(loadingDiv);
-
-    try {
-        // 4. Daten abrufen
-        const apiUrl = `https://quotes.instaforex.com/api/chart?m=json&q=${s}&limit=100&type=h1`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
-        
-        const resp = await fetch(proxyUrl);
-        const json = await resp.json();
-        
-        if (!json.contents) throw new Error("Leere Antwort");
-        const rawData = JSON.parse(json.contents);
-        
-        if (!rawData || rawData.length === 0) throw new Error("Keine Daten");
-
-        const data = rawData.map(d => ({
-            time: d.t, open: d.o, high: d.h, low: d.l, close: d.c
-        })).sort((a,b) => a.time - b.time);
-
-        if(loadingDiv) loadingDiv.remove();
-
-        const candleSeries = chart.addCandlestickSeries({
-            upColor: '#00ff88', downColor: '#ff3b3b', borderVisible: false,
-            wickUpColor: '#00ff88', wickDownColor: '#ff3b3b'
-        });
-        candleSeries.setData(data);
-
-        // Entry & Exit
-        if(entry && entry > 0) {
-            candleSeries.createPriceLine({
-                price: parseFloat(entry), color: '#3179ff', lineWidth: 2,
-                lineStyle: 2, title: 'ENTRY'
-            });
-        }
-
-        if(exit && exit > 0) {
-            const isWin = type.toLowerCase().includes('buy') ? (exit > entry) : (entry > exit);
-            candleSeries.createPriceLine({
-                price: parseFloat(exit), 
-                color: isWin ? '#00ff88' : '#ff3b3b', 
-                lineWidth: 2, lineStyle: 0, title: 'EXIT'
-            });
-        }
-        
-        chart.timeScale().fitContent();
-
-    } catch (err) {
-        if(loadingDiv) loadingDiv.remove();
-        // Hier zeigen wir jetzt auch den versuchten Namen an
-        tooltip.innerHTML = `<div style="color:#ff3b3b; display:flex; flex-direction:column; height:100%; align-items:center; justify-content:center; text-align:center;">
-            <span>Keine Daten gefunden</span>
-            <span style="color:white; font-size:10px; margin-top:5px;">Code: ${s}</span>
-        </div>`;
-    }
-}
-
-function hideChartTooltip() {
-    document.getElementById('chartTooltip').style.display = 'none';
-}
-
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
@@ -2983,6 +2825,6 @@ function hideChartTooltip() {
 Ende mainApp 
 Ende mainApp 
 Ende mainApp -->
-<div id="chartTooltip"></div>
+
 </body>
 </html>
