@@ -2850,10 +2850,9 @@ let currentChart = null;
 async function showChartTooltip(e, symbol, entry, exit, type) {
     const tooltip = document.getElementById('chartTooltip');
     
-    // 1. Positionierung & Anzeige
+    // 1. Positionierung
     tooltip.style.display = 'block';
     
-    // Intelligente Positionierung (damit es nicht aus dem Bild rutscht)
     let leftPos = e.clientX + 20;
     if (leftPos + 400 > window.innerWidth) leftPos = e.clientX - 420;
     
@@ -2877,26 +2876,40 @@ async function showChartTooltip(e, symbol, entry, exit, type) {
         rightPriceScale: { borderVisible: false }
     });
 
-    // 3. SYMBOL-ÜBERSETZUNG (Mapping)
-    // Hier übersetzen wir deine Broker-Namen in InstaForex-Namen
+    // 3. KORRIGIERTE SYMBOL-ÜBERSETZUNG (Mit Hashtags!)
     let s = symbol.toUpperCase().split('.')[0].replace('/', '').replace('#', '').trim();
 
     const symbolMap = {
-        'GER40': 'DAX30', 'DE40': 'DAX30', 'DAX': 'DAX30', 'DE30': 'DAX30',
+        // Indizes (Brauchen oft ein #)
+        'GER40': '#DAX30', 'DE40': '#DAX30', 'DAX': '#DAX30', 'DE30': '#DAX30', 'DAX30': '#DAX30',
         'NAS100': '#NDX', 'US100': '#NDX', 'NAS': '#NDX', 'NASDAQ': '#NDX',
         'SPX': '#SPX', 'SPX500': '#SPX', 'US500': '#SPX',
-        'UK100': 'FTSE100', 'GB100': 'FTSE100',
+        'US30': '#INDU', 'DOW': '#INDU', 'DJI': '#INDU', // Dow Jones heißt oft #INDU
+        'UK100': '#FTSE100', 'GB100': '#FTSE100', 'FTSE': '#FTSE100',
+        
+        // Metalle & Rohstoffe
         'XAUUSD': 'GOLD', 'XAU': 'GOLD',
         'XAGUSD': 'SILVER', 'XAG': 'SILVER',
         'WTI': '#CL', 'USOIL': '#CL', 'CRUDE': '#CL', 'OIL': '#CL',
+        'BRENT': '#BRENT',
+        
+        // Krypto (InstaForex Schreibweise)
         'BTCUSD': 'BITCOIN', 'BTC': 'BITCOIN',
         'ETHUSD': 'ETHEREUM', 'ETH': 'ETHEREUM',
-        'LTCUSD': 'LITECOIN'
+        'LTCUSD': 'LITECOIN', 'LTC': 'LITECOIN',
+        'XRPUSD': 'RIPPLE', 'XRP': 'RIPPLE'
     };
 
-    // Wenn wir eine Übersetzung haben, nutzen wir sie. Sonst probieren wir das Original.
+    // Mapping anwenden
     if (symbolMap[s]) {
         s = symbolMap[s];
+    } else {
+        // Fallback: Wenn es ein Forex Paar ist (z.B. EURUSD), lassen wir es so.
+        // Wenn es aber nach Index aussieht, fügen wir testweise ein # hinzu
+        if (!['EUR','USD','GBP','JPY','AUD','CAD','NZD','CHF'].some(curr => s.includes(curr))) {
+             // Wenn es keine Währung ist, probieren wir es mit #
+             // s = '#' + s; // (Optional, falls Mapping fehlt)
+        }
     }
 
     // Lade-Hinweis
@@ -2907,19 +2920,15 @@ async function showChartTooltip(e, symbol, entry, exit, type) {
 
     try {
         // 4. Daten abrufen
-        // Wir nutzen 'api.allorigins.win', um die Daten von InstaForex zu holen
         const apiUrl = `https://quotes.instaforex.com/api/chart?m=json&q=${s}&limit=100&type=h1`;
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
         
         const resp = await fetch(proxyUrl);
         const json = await resp.json();
         
-        // Prüfen ob 'contents' existiert und valide ist
         if (!json.contents) throw new Error("Leere Antwort");
-        
         const rawData = JSON.parse(json.contents);
         
-        // Falls InstaForex "null" zurückgibt (Symbol nicht gefunden)
         if (!rawData || rawData.length === 0) throw new Error("Keine Daten");
 
         const data = rawData.map(d => ({
@@ -2934,7 +2943,7 @@ async function showChartTooltip(e, symbol, entry, exit, type) {
         });
         candleSeries.setData(data);
 
-        // 5. Entry & Exit Linien zeichnen
+        // Entry & Exit
         if(entry && entry > 0) {
             candleSeries.createPriceLine({
                 price: parseFloat(entry), color: '#3179ff', lineWidth: 2,
@@ -2955,10 +2964,11 @@ async function showChartTooltip(e, symbol, entry, exit, type) {
 
     } catch (err) {
         if(loadingDiv) loadingDiv.remove();
-        tooltip.innerHTML = `<div style="color:#ff3b3b; display:flex; height:100%; align-items:center; justify-content:center; text-align:center;">
-            Keine Chart-Daten für<br><b style="color:white; font-size:1.2em;">${s}</b><br>gefunden.
+        // Hier zeigen wir jetzt auch den versuchten Namen an
+        tooltip.innerHTML = `<div style="color:#ff3b3b; display:flex; flex-direction:column; height:100%; align-items:center; justify-content:center; text-align:center;">
+            <span>Keine Daten gefunden</span>
+            <span style="color:white; font-size:10px; margin-top:5px;">Code: ${s}</span>
         </div>`;
-        console.error("Chart Error:", err);
     }
 }
 
