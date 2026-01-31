@@ -1961,6 +1961,7 @@ if (result === 'WIN') {
     function prepareEdit(id) {
         const t = trades.find(tr => tr.id === id);
         document.getElementById('date').value = t.date; document.getElementById('time').value = t.time; 
+		document.getElementById('time').value = t.time || '';
         document.getElementById('instrument').value = t.instrument; document.getElementById('strategy').value = t.strategy;
         document.getElementById('direction').value = t.direction; document.getElementById('entry').value = t.entry; 
         document.getElementById('exit').value = t.exit; document.getElementById('result').value = t.result; 
