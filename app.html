@@ -2713,9 +2713,10 @@ function updateRecentTrades(currentTrades) {
 
 function updateLiveTime() {
     const timeInput = document.getElementById('time');
+    const editId = document.getElementById('editId').value;
     
-    // Falls das Feld nicht existiert oder der User gerade selbst etwas eingibt, nicht überschreiben
-    if (!timeInput || document.activeElement === timeInput) return;
+    // Nicht überschreiben wenn: Feld nicht existiert, User tippt gerade, oder im Edit-Modus
+    if (!timeInput || document.activeElement === timeInput || editId) return;
 
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
