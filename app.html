@@ -2066,44 +2066,16 @@ if (result === 'WIN') {
             }
         }
         
-  if(newTrades.length > 0) { 
-    // Filter out duplicates by checking existing trades
-    const { data: existingTrades } = await _supabase
-        .from('trades')
-        .select('date, time, instrument, pl')
-        .eq('user_id', currentUser.id);
-    
-    // Create a set of unique identifiers for existing trades
-    const existingSet = new Set(
-        (existingTrades || []).map(t => `${t.date}_${t.time}_${t.instrument}_${t.pl}`)
-    );
-    
-    // Filter out trades that already exist
-    const uniqueTrades = newTrades.filter(t => {
-        const identifier = `${t.date}_${t.time}_${t.instrument}_${t.pl}`;
-        return !existingSet.has(identifier);
-    });
-    
-    if (uniqueTrades.length === 0) {
-        showToast(`⚠️ All ${newTrades.length} trades already exist - no duplicates imported!`, "error");
-        area.value = "";
-        return;
+        if(newTrades.length > 0) { 
+            await _supabase.from('trades').insert(newTrades); 
+            area.value = ""; 
+            showToast(`✅ Successfully imported ${newTrades.length} trades!`);
+			
+            fetchTrades(); 
+        } else {
+            showToast("❌ No valid trades found. Please check the format.", "error");
+        }
     }
-    
-    await _supabase.from('trades').insert(uniqueTrades); 
-    area.value = ""; 
-    
-    const skipped = newTrades.length - uniqueTrades.length;
-    if (skipped > 0) {
-        showToast(`✅ Imported ${uniqueTrades.length} new trades (${skipped} duplicates skipped)`);
-    } else {
-        showToast(`✅ Successfully imported ${uniqueTrades.length} trades!`);
-    }
-    
-    fetchTrades(); 
-} else {
-    showToast("❌ No valid trades found. Please check the format.", "error");
-}
 
     function changeMonth(val) { currentViewDate.setMonth(currentViewDate.getMonth() + val); selectedDateFilter = null; renderCalendar(); updateStatsAndTable(); }
 	
