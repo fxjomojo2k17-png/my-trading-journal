@@ -1208,7 +1208,7 @@ tr.row-loss {
                 <div class="form-group"><label>Exit</label><input type="text" id="exit" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
                 <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
+                <label>Risk ($)</label><input type="text" id="risk" placeholder="Optional" oninput="validateNumber(this)">
                 <div class="form-group"><label>Tag</label>
                     <select id="mistake">
                         <option value="PLAN">Per Plan</option>
@@ -1924,7 +1924,7 @@ if (result === 'WIN') {
             date: document.getElementById('date').value, time: document.getElementById('time').value, instrument: document.getElementById('instrument').value, 
             strategy: document.getElementById('strategy').value, direction: document.getElementById('direction').value, entry: document.getElementById('entry').value, 
             exit: document.getElementById('exit').value, result: result, pl: plValue, 
-            risk: document.getElementById('risk').value || "100", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, 
+            risk: document.getElementById('risk').value || "", mistake: document.getElementById('mistake').value, screenshot: document.getElementById('screenshot').value, 
             notes: document.getElementById('notes').value
         };
         if (editId) await _supabase.from('trades').update(data).eq('id', editId);
@@ -1968,7 +1968,7 @@ if (result === 'WIN') {
         document.getElementById('instrument').value = t.instrument; document.getElementById('strategy').value = t.strategy;
         document.getElementById('direction').value = t.direction; document.getElementById('entry').value = t.entry; 
         document.getElementById('exit').value = t.exit; document.getElementById('result').value = t.result; 
-        document.getElementById('pl').value = Math.abs(t.pl); document.getElementById('risk').value = t.risk; 
+        document.getElementById('pl').value = Math.abs(t.pl); document.getElementById('risk').value = t.risk || "";
         document.getElementById('mistake').value = t.mistake; document.getElementById('screenshot').value = t.screenshot; 
         document.getElementById('notes').value = t.notes; document.getElementById('editId').value = t.id; 
         document.getElementById('submitBtn').textContent = "Update Trade";
