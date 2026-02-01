@@ -1869,158 +1869,28 @@ if (typeof updateRecentTrades === "function") {
     }
 }
 
-function updateCharts(chartTrades) {
-    const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-    const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+    function updateCharts(chartTrades) {
+        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+        const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+        let runningEquity = initialBalance, peak = initialBalance;
+        const equityData = [initialBalance], drawdownData = [0];
+        chrono.forEach(t => { runningEquity += Number(t.pl); equityData.push(runningEquity); if (runningEquity > peak) peak = runningEquity; drawdownData.push(runningEquity - peak); });
+
+        if (equityChart) equityChart.destroy();
+        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.05)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
+        if (drawdownChart) drawdownChart.destroy();
+        drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.05)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
+        const stratMap = {}; chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
+        if (strategyPLChart) strategyPLChart.destroy();
+        strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} } } });
+        if (distributionChart) distributionChart.destroy();
+        distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' }, legend: {display:false} } } });
+        const dD = [0,0,0,0,0,0,0]; chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
+        if (weekdayChart) weekdayChart.destroy();
+        weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' }, legend: {display:false} } } });
     
-    let runningEquity = initialBalance, peak = initialBalance;
-    const equityData = [initialBalance], drawdownData = [0];
-    
-    chrono.forEach(t => { 
-        runningEquity += Number(t.pl); 
-        equityData.push(runningEquity); 
-        if (runningEquity > peak) peak = runningEquity; 
-        drawdownData.push(runningEquity - peak); 
-    });
-
-    // --- 1. EQUITY CHART MIT GLOW ---
-    const eCtx = document.getElementById('equityChart').getContext('2d');
-    const eGradient = eCtx.createLinearGradient(0, 0, 0, 400);
-    eGradient.addColorStop(0, 'rgba(0, 242, 255, 0.2)');
-    eGradient.addColorStop(1, 'rgba(0, 242, 255, 0)');
-
-    if (equityChart) equityChart.destroy();
-    equityChart = new Chart(eCtx, { 
-        type: 'line', 
-        data: { 
-            labels: [0, ...chrono.map((_,i)=>i+1)], 
-            datasets: [{ 
-                label: 'Equity', 
-                data: equityData, 
-                borderColor: '#00f2ff', 
-                borderWidth: 3,
-                fill: true, 
-                backgroundColor: eGradient, 
-                tension: 0.4, 
-                pointRadius: 0,
-                pointHoverRadius: 5
-            }] 
-        }, 
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0', font: {family: 'monospace'} }, legend: {display:false} },
-            scales: {
-                x: { grid: { display: false }, ticks: { color: '#8892b0', font: { family: 'monospace' } } },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892b0', font: { family: 'monospace' } } }
-            }
-        } 
-    });
-
-    // --- 2. DRAWDOWN CHART ---
-    const dCtx = document.getElementById('drawdownChart').getContext('2d');
-    const dGradient = dCtx.createLinearGradient(0, 0, 0, 200);
-    dGradient.addColorStop(0, 'rgba(255, 74, 104, 0.2)');
-    dGradient.addColorStop(1, 'rgba(255, 74, 104, 0)');
-
-    if (drawdownChart) drawdownChart.destroy();
-    drawdownChart = new Chart(dCtx, { 
-        type: 'line', 
-        data: { 
-            labels: [0, ...chrono.map((_,i)=>i+1)], 
-            datasets: [{ 
-                label: 'Drawdown', 
-                data: drawdownData, 
-                borderColor: '#ff4a68', 
-                fill: true, 
-                backgroundColor: dGradient, 
-                tension: 0.3, 
-                pointRadius: 0 
-            }] 
-        }, 
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0', font: {family: 'monospace'} }, legend: {display:false} },
-            scales: {
-                x: { display: false },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892b0', font: { family: 'monospace' } } }
-            }
-        } 
-    });
-
-    // --- 3. STRATEGY & WEEKDAY (BAR CHARTS) ---
-    const stratMap = {}; 
-    chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
-    
-    if (strategyPLChart) strategyPLChart.destroy();
-    strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { 
-        type: 'bar', 
-        data: { 
-            labels: Object.keys(stratMap), 
-            datasets: [{ 
-                data: Object.values(stratMap), 
-                backgroundColor: Object.values(stratMap).map(v => v >= 0 ? 'rgba(0, 242, 255, 0.7)' : 'rgba(255, 74, 104, 0.7)'),
-                borderRadius: 4
-            }] 
-        }, 
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0', font: {family: 'monospace'} }, legend: {display:false} },
-            scales: {
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892b0', font: { family: 'monospace' } } },
-                x: { ticks: { color: '#8892b0', font: { family: 'monospace' } } }
-            }
-        } 
-    });
-
-    // --- 4. TAGS (MISTAKES) ---
-    if (distributionChart) distributionChart.destroy();
-    distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { 
-        type: 'bar', 
-        data: { 
-            labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], 
-            datasets: [{ 
-                data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), 
-                backgroundColor: '#764ba2',
-                borderRadius: 4
-            }] 
-        }, 
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { title: { display: true, text: 'TRADING PSYCHOLOGY', color: '#8892b0', font: {family: 'monospace'} }, legend: {display:false} },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1, color: '#8892b0' } },
-                x: { ticks: { color: '#8892b0', font: { family: 'monospace' } } }
-            }
-        } 
-    });
-
-    // --- 5. WEEKDAY P/L ---
-    const dD = [0,0,0,0,0,0,0]; 
-    chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
-    
-    if (weekdayChart) weekdayChart.destroy();
-    weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { 
-        type: 'bar', 
-        data: { 
-            labels: ['S','M','T','W','T','F','S'], 
-            datasets: [{ 
-                data: dD, 
-                backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68'),
-                borderRadius: 4
-            }] 
-        }, 
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { title: { display: true, text: 'WEEKDAY PERFORMANCE', color: '#8892b0', font: {family: 'monospace'} }, legend: {display:false} },
-            scales: {
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892b0', font: { family: 'monospace' } } },
-                x: { ticks: { color: '#8892b0', font: { family: 'monospace' } } }
-            }
-        } 
-    });
-
-    createHeatmap(chartTrades);
-}
+		createHeatmap(chartTrades);
+	}
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
