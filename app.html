@@ -1303,39 +1303,43 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
-/* Grundstyling für deine Textarea */
-#notes {
+/* Das Feld in der Standard-Ansicht (Classic) */
+.form-group.span-2 textarea#notes {
     width: 100%;
-    min-height: 45px; /* Etwas höher als ein normales Feld */
-    padding: 10px 12px;
-    line-height: 1.5;
-    resize: none; /* Deaktiviert das manuelle Ziehen für einen sauberen Look */
-    overflow: hidden; /* Versteckt Scrollbars bei Auto-Expand */
-    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+    min-height: 120px; /* Hier geben wir dem Feld deutlich mehr Grund-Höhe */
+    padding: 15px;      /* Mehr Luft im Inneren */
+    font-size: 15px;
+    line-height: 1.6;
+    background: #1a1f26;
+    border: 1px solid #3d4651;
+    border-radius: 8px;
+    color: #fff;
+    resize: vertical;   /* Ermöglicht es dem User, die Höhe manuell zu ziehen */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* PRO MODE: Der Terminal-Vibe */
-body.pro-mode #notes {
-    background-color: rgba(10, 15, 20, 0.9) !important;
-    /* Subtiles Raster-Muster (Blueprint-Style) */
+/* PRO MODE: Kraftvolles, technisches Design */
+body.pro-mode .form-group.span-2 textarea#notes {
+    min-height: 150px; /* Im Pro Mode sogar noch etwas größer für den Fokus */
+    background-color: #080a0c !important;
     background-image: 
-        linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
-    background-size: 15px 15px;
+        linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px) !important;
+    background-size: 25px 25px !important; /* Größeres Raster für bessere Optik */
     
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-left: 3px solid #00f2ff !important; /* Akzentlinie links */
+    border: 1px solid rgba(0, 242, 255, 0.3) !important;
+    border-left: 5px solid #00f2ff !important;
     color: #00f2ff !important;
     font-family: 'JetBrains Mono', monospace !important;
-    border-radius: 0;
+    border-radius: 0px !important;
 }
 
-/* Fokus-Effekt: Das Feld fängt an zu leuchten */
-body.pro-mode #notes:focus {
-    outline: none;
-    border-color: #00f2ff !important;
-    background-color: rgba(0, 242, 255, 0.05) !important;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.15);
+/* Spezial-Effekt für das Label oben drüber */
+.form-group.span-2 label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+    letter-spacing: 1px;
 }
 
     </style>
@@ -1542,7 +1546,7 @@ body.pro-mode #notes:focus {
     </div>
 </div>
                 <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
-                <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
+                <div class="form-group span-2"><label>Notes</label><textarea id="notes" placeholder="Details..."></textarea></div>
             </div>
             <div class="button-group">
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
