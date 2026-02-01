@@ -1217,16 +1217,14 @@ tr.row-loss {
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
                 <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Tag</label>
-                    <select id="mistake">
-                        <option value="PLAN">Per Plan</option>
-                        <option value="FOMO">FOMO</option>
-                        <option value="EARLY_EXIT">Early Exit</option>
-                        <option value="REVENGE">Revenge</option>
-                        <option value="LATE_ENTRY">Late Entry</option>
-                        <option value="MISTAKE">Mistake</option>
-                    </select>
-                </div>
+                <div class="form-group">
+    <label>Tag</label>
+    <div class="combo-container">
+        <select id="mistake" required></select>
+        <button type="button" class="btn-action btn-add" onclick="addNewTag()">+</button>
+        <button type="button" class="btn-action btn-del" onclick="removeTag()">–</button>
+    </div>
+</div>
                 <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
                 <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
@@ -1689,8 +1687,9 @@ function copyToClip(id) {
     }
 
     let trades = [];
-   let customInstruments = ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
-let customStrategies = ["Breakout", "Retest", "Trend", "Scalp"];
+	let customInstruments = ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
+	let customStrategies = ["Breakout", "Retest", "Trend", "Scalp"];
+	let customTags = ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"];
     let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
@@ -1718,7 +1717,7 @@ async function fetchTrades() {
     if (error) console.error('Error:', error);
     else { 
         trades = data || []; 
-        await loadUserSettings(); // <-- NEU HINZUFÜGEN
+        // await loadUserSettings(); // TEMPORÄR DEAKTIVIERT
         refreshApp(); 
     }
 }
@@ -1746,11 +1745,17 @@ async function fetchTrades() {
     }
 
     function populateLists() {
-        document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
-        document.getElementById('strategy').innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
-        const filter = document.getElementById('historyInstrumentFilter');
-        filter.innerHTML = `<option value="ALL">All Instruments</option>` + customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+    document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+    document.getElementById('strategy').innerHTML = customStrategies.map(s => `<option value="${s}">${s}</option>`).join('');
+    const filter = document.getElementById('historyInstrumentFilter');
+    filter.innerHTML = `<option value="ALL">All Instruments</option>` + customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
+    
+    // Tags Dropdown füllen
+    const mistakeSelect = document.getElementById('mistake');
+    if (mistakeSelect) {
+        mistakeSelect.innerHTML = customTags.map(t => `<option value="${t}">${t}</option>`).join('');
     }
+}
 
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
@@ -2287,7 +2292,51 @@ if (result === 'WIN') {
         showToast(`Strategy [${cleanV}] successfully initialized in core.`); // Optional: Direkt Feedback geben
     }
 }
+
+async function addNewTag() {
+    const v = await showCustomPrompt("Enter New Tag Name:");
     
+    if(v && v.trim() !== "") {
+        const upperV = v.trim().toUpperCase().replace(/ /g, '_');
+        
+        if (!customTags.includes(upperV)) {
+            customTags.push(upperV);
+            await saveUserSettings();
+            populateLists();
+            showToast(`Tag "${upperV}" created successfully.`);
+        } else {
+            showToast("Tag already exists.", "error");
+        }
+    } else if (v === "") {
+        showToast("Error: Tag name cannot be empty.", "error");
+    }
+}
+
+async function removeTag() {
+    const selectedTag = document.getElementById('mistake').value;
+    
+    if (customTags.length <= 1) {
+        showToast("Access Denied: Minimum 1 tag required!", "error");
+        return;
+    }
+
+    const usedInTrades = trades.filter(t => t.mistake === selectedTag).length;
+    
+    let message = usedInTrades > 0 
+        ? `WARNING: Tag "${selectedTag}" is used in ${usedInTrades} trades. Delete anyway?` 
+        : `System: Remove tag "${selectedTag}"?`;
+
+    const confirmed = await showCustomPrompt(message, true);
+
+    if (confirmed) {
+        customTags = customTags.filter(t => t !== selectedTag);
+        await saveUserSettings();
+        populateLists();
+        showToast(`Tag "${selectedTag}" deleted.`);
+    } else {
+        showToast("Operation cancelled.", "error");
+    }
+}    
 	
 async function removeInstrument() {
     const selectedInstrument = document.getElementById('instrument').value;
@@ -2876,6 +2925,7 @@ async function loadUserSettings() {
         // Settings gefunden - verwenden
         customInstruments = data.custom_instruments || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
         customStrategies = data.custom_strategies || ["Breakout", "Retest", "Trend", "Scalp"];
+		customTags = data.custom_tags || ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"];
         document.getElementById('initialBalanceInput').value = data.initial_balance || 10000;
     } else {
         // Keine Settings gefunden - Defaults erstellen
@@ -2883,6 +2933,7 @@ async function loadUserSettings() {
             user_id: currentUser.id,
             custom_instruments: ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"],
             custom_strategies: ["Breakout", "Retest", "Trend", "Scalp"],
+			custom_tags: ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"],
             initial_balance: 10000
         }]);
     }
@@ -2898,6 +2949,7 @@ async function saveUserSettings() {
         .update({
             custom_instruments: customInstruments,
             custom_strategies: customStrategies,
+			custom_tags: customTags,
             initial_balance: parseFloat(document.getElementById('initialBalanceInput').value) || 10000,
             updated_at: new Date().toISOString()
         })
