@@ -1034,6 +1034,51 @@ tr.row-loss {
     color: #ccc !important;
 }
 
+
+
+/* --- PRO MODE & SWITCH STYLES --- */
+
+/* Der Schalter selbst */
+.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3d4651; transition: .4s; border-radius: 34px; border: 1px solid #555; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
+input:checked + .slider:before { transform: translateX(18px); background-color: #0b0e11; }
+
+/* PRO MODE DESIGN ÄNDERUNGEN */
+body.pro-mode {
+    background-color: #050505; /* Etwas dunklerer, tieferer Hintergrund */
+}
+
+/* Die Chart-Boxen im Pro-Mode (Glas-Effekt & Kantig) */
+body.pro-mode .chart-box {
+    background: rgba(13, 17, 23, 0.6) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px; /* Eckiger für Terminal-Look */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Der feine Glow-Strich oben an den Boxen */
+body.pro-mode .chart-box::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.5), transparent);
+}
+
+/* Statistik Karten im Pro-Mode */
+body.pro-mode .stat-card {
+    background: rgba(20, 25, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #00f2ff; /* Immer Neon-Cyan als Akzent */
+    border-radius: 4px;
+}
+
+
     </style>
 </head>
 <body>
@@ -1111,19 +1156,27 @@ tr.row-loss {
 <div id="mainApp" style="display:none;">
 
 <div class="container">
-   <div class="user-info">
-        <span id="userEmail"></span>
-        <button class="btn-logout" onclick="handleLogout()">Logout</button>
-		<button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
+<div class="user-info">
+    <div class="style-switch-wrapper" style="margin-right: 15px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:10px; color:#8892b0; font-weight:bold;">CLASSIC</span>
+        <label class="switch">
+            <input type="checkbox" id="proModeToggle" onchange="toggleProMode()">
+            <span class="slider round"></span>
+        </label>
+        <span style="font-size:10px; color:#00f2ff; font-weight:bold; text-shadow: 0 0 5px rgba(0,242,255,0.5);">PRO</span>
+    </div>
+
+    <span id="userEmail"></span>
+    <button class="btn-logout" onclick="handleLogout()">Logout</button>
+    
+    <button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
         <i class="fa-brands fa-telegram"></i> CONTACT DEV
     </button>
 
-
-<button id="perfToggleBtn" onclick="togglePerformanceMode()" class="perf-btn">
-    <div class="led"></div> FX_RENDER: ON
-</button>
-
-    </div>
+    <button id="perfToggleBtn" onclick="togglePerformanceMode()" class="perf-btn">
+        <div class="led"></div> FX_RENDER: ON
+    </button>
+</div>
 
     <div class="header">
 	<!-- MOCKUP 5 -->
@@ -1869,28 +1922,222 @@ if (typeof updateRecentTrades === "function") {
     }
 }
 
-    function updateCharts(chartTrades) {
-        const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-        const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
-        let runningEquity = initialBalance, peak = initialBalance;
-        const equityData = [initialBalance], drawdownData = [0];
-        chrono.forEach(t => { runningEquity += Number(t.pl); equityData.push(runningEquity); if (runningEquity > peak) peak = runningEquity; drawdownData.push(runningEquity - peak); });
+// Variable für den Status
+let isProMode = false;
 
-        if (equityChart) equityChart.destroy();
-        equityChart = new Chart(document.getElementById('equityChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Equity', data: equityData, borderColor: '#00f2ff', fill: true, backgroundColor: 'rgba(0, 242, 255, 0.05)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'EQUITY CURVE', color: '#8892b0' }, legend: {display:false} } } });
-        if (drawdownChart) drawdownChart.destroy();
-        drawdownChart = new Chart(document.getElementById('drawdownChart').getContext('2d'), { type: 'line', data: { labels: [0, ...chrono.map((_,i)=>i+1)], datasets: [{ label: 'Drawdown', data: drawdownData, borderColor: '#ff4a68', fill: true, backgroundColor: 'rgba(255, 74, 104, 0.05)', tension: 0.3, pointRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0' }, legend: {display:false} } } });
-        const stratMap = {}; chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
-        if (strategyPLChart) strategyPLChart.destroy();
-        strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(stratMap), datasets: [{ data: Object.values(stratMap), backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'BY STRATEGY', color: '#8892b0' }, legend: {display:false} } } });
-        if (distributionChart) distributionChart.destroy();
-        distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { type: 'bar', data: { labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], datasets: [{ data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), backgroundColor: '#764ba2' }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'TAGS', color: '#8892b0' }, legend: {display:false} } } });
-        const dD = [0,0,0,0,0,0,0]; chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
-        if (weekdayChart) weekdayChart.destroy();
-        weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { type: 'bar', data: { labels: ['S','M','T','W','T','F','S'], datasets: [{ data: dD, backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68') }] }, options: { maintainAspectRatio: false, plugins: { title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0' }, legend: {display:false} } } });
+// Funktion zum Umschalten
+function toggleProMode() {
+    isProMode = document.getElementById('proModeToggle').checked;
     
-		createHeatmap(chartTrades);
-	}
+    // Klasse am Body setzen für CSS-Änderungen
+    if(isProMode) document.body.classList.add('pro-mode');
+    else document.body.classList.remove('pro-mode');
+
+    // Speichern
+    localStorage.setItem('tj_pro_mode', isProMode);
+    
+    // Charts neu zeichnen
+    updateStatsAndTable(); 
+}
+
+// Beim Laden den Status wiederherstellen
+window.addEventListener('load', () => {
+    const savedPro = localStorage.getItem('tj_pro_mode');
+    if(savedPro === 'true') {
+        isProMode = true;
+        document.getElementById('proModeToggle').checked = true;
+        document.body.classList.add('pro-mode');
+    }
+});
+
+// DIE NEUE INTELLIGENTE CHART-FUNKTION
+function updateCharts(chartTrades) {
+    const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+    
+    // Chronologische Sortierung
+    const chrono = [...chartTrades].sort((a,b) => new Date(a.date + ' ' + (a.time || '00:00')) - new Date(b.date + ' ' + (b.time || '00:00')));
+    
+    let runningEquity = initialBalance, peak = initialBalance;
+    const equityData = [initialBalance], drawdownData = [0];
+    
+    chrono.forEach(t => { 
+        runningEquity += Number(t.pl); 
+        equityData.push(runningEquity); 
+        if (runningEquity > peak) peak = runningEquity; 
+        drawdownData.push(runningEquity - peak); 
+    });
+
+    // --- PRO MODE EINSTELLUNGEN ---
+    // Wenn Pro-Mode an ist: Achse rechts, weniger Gitter, Monospace Font
+    const commonOptions = {
+        maintainAspectRatio: false,
+        animation: { duration: isProMode ? 1500 : 750, easing: 'easeOutQuart' }, // Langsamer & edler im Pro Mode
+        plugins: { 
+            legend: { display: false },
+            tooltip: {
+                enabled: true,
+                mode: 'index',
+                intersect: false,
+                backgroundColor: isProMode ? 'rgba(5, 7, 10, 0.9)' : 'rgba(0,0,0,0.8)',
+                borderColor: isProMode ? '#00f2ff' : 'transparent',
+                borderWidth: isProMode ? 1 : 0,
+                titleFont: { family: isProMode ? 'monospace' : 'sans-serif' },
+                bodyFont: { family: isProMode ? 'monospace' : 'sans-serif' }
+            }
+        },
+        scales: {
+            x: { 
+                grid: { display: false }, 
+                ticks: { 
+                    color: '#8892b0', 
+                    font: { family: isProMode ? 'monospace' : 'sans-serif', size: isProMode ? 10 : 12 } 
+                } 
+            },
+            y: { 
+                position: isProMode ? 'right' : 'left', // HIER IST DER SWITCH!
+                grid: { 
+                    color: isProMode ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)', 
+                    drawBorder: false 
+                }, 
+                ticks: { 
+                    color: '#8892b0', 
+                    font: { family: isProMode ? 'monospace' : 'sans-serif' } 
+                } 
+            }
+        },
+        interaction: { mode: 'index', intersect: false }
+    };
+
+    // 1. EQUITY CHART
+    const eCtx = document.getElementById('equityChart').getContext('2d');
+    
+    // Gradient nur erstellen, wenn Context da ist
+    let eGradient = null;
+    if(isProMode) {
+        eGradient = eCtx.createLinearGradient(0, 0, 0, 400);
+        eGradient.addColorStop(0, 'rgba(0, 242, 255, 0.2)');
+        eGradient.addColorStop(1, 'rgba(0, 242, 255, 0)');
+    } else {
+        // Standard Classic Style
+        eGradient = 'rgba(0, 242, 255, 0.05)';
+    }
+
+    if (equityChart) equityChart.destroy();
+    equityChart = new Chart(eCtx, { 
+        type: 'line', 
+        data: { 
+            labels: [0, ...chrono.map((_,i)=>i+1)], 
+            datasets: [{ 
+                label: 'Equity', 
+                data: equityData, 
+                borderColor: '#00f2ff', 
+                borderWidth: isProMode ? 2 : 2,
+                fill: true, 
+                backgroundColor: eGradient, 
+                tension: isProMode ? 0.4 : 0.3, // Weicher im Pro Mode
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#00f2ff'
+            }] 
+        }, 
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, title: { display: true, text: 'EQUITY CURVE', color: '#8892b0', font: { family: isProMode ? 'monospace' : 'sans-serif' } } }
+        }
+    });
+
+    // 2. DRAWDOWN CHART
+    const dCtx = document.getElementById('drawdownChart').getContext('2d');
+    let dGradient = isProMode ? dCtx.createLinearGradient(0, 0, 0, 200) : 'rgba(255, 74, 104, 0.05)';
+    if(isProMode) {
+        dGradient.addColorStop(0, 'rgba(255, 74, 104, 0.2)');
+        dGradient.addColorStop(1, 'rgba(255, 74, 104, 0)');
+    }
+
+    if (drawdownChart) drawdownChart.destroy();
+    drawdownChart = new Chart(dCtx, { 
+        type: 'line', 
+        data: { 
+            labels: [0, ...chrono.map((_,i)=>i+1)], 
+            datasets: [{ 
+                label: 'Drawdown', 
+                data: drawdownData, 
+                borderColor: '#ff4a68', 
+                fill: true, 
+                backgroundColor: dGradient, 
+                tension: 0.3, 
+                pointRadius: 0 
+            }] 
+        }, 
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, title: { display: true, text: 'DRAWDOWN ($)', color: '#8892b0', font: { family: isProMode ? 'monospace' : 'sans-serif' } } }
+        }
+    });
+
+    // 3. STRATEGY CHART
+    const stratMap = {}; 
+    chartTrades.forEach(t => { const s = t.strategy || 'Other'; stratMap[s] = (stratMap[s] || 0) + Number(t.pl); });
+    
+    if (strategyPLChart) strategyPLChart.destroy();
+    strategyPLChart = new Chart(document.getElementById('strategyPLChart').getContext('2d'), { 
+        type: 'bar', 
+        data: { 
+            labels: Object.keys(stratMap), 
+            datasets: [{ 
+                data: Object.values(stratMap), 
+                backgroundColor: Object.values(stratMap).map(v => v >= 0 ? '#00f2ff' : '#ff4a68'),
+                borderRadius: isProMode ? 2 : 4
+            }] 
+        }, 
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, title: { display: true, text: 'BY STRATEGY', color: '#8892b0', font: { family: isProMode ? 'monospace' : 'sans-serif' } } }
+        } 
+    });
+
+    // 4. TAGS / MISTAKES
+    if (distributionChart) distributionChart.destroy();
+    distributionChart = new Chart(document.getElementById('distributionChart').getContext('2d'), { 
+        type: 'bar', 
+        data: { 
+            labels: ['Plan', 'FOMO', 'Early', 'Revenge', 'Late'], 
+            datasets: [{ 
+                data: ['PLAN', 'FOMO', 'EARLY_EXIT', 'REVENGE', 'LATE_ENTRY'].map(tag => chartTrades.filter(t=>t.mistake===tag).length), 
+                backgroundColor: '#764ba2',
+                borderRadius: isProMode ? 2 : 4
+            }] 
+        }, 
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, title: { display: true, text: 'PSYCHOLOGY', color: '#8892b0', font: { family: isProMode ? 'monospace' : 'sans-serif' } } }
+        } 
+    });
+
+    // 5. WEEKDAY CHART
+    const dD = [0,0,0,0,0,0,0]; 
+    chartTrades.forEach(t => { dD[new Date(t.date).getDay()] += Number(t.pl); });
+    
+    if (weekdayChart) weekdayChart.destroy();
+    weekdayChart = new Chart(document.getElementById('weekdayChart').getContext('2d'), { 
+        type: 'bar', 
+        data: { 
+            labels: ['S','M','T','W','T','F','S'], 
+            datasets: [{ 
+                data: dD, 
+                backgroundColor: dD.map(v => v >= 0 ? '#00ffaa' : '#ff4a68'),
+                borderRadius: isProMode ? 2 : 4
+            }] 
+        }, 
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, title: { display: true, text: 'WEEKDAY P/L', color: '#8892b0', font: { family: isProMode ? 'monospace' : 'sans-serif' } } }
+        } 
+    });
+
+    // Heatmap immer aktualisieren
+    createHeatmap(chartTrades);
+}
 
     document.getElementById('tradeForm').addEventListener('submit', async function(e) {
         e.preventDefault();
