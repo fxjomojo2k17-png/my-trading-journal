@@ -1225,6 +1225,34 @@ body.pro-mode select:active,
 body.pro-mode select:focus {
     background-color: #0b0e11 !important;
 }
+
+/* Findet die Form-Gruppe, die das Tag-Dropdown enthält und macht sie breiter */
+.form-group:has(#mistake) {
+    grid-column: span 2; /* Nimmt den Platz von 2 normalen Feldern ein */
+    min-width: 250px;    /* Garantiert eine Mindestbreite */
+}
+
+/* Stellt sicher, dass der Container innerhalb der Gruppe die volle Breite nutzt */
+.combo-container {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+
+/* Macht das Select-Feld selbst flexibel, damit es den Platz ausfüllt */
+#mistake {
+    flex-grow: 1; 
+    min-width: 0; /* Verhindert das Überlaufen in Flexbox */
+    text-overflow: ellipsis;
+}
+
+/* Im Pro-Mode: Etwas mehr Innenabstand für längere Texte */
+body.pro-mode #mistake {
+    padding-right: 25px; 
+    font-size: 13px;
+}
+
+
     </style>
 </head>
 <body>
