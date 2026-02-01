@@ -601,52 +601,12 @@
 
         .form-section { padding: 20px; }
         
-/* Das Haupt-Raster */
-.form-grid {
-    display: grid;
-    /* Wir erstellen 4 schmale Spalten für maximale Flexibilität */
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px 20px;
-    align-items: start;
-}
-
-/* Standard-Verhalten für alle Gruppen (1 Spalte) */
-.form-group {
-    grid-column: span 1;
-}
-
-/* Deine span-2 Elemente (Instrument, Strategy) nutzen 2 Spalten */
-.form-group.span-2 {
-    grid-column: span 2;
-}
-
-/* --- NOTES FIX --- */
-/* Wir suchen die Gruppe, in der die Notes liegen */
-.form-group:has(#notes) {
-    grid-column: 3 / 5; /* Startet in Spalte 3 und geht bis zum Ende */
-    grid-row: 3 / 6;    /* Spannt sich vertikal über mehrere Zeilen */
-    height: 100%;       /* Nutzt die volle zugewiesene Höhe */
-}
-
-#notes {
-    min-height: 140px;  /* Die gewünschte Größe aus deinem Bild */
-    height: 100%;
-}
-
-/* --- BUTTON FIX --- */
-/* Die Button-Gruppe positionieren wir unter Tag & Screenshot */
-.button-group {
-    grid-column: 1 / 3; /* Nutzt den Platz unter Tag/Screenshot */
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-/* Korrektur für Tag & Screenshot nebeneinander */
-.form-group:has(#mistake), 
-.form-group:has(#screenshot) {
-    grid-column: span 1;
-}
+        .form-grid { 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            align-items: end;
+        }
         
         @media (min-width: 1024px) {
             .form-grid { grid-template-columns: repeat(12, 1fr); }
@@ -1343,37 +1303,6 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
-/* Das Feld in der Standard-Ansicht (Classic) */
-.form-group.span-2 textarea#notes {
-    width: 100%;
-    min-height: 120px; /* Hier geben wir dem Feld deutlich mehr Grund-Höhe */
-    padding: 15px;      /* Mehr Luft im Inneren */
-    font-size: 15px;
-    line-height: 1.6;
-    background: #1a1f26;
-    border: 1px solid #3d4651;
-    border-radius: 8px;
-    color: #fff;
-    resize: vertical;   /* Ermöglicht es dem User, die Höhe manuell zu ziehen */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* PRO MODE: Kraftvolles, technisches Design */
-body.pro-mode .form-group.span-2 textarea#notes {
-    min-height: 150px; /* Im Pro Mode sogar noch etwas größer für den Fokus */
-    background-color: #080a0c !important;
-    background-image: 
-        linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px) !important;
-    background-size: 25px 25px !important; /* Größeres Raster für bessere Optik */
-    
-    border: 1px solid rgba(0, 242, 255, 0.3) !important;
-    border-left: 5px solid #00f2ff !important;
-    color: #00f2ff !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    border-radius: 0px !important;
-}
-
 
 
     </style>
@@ -1571,7 +1500,6 @@ body.pro-mode .form-group.span-2 textarea#notes {
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
                 <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
-				
                 <div class="form-group">
     <label>Tag</label>
     <div class="combo-container">
@@ -1581,7 +1509,7 @@ body.pro-mode .form-group.span-2 textarea#notes {
     </div>
 </div>
                 <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
-                <div class="form-group span-2"><label>Notes</label><textarea id="notes" placeholder="Details..."></textarea></div>
+                <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
             <div class="button-group">
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
@@ -3535,15 +3463,6 @@ async function saveUserSettings() {
         })
         .eq('user_id', currentUser.id);
 }
-
-const notesField = document.getElementById('notes');
-
-notesField.addEventListener('input', function() {
-    // Setzt die Höhe kurz zurück, um die neue Scroll-Höhe zu berechnen
-    this.style.height = 'auto';
-    // Setzt die neue Höhe basierend auf dem Inhalt
-    this.style.height = (this.scrollHeight) + 'px';
-});
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
