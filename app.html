@@ -601,12 +601,56 @@
 
         .form-section { padding: 20px; }
         
-        .form-grid { 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            align-items: end;
-        }
+        /* Grundstruktur des Grids */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 Spalten */
+    gap: 15px 20px;
+    align-items: start;
+}
+
+/* Standard Felder */
+.form-group {
+    grid-column: span 1;
+}
+
+/* Breite Felder (Instrument & Strategy) */
+.form-group.span-2 {
+    grid-column: span 2;
+}
+
+/* NOTES POSITIONIERUNG (Dein roter Rahmen) */
+.notes-container {
+    grid-column: 3 / 5; /* Nutzt Spalte 3 und 4 */
+    grid-row: 3 / 6;    /* Geht über 3 Zeilen nach unten */
+    display: flex;
+    flex-direction: column;
+}
+
+#notes {
+    height: 100%;
+    min-height: 150px; /* Die gewünschte Höhe aus deinem Bild */
+    resize: none;
+}
+
+/* BUTTON POSITIONIERUNG (Dein roter Pfeil) */
+.button-group {
+    grid-column: 1 / 3; /* Bleibt links unter Tag & Screenshot */
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+}
+
+/* Pro-Mode Design für Notes */
+body.pro-mode #notes {
+    background-color: rgba(0, 242, 255, 0.02) !important;
+    background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
+    border: 1px solid #00f2ff !important;
+    color: #00f2ff !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
         
         @media (min-width: 1024px) {
             .form-grid { grid-template-columns: repeat(12, 1fr); }
@@ -1474,49 +1518,59 @@ body.pro-mode #screenshot.drag-active {
 
     </div>
 
-    <div class="form-section">
-        <form id="tradeForm">
-            <input type="hidden" id="editId" value="">
-            <div class="form-grid">
-                <div class="form-group"><label>Date</label><input type="date" id="date" required></div>
-                <div class="form-group"><label>Time</label><input type="time" id="time" required></div>
-                <div class="form-group span-2"><label>Instrument</label>
-                    <div class="combo-container">
-                        <select id="instrument" required></select>
-                        <button type="button" class="btn-action btn-add" onclick="addNewInstrument()">+</button>
-                        <button type="button" class="btn-action btn-del" onclick="removeInstrument()">–</button>
-                    </div>
+<div class="form-section">
+    <form id="tradeForm">
+        <input type="hidden" id="editId" value="">
+        <div class="form-grid">
+            <div class="form-group"><label>Date</label><input type="date" id="date" required></div>
+            <div class="form-group"><label>Time</label><input type="time" id="time" required></div>
+            <div class="form-group span-2">
+                <label>Instrument</label>
+                <div class="combo-container">
+                    <select id="instrument" required></select>
+                    <button type="button" class="btn-action btn-add" onclick="addNewInstrument()">+</button>
+                    <button type="button" class="btn-action btn-del" onclick="removeInstrument()">–</button>
                 </div>
-                <div class="form-group span-2"><label>Strategy</label>
-                    <div class="combo-container">
-                        <select id="strategy" required></select>
-                        <button type="button" class="btn-action btn-add" onclick="addNewStrategy()">+</button>
-                        <button type="button" class="btn-action btn-del" onclick="removeStrategy()">–</button>
-                    </div>
-                </div>
-                <div class="form-group"><label>Direction</label><select id="direction" required><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
-                <div class="form-group"><label>Entry</label><input type="text" id="entry" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Exit</label><input type="text" id="exit" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
-                <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
-                <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
-                <div class="form-group">
-    <label>Tag</label>
-    <div class="combo-container">
-        <select id="mistake" required></select>
-        <button type="button" class="btn-action btn-add" onclick="addNewTag()">+</button>
-        <button type="button" class="btn-action btn-del" onclick="removeTag()">–</button>
-    </div>
-</div>
-                <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
-                <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
+
+            <div class="form-group span-2">
+                <label>Strategy</label>
+                <div class="combo-container">
+                    <select id="strategy" required></select>
+                    <button type="button" class="btn-action btn-add" onclick="addNewStrategy()">+</button>
+                    <button type="button" class="btn-action btn-del" onclick="removeStrategy()">–</button>
+                </div>
+            </div>
+            <div class="form-group"><label>Direction</label><select id="direction" required><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
+            <div class="form-group"><label>Entry</label><input type="text" id="entry" required oninput="validateNumber(this)"></div>
+
+            <div class="form-group"><label>Exit</label><input type="text" id="exit" required oninput="validateNumber(this)"></div>
+            <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
+            
+            <div class="form-group notes-container">
+                <label>Notes</label>
+                <textarea id="notes" placeholder="Details..."></textarea>
+            </div>
+
+            <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
+            <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
+
+            <div class="form-group">
+                <label>Tag</label>
+                <div class="combo-container">
+                    <select id="mistake" required></select>
+                    <button type="button" class="btn-action btn-add" onclick="addNewTag()">+</button>
+                    <button type="button" class="btn-action btn-del" onclick="removeTag()">–</button>
+                </div>
+            </div>
+            <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
+
             <div class="button-group">
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
             </div>
-        </form>
-    </div>
+        </div> </form>
+</div>
 
     <div class="section-divider"></div>
 
