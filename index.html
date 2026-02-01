@@ -1718,7 +1718,7 @@ async function fetchTrades() {
     if (error) console.error('Error:', error);
     else { 
         trades = data || []; 
-        await loadUserSettings(); // <-- NEU HINZUFÜGEN
+        // await loadUserSettings(); // TEMPORÄR DEAKTIVIERT
         refreshApp(); 
     }
 }
