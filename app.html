@@ -601,10 +601,9 @@
 
         .form-section { padding: 20px; }
         
-.form-grid {
+    .form-grid {
     display: grid;
-    /* Drei Spalten: Zwei normale für die Inputs, eine breite für Notes */
-    grid-template-columns: 1fr 1fr 1.5fr; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
     align-items: start;
 }
@@ -1343,27 +1342,29 @@ body.pro-mode .form-group.span-2 textarea#notes {
     letter-spacing: 1px;
 }
 
-/* Wir sorgen dafür, dass die Notes in der dritten Spalte "andocken" */
-.form-group:has(#notes) {
-    grid-column: 3;      /* Festgelegt auf die 3. Spalte */
-    grid-row: 1 / 4;     /* Geht von der ersten bis zur vierten Zeile nach unten */
-}
-
-/* Tag und Screenshot müssen in die Spalten 1 und 2 */
+/* Tag und Screenshot wieder nebeneinander, aber mit genug Platz */
 .form-group:has(#mistake), 
 .form-group:has(#screenshot) {
-    grid-column: span 1; 
+    grid-column: auto; /* Wir nehmen das span-2 weg, damit es nicht das Grid sprengt */
+    min-width: 200px;
 }
 
-/* Falls das Fenster schmaler wird (Mobile), schalten wir auf eine Spalte um */
-@media (max-width: 900px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    .form-group:has(#notes) {
-        grid-column: 1;
-        grid-row: auto;
-    }
+/* Die Notes machen wir jetzt zum "Anker" auf der rechten Seite */
+.form-group:has(#notes) {
+    grid-column: span 2; /* Die Notes dürfen sich über zwei Spalten breit machen */
+    grid-row: span 2;    /* Die Notes gehen über zwei Zeilen tief */
+}
+
+/* Falls du die Klassen direkt im HTML hast (Alternative) */
+.span-2 {
+    grid-column: span 2 !important;
+}
+
+/* Korrektur für die Abstände der Buttons im Tag-Feld */
+.combo-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
     </style>
