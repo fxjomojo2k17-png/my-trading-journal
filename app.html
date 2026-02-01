@@ -2920,9 +2920,9 @@ async function loadUserSettings() {
     
     if (data) {
         // Settings gefunden - verwenden
-        customInstruments = data.custom_instruments || ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
-        customStrategies = data.custom_strategies || ["Breakout", "Retest", "Trend", "Scalp"];
-		customTags = (data.custom_tags && data.custom_tags.length > 0) ? data.custom_tags : ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"];
+   customInstruments = data.custom_instruments ?? ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
+customStrategies = data.custom_strategies ?? ["Breakout", "Retest", "Trend", "Scalp"];
+customTags = data.custom_tags ?? ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"];
         document.getElementById('initialBalanceInput').value = data.initial_balance || 10000;
     } else {
         // Keine Settings gefunden - Defaults erstellen
