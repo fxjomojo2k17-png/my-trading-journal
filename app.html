@@ -1252,6 +1252,27 @@ body.pro-mode #screenshot {
     grid-column: span 2 !important;
 }
 
+/* Erzeugt Abstand zwischen dem Tag-Feld und dem nächsten Element */
+.form-group:has(#mistake) {
+    margin-right: 15px; /* Abstand nach rechts */
+}
+
+/* Falls die Felder untereinander stehen (auf kleineren Bildschirmen), 
+   sorgen wir auch für Abstand nach unten */
+.form-group.wide-field {
+    margin-bottom: 5px;
+}
+
+/* Speziell um den - Button vom Screenshot-Label zu trennen */
+.combo-container {
+    padding-right: 10px; /* Schafft innerhalb des Containers Platz am Ende */
+}
+
+/* Im Pro-Mode machen wir den Abstand noch klarer durch eine feine Trennlinie */
+body.pro-mode .form-group:has(#mistake) {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding-right: 20px;
+}
 
     </style>
 </head>
