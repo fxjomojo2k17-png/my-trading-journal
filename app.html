@@ -601,12 +601,12 @@
 
         .form-section { padding: 20px; }
         
-        .form-grid { 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            align-items: end;
-        }
+    .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
         
         @media (min-width: 1024px) {
             .form-grid { grid-template-columns: repeat(12, 1fr); }
@@ -1340,6 +1340,31 @@ body.pro-mode .form-group.span-2 textarea#notes {
     margin-bottom: 8px;
     display: block;
     letter-spacing: 1px;
+}
+
+/* Tag und Screenshot wieder nebeneinander, aber mit genug Platz */
+.form-group:has(#mistake), 
+.form-group:has(#screenshot) {
+    grid-column: auto; /* Wir nehmen das span-2 weg, damit es nicht das Grid sprengt */
+    min-width: 200px;
+}
+
+/* Die Notes machen wir jetzt zum "Anker" auf der rechten Seite */
+.form-group:has(#notes) {
+    grid-column: span 2; /* Die Notes dürfen sich über zwei Spalten breit machen */
+    grid-row: span 2;    /* Die Notes gehen über zwei Zeilen tief */
+}
+
+/* Falls du die Klassen direkt im HTML hast (Alternative) */
+.span-2 {
+    grid-column: span 2 !important;
+}
+
+/* Korrektur für die Abstände der Buttons im Tag-Feld */
+.combo-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
     </style>
