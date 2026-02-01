@@ -2303,7 +2303,7 @@ async function addNewTag() {
             customTags.push(upperV);
             await saveUserSettings();
             populateLists();
-            showToast(`Tag "${upperV}" created successfully.`);
+            showToast(`Tag "${upperV}" created successfully.`);  // ← FIX
         } else {
             showToast("Tag already exists.", "error");
         }
@@ -2319,24 +2319,21 @@ async function removeTag() {
         showToast("Access Denied: Minimum 1 tag required!", "error");
         return;
     }
-
     const usedInTrades = trades.filter(t => t.mistake === selectedTag).length;
     
     let message = usedInTrades > 0 
         ? `WARNING: Tag "${selectedTag}" is used in ${usedInTrades} trades. Delete anyway?` 
         : `System: Remove tag "${selectedTag}"?`;
-
     const confirmed = await showCustomPrompt(message, true);
-
     if (confirmed) {
         customTags = customTags.filter(t => t !== selectedTag);
         await saveUserSettings();
         populateLists();
-        showToast(`Tag "${selectedTag}" deleted.`);
+        showToast(`Tag "${selectedTag}" deleted.`);  // ← FIX
     } else {
         showToast("Operation cancelled.", "error");
     }
-}    
+}
 	
 async function removeInstrument() {
     const selectedInstrument = document.getElementById('instrument').value;
