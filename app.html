@@ -1157,25 +1157,29 @@ body.pro-mode .stat-card {
 
 <div class="container">
 <div class="user-info">
-    <div class="style-switch-wrapper" style="margin-right: 15px; display:flex; align-items:center; gap:8px;">
-        <span style="font-size:10px; color:#8892b0; font-weight:bold;">CLASSIC</span>
-        <label class="switch">
-            <input type="checkbox" id="proModeToggle" onchange="toggleProMode()">
-            <span class="slider round"></span>
-        </label>
-        <span style="font-size:10px; color:#00f2ff; font-weight:bold; text-shadow: 0 0 5px rgba(0,242,255,0.5);">PRO</span>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span id="userEmail"></span>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        <button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
+            <i class="fa-brands fa-telegram"></i> CONTACT
+        </button>
     </div>
 
-    <span id="userEmail"></span>
-    <button class="btn-logout" onclick="handleLogout()">Logout</button>
-    
-    <button onclick="window.open('https://t.me/Hohomoholos', '_blank')" class="contact-btn">
-        <i class="fa-brands fa-telegram"></i> CONTACT DEV
-    </button>
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px; margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+        
+        <button id="perfToggleBtn" onclick="togglePerformanceMode()" class="perf-btn" style="width: 100%; justify-content: center;">
+            <div class="led"></div> FX_RENDER
+        </button>
 
-    <button id="perfToggleBtn" onclick="togglePerformanceMode()" class="perf-btn">
-        <div class="led"></div> FX_RENDER: ON
-    </button>
+        <div class="style-switch-wrapper" style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:9px; color:#555; font-weight:bold; letter-spacing:1px;">CLASSIC</span>
+            <label class="switch" style="transform: scale(0.7); margin: 0;"> <input type="checkbox" id="proModeToggle" onchange="toggleProMode()">
+                <span class="slider round"></span>
+            </label>
+            <span style="font-size:9px; color:#00f2ff; font-weight:bold; letter-spacing:1px;">PRO</span>
+        </div>
+
+    </div>
 </div>
 
     <div class="header">
