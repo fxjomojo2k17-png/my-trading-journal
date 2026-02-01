@@ -1078,7 +1078,131 @@ body.pro-mode .stat-card {
     border-radius: 4px;
 }
 
+/* =========================================
+   PRO MODE: INPUTS & FORMS
+   ========================================= */
 
+/* Inputs eckiger, dunkler und mit technischer Schrift */
+body.pro-mode input, 
+body.pro-mode select, 
+body.pro-mode textarea {
+    background: rgba(10, 12, 16, 0.95) !important; /* Fast schwarz */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-left: 2px solid #333 !important; /* Standard linker Rand */
+    border-radius: 0px !important; /* Ecken kantig machen */
+    font-family: 'Courier New', monospace !important; /* Hacker-Font */
+    color: #00f2ff !important; /* Text ist immer Neon-Cyan */
+    letter-spacing: 1px;
+    box-shadow: none !important;
+}
+
+/* Fokus-Effekt: Leuchtet auf */
+body.pro-mode input:focus, 
+body.pro-mode select:focus, 
+body.pro-mode textarea:focus {
+    border-color: #00f2ff !important;
+    border-left: 2px solid #00f2ff !important;
+    background: rgba(0, 242, 255, 0.05) !important;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.1) !important;
+}
+
+/* Labels im Formular */
+body.pro-mode label {
+    font-family: monospace;
+    color: #555;
+    font-weight: normal;
+}
+
+/* Buttons im Formular: Kantig und technisch */
+body.pro-mode .btn-primary,
+body.pro-mode .btn-secondary,
+body.pro-mode .btn-action {
+    border-radius: 0px !important;
+    font-family: monospace;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+body.pro-mode .btn-primary {
+    background: transparent !important;
+    border: 1px solid #00f2ff !important;
+    color: #00f2ff !important;
+    box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
+}
+
+body.pro-mode .btn-primary:hover {
+    background: #00f2ff !important;
+    color: #000 !important;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+}
+
+/* =========================================
+   PRO MODE: CALENDAR
+   ========================================= */
+
+/* Kalender-Gitter: Dunklerer Hintergrund */
+body.pro-mode .calendar-grid {
+    background: rgba(10, 12, 16, 0.8) !important;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0px !important;
+}
+
+/* Einzelner Tag: Quadratisch und technisch */
+body.pro-mode .calendar-day {
+    border-radius: 0px !important;
+    background: rgba(20, 25, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    font-family: monospace;
+}
+
+/* Hover Effekt im Kalender */
+body.pro-mode .calendar-day:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #00f2ff;
+    transform: none !important; /* Kein Springen im Pro Mode */
+}
+
+/* Gewinn-Tage: Leuchtendes Gitter statt Fläche */
+body.pro-mode .day-win {
+    background: rgba(0, 255, 170, 0.05) !important;
+    border: 1px solid #00ffaa !important;
+    color: #00ffaa !important;
+    box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.1);
+}
+
+/* Verlust-Tage: Roter Rahmen, glitchy look */
+body.pro-mode .day-loss {
+    background: rgba(255, 74, 104, 0.05) !important;
+    border: 1px solid #ff4a68 !important;
+    color: #ff4a68 !important;
+    box-shadow: inset 0 0 10px rgba(255, 74, 104, 0.1);
+}
+
+/* Header im Kalender */
+body.pro-mode .calendar-header {
+    font-family: monospace;
+    letter-spacing: 2px;
+    color: #00f2ff;
+}
+
+/* Tabelle unten (Trade Liste) im Pro Mode */
+body.pro-mode .trades-table th {
+    background: #05070a;
+    font-family: monospace;
+    border-bottom: 1px solid #333;
+    color: #00f2ff;
+}
+
+body.pro-mode .trades-table tr {
+    border-radius: 0px !important; /* Keine runden Ecken */
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+body.pro-mode .trades-table tr:hover {
+    background: rgba(0, 242, 255, 0.05) !important;
+    box-shadow: none !important;
+    border-left: 2px solid #00f2ff;
+}
     </style>
 </head>
 <body>
