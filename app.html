@@ -1303,6 +1303,41 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
+/* Grundstyling für deine Textarea */
+#notes {
+    width: 100%;
+    min-height: 45px; /* Etwas höher als ein normales Feld */
+    padding: 10px 12px;
+    line-height: 1.5;
+    resize: none; /* Deaktiviert das manuelle Ziehen für einen sauberen Look */
+    overflow: hidden; /* Versteckt Scrollbars bei Auto-Expand */
+    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+}
+
+/* PRO MODE: Der Terminal-Vibe */
+body.pro-mode #notes {
+    background-color: rgba(10, 15, 20, 0.9) !important;
+    /* Subtiles Raster-Muster (Blueprint-Style) */
+    background-image: 
+        linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+    background-size: 15px 15px;
+    
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-left: 3px solid #00f2ff !important; /* Akzentlinie links */
+    color: #00f2ff !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    border-radius: 0;
+}
+
+/* Fokus-Effekt: Das Feld fängt an zu leuchten */
+body.pro-mode #notes:focus {
+    outline: none;
+    border-color: #00f2ff !important;
+    background-color: rgba(0, 242, 255, 0.05) !important;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.15);
+}
+
     </style>
 </head>
 <body>
@@ -3461,6 +3496,15 @@ async function saveUserSettings() {
         })
         .eq('user_id', currentUser.id);
 }
+
+const notesField = document.getElementById('notes');
+
+notesField.addEventListener('input', function() {
+    // Setzt die Höhe kurz zurück, um die neue Scroll-Höhe zu berechnen
+    this.style.height = 'auto';
+    // Setzt die neue Höhe basierend auf dem Inhalt
+    this.style.height = (this.scrollHeight) + 'px';
+});
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
