@@ -1203,6 +1203,28 @@ body.pro-mode .trades-table tr:hover {
     box-shadow: none !important;
     border-left: 2px solid #00f2ff;
 }
+/* Verhindert den weißen Hintergrund in Dropdowns im Pro-Mode */
+body.pro-mode select option {
+    background-color: #0b0e11 !important; /* Passend zum restlichen dunklen Design */
+    color: #00f2ff !important;
+    font-family: monospace;
+    padding: 10px;
+}
+
+/* Speziell für Chrome/Safari/Edge, um die Standard-Styles zu überschreiben */
+body.pro-mode select {
+    appearance: none; /* Entfernt den Standard-Pfeil (optional) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300f2ff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 12px) center;
+    padding-right: 30px !important;
+}
+
+/* Firefox Korrektur */
+body.pro-mode select:active, 
+body.pro-mode select:focus {
+    background-color: #0b0e11 !important;
+}
     </style>
 </head>
 <body>
