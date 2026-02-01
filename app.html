@@ -1290,6 +1290,19 @@ body.pro-mode #screenshot.drag-active {
     border-style: solid; /* Durchgezogene Linie im Pro Mode wirkt technischer */
 }
 
+@keyframes pulse-cyan {
+    0% { box-shadow: 0 0 5px rgba(0, 242, 255, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); }
+    100% { box-shadow: 0 0 5px rgba(0, 242, 255, 0.2); }
+}
+
+#screenshot.drag-active {
+    background: rgba(0, 242, 255, 0.1) !important;
+    border: 2px solid #00f2ff !important;
+    animation: pulse-cyan 1.5s infinite;
+    transform: translateY(-2px); /* Hebt sich leicht ab */
+}
+
     </style>
 </head>
 <body>
@@ -2000,31 +2013,41 @@ async function fetchTrades() {
 function setupDragAndDrop() {
     const dropArea = document.getElementById('screenshot');
 
-    // Wenn die Datei über das Feld gezogen wird
-    dropArea.addEventListener('dragover', (e) => { 
-        e.preventDefault(); 
-        dropArea.classList.add('drag-active'); // Effekt an
+    // 1. Wenn IRGENDWO in der App eine Datei drübergezogen wird
+    window.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        // Das Feld leuchtet auf, egal wo die Maus gerade ist
+        dropArea.classList.add('drag-active');
     });
 
-    // Wenn die Datei das Feld verlässt
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('drag-active'); // Effekt aus
+    // 2. Wenn der Drag-Vorgang abgebrochen oder das Fenster verlassen wird
+    window.addEventListener('dragleave', (e) => {
+        // Nur entfernen, wenn die Maus wirklich das Fenster verlässt
+        if (e.relatedTarget === null) {
+            dropArea.classList.remove('drag-active');
+        }
     });
 
-    // Wenn die Datei losgelassen wird
-    dropArea.addEventListener('drop', (e) => {
-        e.preventDefault(); 
-        dropArea.classList.remove('drag-active'); // Effekt aus
-        
+    // 3. Der eigentliche Drop-Vorgang
+    window.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('drag-active');
+
         const file = e.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) {
             const reader = new FileReader();
-            reader.onload = (ev) => { 
-                dropArea.value = ev.target.result; 
-                // Kleines Feedback: Text kurz ändern
+            reader.onload = (ev) => {
+                dropArea.value = ev.target.result;
+                
+                // Visuelle Bestätigung
+                dropArea.style.borderColor = "#00ffaa"; // Kurz grün leuchten
                 const originalPlaceholder = dropArea.placeholder;
-                dropArea.placeholder = "✅ Image uploaded!";
-                setTimeout(() => dropArea.placeholder = originalPlaceholder, 2000);
+                dropArea.placeholder = "✅ Screenshot geladen!";
+                
+                setTimeout(() => {
+                    dropArea.style.borderColor = ""; 
+                    dropArea.placeholder = originalPlaceholder;
+                }, 2000);
             };
             reader.readAsDataURL(file);
         }
