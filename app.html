@@ -1274,6 +1274,22 @@ body.pro-mode .form-group:has(#mistake) {
     padding-right: 20px;
 }
 
+/* Der Effekt, wenn eine Datei über das Feld gehalten wird */
+#screenshot.drag-active {
+    background: rgba(0, 242, 255, 0.1) !important;
+    border: 2px dashed #00f2ff !important;
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+/* Im Pro-Mode ein noch stärkerer Glow */
+body.pro-mode #screenshot.drag-active {
+    background: rgba(0, 242, 255, 0.15) !important;
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+    border-style: solid; /* Durchgezogene Linie im Pro Mode wirkt technischer */
+}
+
     </style>
 </head>
 <body>
@@ -1981,20 +1997,39 @@ async function fetchTrades() {
         setupDragAndDrop();
     });
 
-    function setupDragAndDrop() {
-        const dropArea = document.getElementById('screenshot');
-        dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = "#00f2ff"; });
-        dropArea.addEventListener('dragleave', () => dropArea.style.borderColor = "#3d4651");
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault(); dropArea.style.borderColor = "#3d4651";
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => { dropArea.value = ev.target.result; };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+function setupDragAndDrop() {
+    const dropArea = document.getElementById('screenshot');
+
+    // Wenn die Datei über das Feld gezogen wird
+    dropArea.addEventListener('dragover', (e) => { 
+        e.preventDefault(); 
+        dropArea.classList.add('drag-active'); // Effekt an
+    });
+
+    // Wenn die Datei das Feld verlässt
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('drag-active'); // Effekt aus
+    });
+
+    // Wenn die Datei losgelassen wird
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault(); 
+        dropArea.classList.remove('drag-active'); // Effekt aus
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { 
+                dropArea.value = ev.target.result; 
+                // Kleines Feedback: Text kurz ändern
+                const originalPlaceholder = dropArea.placeholder;
+                dropArea.placeholder = "✅ Image uploaded!";
+                setTimeout(() => dropArea.placeholder = originalPlaceholder, 2000);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
 
     function populateLists() {
     document.getElementById('instrument').innerHTML = customInstruments.map(i => `<option value="${i}">${i}</option>`).join('');
