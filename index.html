@@ -601,25 +601,37 @@
 
         .form-section { padding: 20px; }
         
-/* Das Grid so einstellen, dass es 3 Spalten hat, die flexibel sind */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+        .form-grid { 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            align-items: end;
+        }
+		
+		/* Findet die Form-Gruppe, die das Tag-Dropdown enthält und macht sie breiter */
+.form-group:has(#mistake) {
+    grid-column: span 2; /* Nimmt den Platz von 2 normalen Feldern ein */
+    min-width: 250px;    /* Garantiert eine Mindestbreite */
 }
 
-/* Speziell das Tag-Feld und Screenshot-Feld etwas breiter machen (1.5-fache Breite) */
-.form-group:has(#tagsInput), 
-.form-group:has(#screenshotInput) {
-    grid-column: span 2; /* Nimmt zwei Spaltenplätze ein, statt nur einen */
+/* Stellt sicher, dass der Container innerhalb der Gruppe die volle Breite nutzt */
+.combo-container {
+    display: flex;
+    gap: 5px;
+    width: 100%;
 }
 
-/* Damit man bei "Late Entry" alles sieht, vergrößern wir das Padding und die Schrift */
-#tagsInput, #screenshotInput {
-    padding-left: 8px;
-    padding-right: 8px;
-    text-overflow: ellipsis; /* Falls es doch zu lang wird, zeigt es Punkte ... */
-    white-space: nowrap;
+/* Macht das Select-Feld selbst flexibel, damit es den Platz ausfüllt */
+#mistake {
+    flex-grow: 1; 
+    min-width: 0; /* Verhindert das Überlaufen in Flexbox */
+    text-overflow: ellipsis;
+}
+
+/* Im Pro-Mode: Etwas mehr Innenabstand für längere Texte */
+body.pro-mode #mistake {
+    padding-right: 25px; 
+    font-size: 13px;
 }
         
         @media (min-width: 1024px) {
