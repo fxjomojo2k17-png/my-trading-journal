@@ -1762,7 +1762,7 @@ async function fetchTrades() {
   async function updateStatsAndTable() {
     // 1. Grundlegende Daten laden
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-    await saveUserSettings();
+    // await saveUserSettings();
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
     // 2. Filtern der Trades
