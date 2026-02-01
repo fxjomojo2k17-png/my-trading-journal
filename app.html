@@ -601,11 +601,51 @@
 
         .form-section { padding: 20px; }
         
-    .form-grid {
+/* Das Haupt-Raster */
+.form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    /* Wir erstellen 4 schmale Spalten für maximale Flexibilität */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px 20px;
     align-items: start;
+}
+
+/* Standard-Verhalten für alle Gruppen (1 Spalte) */
+.form-group {
+    grid-column: span 1;
+}
+
+/* Deine span-2 Elemente (Instrument, Strategy) nutzen 2 Spalten */
+.form-group.span-2 {
+    grid-column: span 2;
+}
+
+/* --- NOTES FIX --- */
+/* Wir suchen die Gruppe, in der die Notes liegen */
+.form-group:has(#notes) {
+    grid-column: 3 / 5; /* Startet in Spalte 3 und geht bis zum Ende */
+    grid-row: 3 / 6;    /* Spannt sich vertikal über mehrere Zeilen */
+    height: 100%;       /* Nutzt die volle zugewiesene Höhe */
+}
+
+#notes {
+    min-height: 140px;  /* Die gewünschte Größe aus deinem Bild */
+    height: 100%;
+}
+
+/* --- BUTTON FIX --- */
+/* Die Button-Gruppe positionieren wir unter Tag & Screenshot */
+.button-group {
+    grid-column: 1 / 3; /* Nutzt den Platz unter Tag/Screenshot */
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Korrektur für Tag & Screenshot nebeneinander */
+.form-group:has(#mistake), 
+.form-group:has(#screenshot) {
+    grid-column: span 1;
 }
         
         @media (min-width: 1024px) {
@@ -1334,38 +1374,7 @@ body.pro-mode .form-group.span-2 textarea#notes {
     border-radius: 0px !important;
 }
 
-/* Spezial-Effekt für das Label oben drüber */
-.form-group.span-2 label {
-    font-weight: bold;
-    margin-bottom: 8px;
-    display: block;
-    letter-spacing: 1px;
-}
 
-/* Tag und Screenshot wieder nebeneinander, aber mit genug Platz */
-.form-group:has(#mistake), 
-.form-group:has(#screenshot) {
-    grid-column: auto; /* Wir nehmen das span-2 weg, damit es nicht das Grid sprengt */
-    min-width: 200px;
-}
-
-/* Die Notes machen wir jetzt zum "Anker" auf der rechten Seite */
-.form-group:has(#notes) {
-    grid-column: span 2; /* Die Notes dürfen sich über zwei Spalten breit machen */
-    grid-row: span 2;    /* Die Notes gehen über zwei Zeilen tief */
-}
-
-/* Falls du die Klassen direkt im HTML hast (Alternative) */
-.span-2 {
-    grid-column: span 2 !important;
-}
-
-/* Korrektur für die Abstände der Buttons im Tag-Feld */
-.combo-container {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
 
     </style>
 </head>
@@ -1562,6 +1571,7 @@ body.pro-mode .form-group.span-2 textarea#notes {
                 <div class="form-group"><label>Result</label><select id="result" required><option value="WIN">Win</option><option value="LOSS">Loss</option><option value="BE">BE</option></select></div>
                 <div class="form-group"><label>P/L ($)</label><input type="text" id="pl" required oninput="validateNumber(this)"></div>
                 <div class="form-group"><label>Risk ($)</label><input type="text" id="risk" oninput="validateNumber(this)"></div>
+				
                 <div class="form-group">
     <label>Tag</label>
     <div class="combo-container">
