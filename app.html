@@ -3458,6 +3458,9 @@ async function loadUserSettings() {
     console.log("loadUserSettings - Nach populateLists - customTags:", customTags); // DEBUG
 }
 
+
+
+
 async function saveUserSettings() {
     if (!currentUser) return;
     
@@ -3473,96 +3476,99 @@ async function saveUserSettings() {
         .eq('user_id', currentUser.id);
 }
 
-/* --- HEADER CHART GENERATOR --- */
+/* --- SAFE HEADER CHART GENERATOR --- */
 function initHeaderChart() {
     const canvas = document.getElementById('headerChartCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return; // Abbruch, falls Canvas nicht existiert (verhindert Fehler)
 
-    // Größe anpassen
+    const ctx = canvas.getContext('2d');
+    let resizeTimeout; // Verhindert Endlosschleifen beim Resize
+
     const setSize = () => {
-        canvas.width = canvas.parentElement.offsetWidth;
-        canvas.height = canvas.parentElement.offsetHeight;
-        drawChart();
+        const parent = canvas.parentElement;
+        if (!parent) return;
+
+        // Nur neu zeichnen, wenn sich die Größe wirklich geändert hat
+        if (canvas.width !== parent.offsetWidth || canvas.height !== parent.offsetHeight) {
+            canvas.width = parent.offsetWidth;
+            canvas.height = parent.offsetHeight;
+            requestAnimationFrame(drawChart); // Weicheres Zeichnen
+        }
     };
 
-    window.addEventListener('resize', setSize);
+    // Debounce: Resize nur alle 100ms feuern
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(setSize, 100);
+    });
     
     function drawChart() {
         const w = canvas.width;
         const h = canvas.height;
         ctx.clearRect(0, 0, w, h);
 
-        // Einstellungen für die Kerzen
         const candleWidth = 8;
         const gap = 4;
         const totalCandles = Math.ceil(w / (candleWidth + gap));
         
-        // Startpreis in der vertikalen Mitte
+        // Startpreis mittig
         let currentPrice = h / 2;
         
-        // Farben (Deine Theme Farben)
-        const colorBull = '#00ffaa'; // Grün
-        const colorBear = '#ff4a68'; // Rot
+        // Deine Farben
+        const colorBull = '#00ffaa'; 
+        const colorBear = '#ff4a68'; 
 
         for (let i = 0; i < totalCandles; i++) {
-            // Volatilität simulieren
-            const volatility = Math.random() * 25 + 5; // Bewegung zwischen 5px und 30px
-            
-            // Zufällige Richtung (etwas mehr Tendenz zur Mitte zurück, damit es nicht aus dem Bild läuft)
+            // Volatilität begrenzen
+            const volatility = Math.random() * 20 + 2;
             const move = (Math.random() - 0.5) * volatility;
             
-            // Open, Close, High, Low berechnen
             let open = currentPrice;
             let close = currentPrice + move;
             
-            // Wicks berechnen (High/Low sind etwas höher/tiefer als Open/Close)
-            let high = Math.min(open, close) - (Math.random() * 15);
-            let low = Math.max(open, close) + (Math.random() * 15);
+            // Dochte berechnen
+            let high = Math.min(open, close) - (Math.random() * 10);
+            let low = Math.max(open, close) + (Math.random() * 10);
 
-            // Korrektur: Chart darf nicht oben/unten rauslaufen
-            if (high < 10) { high = 10; open += 20; close += 20; }
-            if (low > h - 10) { low = h - 10; open -= 20; close -= 20; }
+            // Chart im Bild halten (Bounce-Effekt an Rändern)
+            if (high < 5) { high = 5; open += 15; close += 15; currentPrice += 15; }
+            if (low > h - 5) { low = h - 5; open -= 15; close -= 15; currentPrice -= 15; }
 
-            // Farbe bestimmen
-            const isBullish = close < open; // In Canvas ist Y=0 oben, also kleiner Y-Wert = Höherer Preis
+            const isBullish = close < open;
             ctx.fillStyle = isBullish ? colorBull : colorBear;
             ctx.strokeStyle = isBullish ? colorBull : colorBear;
 
-            const x = i * (candleWidth + gap) + 10; // Start X Position
+            const x = i * (candleWidth + gap) + 10; 
 
-            // 1. DOCHT ZEICHNEN (Wick)
+            // 1. DOCHT (Wick)
             ctx.beginPath();
             ctx.moveTo(x + candleWidth / 2, high);
             ctx.lineTo(x + candleWidth / 2, low);
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // 2. KÖRPER ZEICHNEN (Body)
-            // Höhe berechnen (Math.abs weil Höhe positiv sein muss)
+            // 2. KÖRPER (Body)
             let bodyHeight = Math.abs(close - open);
-            if (bodyHeight < 1) bodyHeight = 1; // Mindestens 1px hoch (Doji)
-            
-            // Start Y des Bodys ist das Minimum von Open/Close
+            if (bodyHeight < 1) bodyHeight = 1; 
             let bodyY = Math.min(open, close);
 
             ctx.fillRect(x, bodyY, candleWidth, bodyHeight);
-
-            // GLOW EFFEKT (Optional für Neon Look)
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = isBullish ? "rgba(0, 255, 170, 0.5)" : "rgba(255, 74, 104, 0.5)";
             
-            // Preis für die nächste Kerze aktualisieren
+            // Preis update für nächste Kerze
             currentPrice = close;
-            ctx.shadowBlur = 0; // Reset für nächste Iteration
         }
     }
 
-    setSize(); // Erster Aufruf
+    // Einmaliger Start
+    setSize();
 }
 
-// Chart starten, sobald Seite geladen ist
-document.addEventListener('DOMContentLoaded', initHeaderChart);
+// Sicherer Start, wenn die Seite geladen ist
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderChart);
+} else {
+    initHeaderChart();
+}
 
 
 
