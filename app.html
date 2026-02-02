@@ -615,22 +615,34 @@
             50% { transform: scaleY(1); }
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-            padding: 15px;
-            background: rgba(28, 34, 41, 0.6);
-        }
-        
-        .stat-card {
-          
-            padding: 12px;
-           
-            text-align: center;
-        
-            transition: all 0.4s ease;
-        }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0; /* Wir setzen Gap auf 0, damit die Linien sich berühren */
+    background: rgba(28, 34, 41, 0.6);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-card {
+    background: transparent; /* Hintergrund der Grid-Box nutzen */
+    padding: 15px;
+    border: none; /* Alte Border entfernen */
+    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Die Trennlinie */
+    border-radius: 0;
+    transition: all 0.4s ease;
+}
+
+/* Entfernt die Linie bei der letzten Card, damit es sauber aussieht */
+.stat-card:last-child {
+    border-right: none;
+}
+
+/* Hover-Effekt: Die Card leicht hervorheben */
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
 
 /* Der Titel (z.B. Win Rate) */
 .stat-card h3 {
@@ -657,7 +669,7 @@
     text-align: center;
 }
 
-      /*   .glow-win { box-shadow: 0 0 15px rgba(0, 255, 170, 0.2); border-color: rgba(0, 255, 170, 0.4); } */
+      /*   .glow-win { box-shadow: 0 0 15px rgba(0, 255, 170, 0.2); border-color: rgba(0, 255, 170, 0.4); }*/
       /*   .glow-loss { box-shadow: 0 0 15px rgba(255, 74, 104, 0.2); border-color: rgba(255, 74, 104, 0.4); } */
 
         .stat-card h3 { color: #8892b0; font-size: 0.6em; text-transform: uppercase; margin-bottom: 5px; }
