@@ -544,27 +544,40 @@
     transition: all 0.4s ease;
 }
 
-/* Wenn eine Session aktiv ist -> GLOW + PULSIEREN */
 .session-tag.active {
-    color: #00f2ff;
-    /* Starker Basis-Glow */
+    color: #fff; /* Text auf Weiß setzen, damit das Cyan außenrum krasser wirkt */
+    font-weight: 900;
+    /* EXTREMER GLOW-STACK */
     text-shadow: 
-        0 0 10px #00f2ff,
-        0 0 20px rgba(0, 242, 255, 0.6);
+        0 0 5px #00f2ff, 
+        0 0 10px #00f2ff, 
+        0 0 20px #00f2ff, 
+        0 0 40px #00f2ff;
     
-    /* Hier wird die Animation gestartet */
-    animation: sessionPulse 2s infinite alternate ease-in-out;
+    animation: sessionOverdrive 1.5s infinite alternate ease-in-out !important;
+    position: relative;
+    z-index: 10;
 }
 
-/* Die Animation für das Pulsieren */
-@keyframes sessionPulse {
-    from {
-        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 40px rgba(0, 242, 255, 0.7);
+@keyframes sessionOverdrive {
+    0% {
+        text-shadow: 
+            0 0 5px #00f2ff, 
+            0 0 10px #00f2ff, 
+            0 0 20px rgba(0, 242, 255, 0.6);
+        filter: brightness(1) drop-shadow(0 0 5px rgba(0, 242, 255, 0.5));
         transform: scale(1);
     }
-    to {
-        text-shadow: 0 0 15px #00f2ff, 0 0 30px #00f2ff, 0 0 60px #00f2ff, 0 0 100px rgba(0, 242, 255, 0.9);
-        transform: scale(1.02); /* Minimales Atmen des Textes */
+    100% {
+        /* Hier stapeln wir den Schatten für maximales Leuchten */
+        text-shadow: 
+            0 0 10px #00f2ff, 
+            0 0 20px #00f2ff, 
+            0 0 40px #00f2ff, 
+            0 0 60px #00f2ff,
+            0 0 80px rgba(0, 242, 255, 0.8);
+        filter: brightness(1.3) drop-shadow(0 0 15px rgba(0, 242, 255, 1));
+        transform: scale(1.1); /* Deutlicheres Pulsieren */
     }
 }
 
