@@ -1309,7 +1309,38 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
+/* Container, der Header und Chart hält */
+.header-chart-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0; /* Hinter dem Text */
+}
 
+/* Das Canvas selbst */
+#headerChartCanvas {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6; /* Transparenz, damit der Text lesbar bleibt */
+}
+
+/* Vignette/Fade Effekt an den Seiten */
+.chart-fade-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, #0b0e11 0%, transparent 20%, transparent 80%, #0b0e11 100%);
+    pointer-events: none;
+}
+
+/* Wichtig: Text muss über dem Canvas liegen */
+.candle-chart-text {
+    position: relative;
+    z-index: 2; /* Über dem Chart */
+    /* ... deine restlichen Styles für den Text ... */
+}
 
     </style>
 </head>
@@ -1414,48 +1445,20 @@ body.pro-mode #screenshot.drag-active {
     </div>
 </div>
 
-    <div class="header">
-	<!-- MOCKUP 5 -->
-        <div class="mockup-section">
-            
-        
-            <div class="header-demo">
-                <div style="position: relative; display: inline-block;">
-                    <div class="chart-overlay">
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 60px;"></div>
-                        <div class="mini-candle" style="height: 35px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 45px;"></div>
-                        <div class="mini-candle" style="height: 55px;"></div>
-                        <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 65px;"></div>
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-						    <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-                    </div>
-					
-					
-					
-            <div class="candle-chart-text">TRADING JOURNAL</div>
+<div class="header">
+    <div class="header-chart-container">
+        <canvas id="headerChartCanvas"></canvas>
+        <div class="chart-fade-overlay"></div>
+    </div>
 
-
-
-
-                </div>
-							<div style="display: flex; gap: 15px; margin-top: 10px; font-size: 1.0em; font-family: monospace;">
-<span id="session-london" style="color: #444;"> LONDON session</span>
-    <span id="session-newyork" style="color: #444;"> NEW YORK session</span>
-    <span id="session-tokyo" style="color: #444;"> TOKYO session</span>
+    <div class="candle-chart-text">TRADING JOURNAL</div>
+    
+    <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 1.0em; font-family: monospace; justify-content: center; position: relative; z-index: 2;">
+        <span id="session-london" style="color: #444;"> LONDON session</span>
+        <span id="session-newyork" style="color: #444;"> NEW YORK session</span>
+        <span id="session-tokyo" style="color: #444;"> TOKYO session</span>
+    </div>
 </div>
-            </div></div>
-	</div>
 
     <div class="stats-grid">
         <div class="stat-card" id="card-balance">
@@ -3469,6 +3472,100 @@ async function saveUserSettings() {
         })
         .eq('user_id', currentUser.id);
 }
+
+/* --- HEADER CHART GENERATOR --- */
+function initHeaderChart() {
+    const canvas = document.getElementById('headerChartCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Größe anpassen
+    const setSize = () => {
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
+        drawChart();
+    };
+
+    window.addEventListener('resize', setSize);
+    
+    function drawChart() {
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // Einstellungen für die Kerzen
+        const candleWidth = 8;
+        const gap = 4;
+        const totalCandles = Math.ceil(w / (candleWidth + gap));
+        
+        // Startpreis in der vertikalen Mitte
+        let currentPrice = h / 2;
+        
+        // Farben (Deine Theme Farben)
+        const colorBull = '#00ffaa'; // Grün
+        const colorBear = '#ff4a68'; // Rot
+
+        for (let i = 0; i < totalCandles; i++) {
+            // Volatilität simulieren
+            const volatility = Math.random() * 25 + 5; // Bewegung zwischen 5px und 30px
+            
+            // Zufällige Richtung (etwas mehr Tendenz zur Mitte zurück, damit es nicht aus dem Bild läuft)
+            const move = (Math.random() - 0.5) * volatility;
+            
+            // Open, Close, High, Low berechnen
+            let open = currentPrice;
+            let close = currentPrice + move;
+            
+            // Wicks berechnen (High/Low sind etwas höher/tiefer als Open/Close)
+            let high = Math.min(open, close) - (Math.random() * 15);
+            let low = Math.max(open, close) + (Math.random() * 15);
+
+            // Korrektur: Chart darf nicht oben/unten rauslaufen
+            if (high < 10) { high = 10; open += 20; close += 20; }
+            if (low > h - 10) { low = h - 10; open -= 20; close -= 20; }
+
+            // Farbe bestimmen
+            const isBullish = close < open; // In Canvas ist Y=0 oben, also kleiner Y-Wert = Höherer Preis
+            ctx.fillStyle = isBullish ? colorBull : colorBear;
+            ctx.strokeStyle = isBullish ? colorBull : colorBear;
+
+            const x = i * (candleWidth + gap) + 10; // Start X Position
+
+            // 1. DOCHT ZEICHNEN (Wick)
+            ctx.beginPath();
+            ctx.moveTo(x + candleWidth / 2, high);
+            ctx.lineTo(x + candleWidth / 2, low);
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 2. KÖRPER ZEICHNEN (Body)
+            // Höhe berechnen (Math.abs weil Höhe positiv sein muss)
+            let bodyHeight = Math.abs(close - open);
+            if (bodyHeight < 1) bodyHeight = 1; // Mindestens 1px hoch (Doji)
+            
+            // Start Y des Bodys ist das Minimum von Open/Close
+            let bodyY = Math.min(open, close);
+
+            ctx.fillRect(x, bodyY, candleWidth, bodyHeight);
+
+            // GLOW EFFEKT (Optional für Neon Look)
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = isBullish ? "rgba(0, 255, 170, 0.5)" : "rgba(255, 74, 104, 0.5)";
+            
+            // Preis für die nächste Kerze aktualisieren
+            currentPrice = close;
+            ctx.shadowBlur = 0; // Reset für nächste Iteration
+        }
+    }
+
+    setSize(); // Erster Aufruf
+}
+
+// Chart starten, sobald Seite geladen ist
+document.addEventListener('DOMContentLoaded', initHeaderChart);
+
+
+
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
