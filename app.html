@@ -519,6 +519,7 @@
     color: #00f2ff;
     text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
     animation: glow 3s infinite alternate; /* Sanftes Pulsieren */
+    display: inline-block; /* Ensures the glow and pulse apply correctly */
 }
 
 @keyframes glow {
@@ -530,6 +531,11 @@
         text-shadow: 0 0 25px rgba(0, 242, 255, 1), 0 0 40px rgba(0, 242, 255, 0.6);
         opacity: 1;
     }
+}
+
+/* Optional: Adding the pulse animation if you want it to scale as well */
+.candle-chart-text:hover {
+    animation: glow 3s infinite alternate, pulse 2s infinite ease-in-out;
 }
 
 @keyframes pulse {
