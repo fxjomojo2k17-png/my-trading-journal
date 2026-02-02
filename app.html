@@ -527,37 +527,45 @@
     animation: pulseGlow 2.5s infinite alternate;
 }
 
+/* Die Sessions Gruppierung */
 .session-container {
     display: flex;
-    gap: 30px;
+    gap: 25px;
     justify-content: center;
-    font-family: 'Courier New', monospace;
+    margin-top: 10px;
 }
 
+/* Grundzustand der Sessions (dezent) */
 .session-tag {
-    font-size: 0.85em;
+    font-size: 0.8em;
+    font-family: 'Courier New', monospace;
     letter-spacing: 2px;
-    color: #333; /* Inaktive Sessions sind dunkel */
+    color: #333; /* Inaktiv fast dunkel */
     font-weight: bold;
     text-transform: uppercase;
-    transition: all 0.4s ease;
+    transition: all 0.5s ease;
 }
 
-/* Wenn eine Session aktiv ist (durch dein Script gesteuert) */
+/* DER PULSIERENDE EFFEKT für die aktive Session */
 .session-tag.active {
     color: #00f2ff;
-    text-shadow: 0 0 15px rgba(0, 242, 255, 0.9);
+    text-shadow: 
+        0 0 5px #00f2ff,
+        0 0 15px rgba(0, 242, 255, 0.7);
+    animation: sessionPulse 2s infinite alternate ease-in-out;
 }
 
-/* Pulsierende Animation für den Haupttitel */
-@keyframes pulseGlow {
-    from {
-        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 40px rgba(0, 242, 255, 0.7);
+/* Die spezifische Puls-Animation für die Sessions */
+@keyframes sessionPulse {
+    0% {
+        text-shadow: 0 0 5px #00f2ff, 0 0 10px rgba(0, 242, 255, 0.5);
+        opacity: 0.7;
         transform: scale(1);
     }
-    to {
-        text-shadow: 0 0 15px #00f2ff, 0 0 30px #00f2ff, 0 0 60px #00f2ff, 0 0 100px rgba(0, 242, 255, 0.9);
-        transform: scale(1.02); /* Minimales Atmen des Textes */
+    100% {
+        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.8);
+        opacity: 1;
+        transform: scale(1.05); /* Leichtes Vergrößern beim Pulsieren */
     }
 }
 
