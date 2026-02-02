@@ -1308,50 +1308,7 @@ body.pro-mode #screenshot.drag-active {
     animation: pulse-cyan 1.5s infinite;
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
-/* Container für die Anordnung */
-.chart-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Abstand zwischen den Kerzen */
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: -1; /* Hinter dem Text */
-}
 
-/* Basis-Style für jede Kerze */
-.mini-candle {
-    width: 8px; /* Breite des Bodys */
-    position: relative;
-    border: none; /* Entfernt alte Border-Reste */
-}
-
-/* Docht-Logik (Wicks) */
-.mini-candle::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    width: 1px;
-    height: 160%; /* Docht ist länger als der Körper */
-    top: -30%;    /* Zentriert den Docht vertikal */
-    background: inherit; /* Nimmt die Farbe der Kerze an */
-    transform: translateX(-50%);
-}
-
-/* Grüne Kerze (Bullish) */
-.mini-candle.bullish {
-    background-color: #00ff88 !important;
-    box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
-}
-
-/* Rote Kerze (Bearish) */
-.mini-candle.bearish {
-    background-color: #ff3366 !important;
-    box-shadow: 0 0 8px rgba(255, 51, 102, 0.4);
-}
 
 
     </style>
@@ -1465,12 +1422,23 @@ body.pro-mode #screenshot.drag-active {
             <div class="header-demo">
                 <div style="position: relative; display: inline-block;">
                     <div class="chart-overlay">
-         <div class="mini-candle bullish" style="height: 40px;"></div>
-    <div class="mini-candle bearish" style="height: 60px;"></div>
-    <div class="mini-candle bullish" style="height: 35px;"></div>
-    <div class="mini-candle bearish" style="height: 70px;"></div>
-    <div class="mini-candle bullish" style="height: 45px;"></div>
-    <div class="mini-candle bearish" style="height: 55px;"></div>
+                        <div class="mini-candle" style="height: 40px;"></div>
+                        <div class="mini-candle" style="height: 60px;"></div>
+                        <div class="mini-candle" style="height: 35px;"></div>
+                        <div class="mini-candle" style="height: 70px;"></div>
+                        <div class="mini-candle" style="height: 45px;"></div>
+                        <div class="mini-candle" style="height: 55px;"></div>
+                        <div class="mini-candle" style="height: 50px;"></div>
+                        <div class="mini-candle" style="height: 65px;"></div>
+                        <div class="mini-candle" style="height: 40px;"></div>
+                        <div class="mini-candle" style="height: 58px;"></div>
+                        <div class="mini-candle" style="height: 42px;"></div>
+                        <div class="mini-candle" style="height: 68px;"></div>
+						    <div class="mini-candle" style="height: 50px;"></div>
+                        <div class="mini-candle" style="height: 70px;"></div>
+                        <div class="mini-candle" style="height: 58px;"></div>
+                        <div class="mini-candle" style="height: 42px;"></div>
+                        <div class="mini-candle" style="height: 68px;"></div>
                     </div>
 					
 					
