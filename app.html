@@ -1303,78 +1303,93 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
-/* Hauptcontainer wieder kompakt */
+/* Hauptcontainer: Fest definiert für Stabilität */
 .calendar-container {
     flex: 1;
-    min-width: 300px;
-    max-width: 480px; /* Begrenzt die Breite */
-    background: rgba(10, 12, 16, 0.6); 
+    min-width: 400px; /* Breite stabilisieren */
+    max-width: 550px;
+    background: rgba(10, 12, 16, 0.7); 
     backdrop-filter: blur(10px);
     border-radius: 12px;
-    padding: 10px; /* Weniger Padding spart Platz */
+    padding: 15px;
     border: 1px solid rgba(0, 242, 255, 0.1);
-    height: 380px; /* DEINE ALTE HÖHE */
-    overflow: hidden;
+    height: 400px; /* Etwas mehr Höhe für Lesbarkeit */
     display: flex;
     flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Header etwas kleiner */
+/* Monat/Jahr Header */
 .calendar-header { 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
-    margin-bottom: 8px; 
+    margin-bottom: 15px; 
     color: #00f2ff;
-    font-size: 0.9em;
+    font-weight: bold;
     font-family: 'Courier New', monospace;
+    font-size: 1em;
 }
 
-/* Das Grid muss den restlichen Platz füllen */
+/* Das Grid: Nutzt den verfügbaren Platz optimal */
 .calendar-grid { 
     display: grid; 
     grid-template-columns: repeat(7, 1fr); 
-    gap: 4px; /* Kleinerer Abstand spart massiv Platz */
-    flex: 1;
-    align-content: stretch;
+    gap: 6px; 
+    flex-grow: 1; /* Füllt den Container aus */
 }
 
-/* Die Tage ohne festes Seitenverhältnis */
+/* Die einzelnen Tage: Quadratisch und klar */
 .calendar-day { 
     background: rgba(255, 255, 255, 0.03); 
-   
-    border-radius: 4px; 
+    border-radius: 6px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
     justify-content: center; 
     position: relative; 
-    font-size: 0.8em; /* Schrift kleiner */
     border: 1px solid rgba(255, 255, 255, 0.05); 
-    cursor: pointer; 
-    height: 100%; /* Füllt die Grid-Zelle */
-    transition: 0.2s; 
+    cursor: pointer;
+    min-height: 45px; /* Verhindert das "Zusammenquetschen" */
+    transition: background 0.2s;
 }
 
-/* Hover Effekt bleibt, aber ohne Skalierung (spart Platzprobleme) */
-.calendar-day:hover { 
-    background: rgba(0, 242, 255, 0.1); 
-    border-color: #00f2ff;
+/* Hover & Selektion */
+.calendar-day:hover { background: rgba(0, 242, 255, 0.1); border-color: #00f2ff; }
+.calendar-day.selected { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; }
+
+/* Markierung für HEUTE */
+.calendar-day.today { 
+    border: 1px solid #00f2ff !important; 
+    box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2);
 }
 
-/* Zahlen innerhalb der Boxen schrumpfen */
+/* Zahlen und P&L */
 .calendar-day .day-num { 
     position: absolute; 
-    top: 2px; 
-    left: 4px; 
-    font-size: 0.7em; 
+    top: 4px; 
+    left: 6px; 
+    font-size: 0.75em; 
     color: #5c6680; 
 }
 
 .calendar-day .day-pl { 
     font-weight: bold; 
-    font-size: 0.75em; 
-    margin-top: 4px; 
+    font-size: 0.8em; 
+    margin-top: 8px; /* Platz unter der Zahl schaffen */
+}
+
+/* Farben für Gewinn/Verlust */
+.pl-positive { color: #00ffaa !important; text-shadow: 0 0 8px rgba(0, 255, 170, 0.3); }
+.pl-negative { color: #ff4a68 !important; text-shadow: 0 0 8px rgba(255, 74, 104, 0.3); }
+
+/* Wochentage (S, M, T...) */
+.calendar-header-day {
+    text-align: center;
+    font-size: 0.75em;
+    color: #5c6680;
+    font-weight: bold;
+    padding-bottom: 5px;
 }
 
     </style>
