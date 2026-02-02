@@ -532,21 +532,40 @@
     gap: 30px;
     justify-content: center;
     font-family: 'Courier New', monospace;
+    margin-top: 10px;
 }
 
 .session-tag {
     font-size: 0.85em;
     letter-spacing: 2px;
-    color: #333; /* Inaktive Sessions sind dunkel */
+    color: #333; /* Inaktiv */
     font-weight: bold;
     text-transform: uppercase;
     transition: all 0.4s ease;
 }
 
-/* Wenn eine Session aktiv ist (durch dein Script gesteuert) */
+/* Wenn eine Session aktiv ist -> GLOW + PULSIEREN */
 .session-tag.active {
     color: #00f2ff;
-    text-shadow: 0 0 15px rgba(0, 242, 255, 0.9);
+    /* Starker Basis-Glow */
+    text-shadow: 
+        0 0 10px #00f2ff,
+        0 0 20px rgba(0, 242, 255, 0.6);
+    
+    /* Hier wird die Animation gestartet */
+    animation: sessionPulse 2s infinite alternate ease-in-out;
+}
+
+/* Die Animation für das Pulsieren */
+@keyframes sessionPulse {
+    from {
+        text-shadow: 0 0 5px #00f2ff, 0 0 15px rgba(0, 242, 255, 0.5);
+        opacity: 0.8;
+    }
+    to {
+        text-shadow: 0 0 12px #00f2ff, 0 0 25px #00f2ff, 0 0 35px rgba(0, 242, 255, 0.8);
+        opacity: 1;
+    }
 }
 
 /* Pulsierende Animation für den Haupttitel */
