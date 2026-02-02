@@ -1445,48 +1445,20 @@ body.pro-mode #screenshot.drag-active {
     </div>
 </div>
 
-    <div class="header">
-	<!-- MOCKUP 5 -->
-        <div class="mockup-section">
-            
-        
-            <div class="header-demo">
-                <div style="position: relative; display: inline-block;">
-                    <div class="chart-overlay">
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 60px;"></div>
-                        <div class="mini-candle" style="height: 35px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 45px;"></div>
-                        <div class="mini-candle" style="height: 55px;"></div>
-                        <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 65px;"></div>
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-						    <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-                    </div>
-					
-					
-					
-            <div class="candle-chart-text">TRADING JOURNAL</div>
+<div class="header">
+    <div class="header-chart-container">
+        <canvas id="headerChartCanvas"></canvas>
+        <div class="chart-fade-overlay"></div>
+    </div>
 
-
-
-
-                </div>
-							<div style="display: flex; gap: 15px; margin-top: 10px; font-size: 1.0em; font-family: monospace;">
-<span id="session-london" style="color: #444;"> LONDON session</span>
-    <span id="session-newyork" style="color: #444;"> NEW YORK session</span>
-    <span id="session-tokyo" style="color: #444;"> TOKYO session</span>
+    <div class="candle-chart-text">TRADING JOURNAL</div>
+    
+    <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 1.0em; font-family: monospace; justify-content: center; position: relative; z-index: 2;">
+        <span id="session-london" style="color: #444;"> LONDON session</span>
+        <span id="session-newyork" style="color: #444;"> NEW YORK session</span>
+        <span id="session-tokyo" style="color: #444;"> TOKYO session</span>
+    </div>
 </div>
-            </div></div>
-	</div>
 
     <div class="stats-grid">
         <div class="stat-card" id="card-balance">
