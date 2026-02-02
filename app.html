@@ -862,79 +862,7 @@ tr.row-loss {
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* Hauptcontainer wieder kompakt */
-.calendar-container {
-    flex: 1;
-    min-width: 300px;
-    max-width: 480px; /* Begrenzt die Breite */
-    background: rgba(10, 12, 16, 0.6); 
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 10px; /* Weniger Padding spart Platz */
-    border: 1px solid rgba(0, 242, 255, 0.1);
-    height: 380px; /* DEINE ALTE HÖHE */
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
 
-/* Header etwas kleiner */
-.calendar-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 8px; 
-    color: #00f2ff;
-    font-size: 0.9em;
-    font-family: 'Courier New', monospace;
-}
-
-/* Das Grid muss den restlichen Platz füllen */
-.calendar-grid { 
-    display: grid; 
-    grid-template-columns: repeat(7, 1fr); 
-    gap: 4px; /* Kleinerer Abstand spart massiv Platz */
-    flex: 1;
-    align-content: stretch;
-}
-
-/* Die Tage ohne festes Seitenverhältnis */
-.calendar-day { 
-    background: rgba(255, 255, 255, 0.03); 
-    /* aspect-ratio: 1.1; <-- ENTFERNT, damit es in die 380px passt */
-    border-radius: 4px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    position: relative; 
-    font-size: 0.8em; /* Schrift kleiner */
-    border: 1px solid rgba(255, 255, 255, 0.05); 
-    cursor: pointer; 
-    height: 100%; /* Füllt die Grid-Zelle */
-    transition: 0.2s; 
-}
-
-/* Hover Effekt bleibt, aber ohne Skalierung (spart Platzprobleme) */
-.calendar-day:hover { 
-    background: rgba(0, 242, 255, 0.1); 
-    border-color: #00f2ff;
-}
-
-/* Zahlen innerhalb der Boxen schrumpfen */
-.calendar-day .day-num { 
-    position: absolute; 
-    top: 2px; 
-    left: 4px; 
-    font-size: 0.7em; 
-    color: #5c6680; 
-}
-
-.calendar-day .day-pl { 
-    font-weight: bold; 
-    font-size: 0.75em; 
-    margin-top: 4px; 
-}
 
 /* Scrollbar innerhalb des Widgets stylen (falls nötig) */
 .tradingview-widget-container {
@@ -1375,7 +1303,79 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
+/* Hauptcontainer wieder kompakt */
+.calendar-container {
+    flex: 1;
+    min-width: 300px;
+    max-width: 480px; /* Begrenzt die Breite */
+    background: rgba(10, 12, 16, 0.6); 
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 10px; /* Weniger Padding spart Platz */
+    border: 1px solid rgba(0, 242, 255, 0.1);
+    height: 380px; /* DEINE ALTE HÖHE */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
+/* Header etwas kleiner */
+.calendar-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 8px; 
+    color: #00f2ff;
+    font-size: 0.9em;
+    font-family: 'Courier New', monospace;
+}
+
+/* Das Grid muss den restlichen Platz füllen */
+.calendar-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 4px; /* Kleinerer Abstand spart massiv Platz */
+    flex: 1;
+    align-content: stretch;
+}
+
+/* Die Tage ohne festes Seitenverhältnis */
+.calendar-day { 
+    background: rgba(255, 255, 255, 0.03); 
+   
+    border-radius: 4px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    font-size: 0.8em; /* Schrift kleiner */
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    cursor: pointer; 
+    height: 100%; /* Füllt die Grid-Zelle */
+    transition: 0.2s; 
+}
+
+/* Hover Effekt bleibt, aber ohne Skalierung (spart Platzprobleme) */
+.calendar-day:hover { 
+    background: rgba(0, 242, 255, 0.1); 
+    border-color: #00f2ff;
+}
+
+/* Zahlen innerhalb der Boxen schrumpfen */
+.calendar-day .day-num { 
+    position: absolute; 
+    top: 2px; 
+    left: 4px; 
+    font-size: 0.7em; 
+    color: #5c6680; 
+}
+
+.calendar-day .day-pl { 
+    font-weight: bold; 
+    font-size: 0.75em; 
+    margin-top: 4px; 
+}
 
     </style>
 </head>
