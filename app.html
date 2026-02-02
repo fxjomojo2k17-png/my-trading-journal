@@ -626,17 +626,34 @@
 }
 
 .stat-card {
-    background: transparent; /* Hintergrund der Grid-Box nutzen */
-    padding: 15px;
-    border: none; /* Alte Border entfernen */
-    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Die Trennlinie */
-    border-radius: 0;
+    background: transparent;
+    padding: 12px;
+    text-align: center;
     transition: all 0.4s ease;
+    
+    /* ZENTRIERUNG ERZWINGEN */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertikal zentriert */
+    align-items: center;     /* Horizontal zentriert */
+    
+    /* Divider auf der rechten Seite */
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
 }
 
-/* Entfernt die Linie bei der letzten Card, damit es sauber aussieht */
+/* Verhindert, dass der letzte Divider am Rand klebt */
 .stat-card:last-child {
     border-right: none;
+}
+
+/* Sicherstellen, dass die Texte selbst auch zentriert sind */
+.stat-card h3, 
+.stat-card .value, 
+.total-sub-value {
+    width: 100%;
+    text-align: center;
 }
 
 /* Hover-Effekt: Die Card leicht hervorheben */
