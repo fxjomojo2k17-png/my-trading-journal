@@ -498,90 +498,66 @@
         }
         
 		
-      .header {
+    .header {
     background-color: #0b0e11;
-    padding: 40px 15px 30px 15px;
+    padding: 60px 15px 40px 15px; /* Mehr Platz nach oben/unten */
     text-align: center;
-    border-bottom: 2px solid rgba(0, 242, 255, 0.2); /* Dezentere Linie in Cyan */
+    border-bottom: 2px solid rgba(0, 242, 255, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 25px; /* Abstand zwischen Titel und Sessions */
 }
 
-/* Dein leuchtender Schriftzug */
 .candle-chart-text {
-    font-size: 1.8em;
+    font-size: 2.2em;
     font-weight: bold;
-    letter-spacing: 8px;
+    letter-spacing: 12px; /* Etwas mehr Abstand zwischen den Buchstaben für den Glow */
     color: #00f2ff;
-    text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
-    animation: glow 3s infinite alternate;
     text-transform: uppercase;
+    
+    /* EXTREMER GLOW: Mehrere Ebenen für maximale Leuchtkraft */
+    text-shadow: 
+        0 0 10px #00f2ff,
+        0 0 20px #00f2ff,
+        0 0 40px #00f2ff,
+        0 0 80px rgba(0, 242, 255, 0.8),
+        0 0 120px rgba(0, 242, 255, 0.4);
+        
+    animation: pulseGlow 2.5s infinite alternate;
 }
 
-/* Die Sessions unter der Überschrift */
-.session-wrapper {
+.session-container {
     display: flex;
-    gap: 20px;
+    gap: 30px;
     justify-content: center;
     font-family: 'Courier New', monospace;
 }
 
-.session-wrapper span {
-    font-size: 0.75em;
-    letter-spacing: 1.5px;
-    color: #444; /* Standard: Dezent im Hintergrund */
+.session-tag {
+    font-size: 0.85em;
+    letter-spacing: 2px;
+    color: #333; /* Inaktive Sessions sind dunkel */
     font-weight: bold;
     text-transform: uppercase;
+    transition: all 0.4s ease;
 }
 
-/* Falls eine Session aktiv ist (für dein Script) */
-.session-wrapper span.active {
+/* Wenn eine Session aktiv ist (durch dein Script gesteuert) */
+.session-tag.active {
     color: #00f2ff;
-    text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.9);
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); opacity: 0.8; }
-    to { text-shadow: 0 0 25px rgba(0, 242, 255, 1); opacity: 1; }
-}
-
-.candle-chart-text {
-    position: relative;
-    font-size: 1.5em; /* Etwas größer für mehr Impact */
-    font-weight: bold;
-    letter-spacing: 8px;
-    color: #00f2ff;
-    text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
-    animation: glow 3s infinite alternate; /* Sanftes Pulsieren */
-    display: inline-block; /* Ensures the glow and pulse apply correctly */
-}
-
-@keyframes glow {
+/* Pulsierende Animation für den Haupttitel */
+@keyframes pulseGlow {
     from {
-        text-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0 20px rgba(0, 242, 255, 0.3);
-        opacity: 0.8;
+        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 40px rgba(0, 242, 255, 0.7);
+        transform: scale(1);
     }
     to {
-        text-shadow: 0 0 25px rgba(0, 242, 255, 1), 0 0 40px rgba(0, 242, 255, 0.6);
-        opacity: 1;
-    }
-}
-
-/* Optional: Adding the pulse animation if you want it to scale as well */
-.candle-chart-text:hover {
-    animation: glow 3s infinite alternate, pulse 2s infinite ease-in-out;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 0.8;
+        text-shadow: 0 0 15px #00f2ff, 0 0 30px #00f2ff, 0 0 60px #00f2ff, 0 0 100px rgba(0, 242, 255, 0.9);
+        transform: scale(1.02); /* Minimales Atmen des Textes */
     }
 }
 
