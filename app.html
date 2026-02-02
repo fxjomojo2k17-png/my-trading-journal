@@ -1452,7 +1452,37 @@ body.pro-mode #screenshot.drag-active {
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
 
+.value-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
 
+.stat-card .value {
+    font-size: 1.1em; /* Dein bisheriger Standard */
+    line-height: 1.2;
+}
+
+.stat-card .value-total {
+    font-size: 0.75em; /* Kleiner für die Gesamtübersicht */
+    color: #8892b0;    /* Etwas ausgegrauter */
+    font-weight: normal;
+}
+.total-sub-value {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #8892b0);
+    margin-top: 4px;
+    font-weight: normal;
+    opacity: 0.8;
+}
+
+/* Optional: Damit die Haupt-Value nicht zu riesig ist */
+.stat-card .value {
+    font-size: 1.4rem; 
+    line-height: 1.1;
+}
 
     </style>
 </head>
@@ -1575,8 +1605,34 @@ body.pro-mode #screenshot.drag-active {
         </div>
         <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
         <div class="stat-card" id="card-trades"><h3>Trades</h3><div class="value" id="totalTrades">0</div></div>
+		
+		
+		<!--
         <div class="stat-card" id="card-winrate"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
         <div class="stat-card" id="card-pl"><h3>P/L ($)</h3><div class="value" id="totalPL">$0.00</div></div>
+		-->
+<div class="stat-card" id="card-winrate">
+    <h3>Win Rate</h3>
+    <div class="value" id="winRate">0%</div>
+    <div class="total-sub-value">Total: <span id="winRateTotal">0%</span></div>
+</div>
+
+<div class="stat-card" id="card-pl">
+    <h3>P/L ($)</h3>
+    <div class="value" id="totalPL">$0.00</div>
+    <div class="total-sub-value">Total: <span id="totalPLTotal">$0.00</span></div>
+</div>
+
+<div class="stat-card" id="plCard">
+    <h3>P/L (Monat / Gesamt)</h3>
+    <div class="value-container">
+        <div class="value" id="totalPL">-</div>
+        <div class="value-total" id="totalPLTotal">Gesamt: -</div>
+    </div>
+</div>
+		
+		
+		
         <div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
         <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
 		<div class="stat-card">
@@ -2189,27 +2245,30 @@ function setupDragAndDrop() {
 
     function refreshApp() { renderCalendar(); updateStatsAndTable(); resetForm(); }
 
-  async function updateStatsAndTable() {
+ async function updateStatsAndTable() {
     // 1. Grundlegende Daten laden
     const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
-    // await saveUserSettings();
     const instrumentFilter = document.getElementById('historyInstrumentFilter').value;
 
-    // 2. Filtern der Trades
+    // 2. Filtern der Trades (Monat/Filter-Ansicht)
     let filtered = trades.filter(t => {
         const matchesTime = selectedDateFilter ? (t.date === selectedDateFilter) : (new Date(t.date).getMonth() === currentViewDate.getMonth() && new Date(t.date).getFullYear() === currentViewDate.getFullYear());
         const matchesInstrument = (instrumentFilter === 'ALL' || t.instrument === instrumentFilter);
         return matchesTime && matchesInstrument;
     });
 
-    let traderAllTrades = trades;
+    // --- BERECHNUNG GESAMT (TOTAL) ---
+    let traderAllTrades = trades; // Alle Trades im Journal
     const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-    
-    // 3. Stats & Profit Factor Berechnung
+    const totalWinsCount = traderAllTrades.filter(t => t.result === 'WIN').length;
+    const totalWinRateVal = traderAllTrades.length > 0 ? (totalWinsCount / traderAllTrades.length) * 100 : 0;
+    // ---------------------------------
+
+    // 3. Stats & Profit Factor Berechnung (Aktuelle Ansicht)
     animateValue('currentEquity', 0, initialBalance + totalNetPL, 800, true);
     
     const wins = filtered.filter(t => t.result === 'WIN');
-    const losses = filtered.filter(t => t.result === 'LOSS'); // Neu für Avg Loss
+    const losses = filtered.filter(t => t.result === 'LOSS');
     
     const viewPL = filtered.reduce((sum, t) => sum + Number(t.pl), 0);
     const winRateVal = filtered.length > 0 ? (wins.length / filtered.length) * 100 : 0;
@@ -2217,23 +2276,26 @@ function setupDragAndDrop() {
     const totalWinAmount = filtered.filter(t => Number(t.pl) > 0).reduce((sum, t) => sum + Number(t.pl), 0);
     const totalLossAmount = Math.abs(filtered.filter(t => Number(t.pl) < 0).reduce((sum, t) => sum + Number(t.pl), 0));
     
-    // --- NEU: DURCHSCHNITTE BERECHNEN ---
+    // --- DURCHSCHNITTE BERECHNEN ---
     const avgWinVal = wins.length > 0 ? (totalWinAmount / wins.length) : 0;
     const avgLossVal = losses.length > 0 ? (totalLossAmount / losses.length) : 0;
 
-    // Werte animieren (wie bei deinen anderen Stats)
     if(document.getElementById('avgWin')) animateValue('avgWin', 0, avgWinVal, 800, true);
     if(document.getElementById('avgLoss')) animateValue('avgLoss', 0, avgLossVal, 800, true);
-    
-    // Diagramm zeichnen
     if (typeof renderAvgChart === "function") renderAvgChart(avgWinVal, avgLossVal);
-    // ------------------------------------
 
     let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
 
+    // --- ANIMATION DER WERTE ---
+    // Monat/Filter Werte
     animateValue('totalTrades', 0, filtered.length, 800);
     animateValue('winRate', 0, winRateVal, 800, false, true);
     animateValue('totalPL', 0, viewPL, 800, true);
+    
+    // Gesamt Werte (Die neuen Felder)
+    animateValue('winRateTotal', 0, totalWinRateVal, 800, false, true);
+    animateValue('totalPLTotal', 0, totalNetPL, 800, true);
+
     if(document.getElementById('profitFactor')) animateValue('profitFactor', 0, pf, 800);
 
     // 4. Glow Effekt
@@ -2243,6 +2305,7 @@ function setupDragAndDrop() {
         if (viewPL > 0) plCard.classList.add('glow-win');
         else if (viewPL < 0) plCard.classList.add('glow-loss');
     }
+
 
     // 5. Durchschnittlicher R-Multiplikator
     const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
