@@ -991,6 +991,40 @@ tr.row-loss {
 .pl-positive { color: #00ffaa !important; text-shadow: 0 0 5px rgba(0, 255, 170, 0.4); }
 .pl-negative { color: #ff4a68 !important; text-shadow: 0 0 5px rgba(255, 74, 104, 0.4); }
 
+
+#calendarMonth {
+    color: #00f2ff;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1em;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    
+    /* Der extreme Glow */
+    text-shadow: 
+        0 0 5px #00f2ff,
+        0 0 10px rgba(0, 242, 255, 0.7),
+        0 0 20px rgba(0, 242, 255, 0.4);
+    
+    /* Die Puls-Animation */
+    animation: monthPulse 3s infinite alternate ease-in-out;
+}
+
+/* Die Animation lässt das Licht sanft atmen */
+@keyframes monthPulse {
+    from {
+        text-shadow: 0 0 5px #00f2ff, 0 0 10px rgba(0, 242, 255, 0.5);
+        opacity: 0.85;
+    }
+    to {
+        text-shadow: 0 0 8px #00f2ff, 0 0 20px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.6);
+        opacity: 1;
+    }
+}
+
+
+
+
 /* Scrollbar innerhalb des Widgets stylen (falls nötig) */
 .tradingview-widget-container {
     filter: grayscale(0.2); /* Macht die Farben etwas dezenter für dein Design */
