@@ -527,46 +527,26 @@
     animation: pulseGlow 2.5s infinite alternate;
 }
 
-/* Die Sessions Gruppierung */
 .session-container {
     display: flex;
-    gap: 25px;
+    gap: 30px;
     justify-content: center;
-    margin-top: 10px;
+    font-family: 'Courier New', monospace;
 }
 
-/* Grundzustand der Sessions (dezent) */
 .session-tag {
-    font-size: 0.8em;
-    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
     letter-spacing: 2px;
-    color: #333; /* Inaktiv fast dunkel */
+    color: #333; /* Inaktive Sessions sind dunkel */
     font-weight: bold;
     text-transform: uppercase;
-    transition: all 0.5s ease;
+    transition: all 0.4s ease;
 }
 
-/* DER PULSIERENDE EFFEKT für die aktive Session */
+/* Wenn eine Session aktiv ist (durch dein Script gesteuert) */
 .session-tag.active {
     color: #00f2ff;
-    text-shadow: 
-        0 0 5px #00f2ff,
-        0 0 15px rgba(0, 242, 255, 0.7);
-    animation: sessionPulse 2s infinite alternate ease-in-out;
-}
-
-/* Die spezifische Puls-Animation für die Sessions */
-@keyframes sessionPulse {
-    0% {
-        text-shadow: 0 0 5px #00f2ff, 0 0 10px rgba(0, 242, 255, 0.5);
-        opacity: 0.7;
-        transform: scale(1);
-    }
-    100% {
-        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.8);
-        opacity: 1;
-        transform: scale(1.05); /* Leichtes Vergrößern beim Pulsieren */
-    }
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.9);
 }
 
 /* Pulsierende Animation für den Haupttitel */
@@ -1010,40 +990,6 @@ tr.row-loss {
 /* Profit & Loss Farben */
 .pl-positive { color: #00ffaa !important; text-shadow: 0 0 5px rgba(0, 255, 170, 0.4); }
 .pl-negative { color: #ff4a68 !important; text-shadow: 0 0 5px rgba(255, 74, 104, 0.4); }
-
-
-#calendarMonth {
-    color: #00f2ff;
-    font-family: 'Courier New', monospace;
-    font-size: 1.1em;
-    font-weight: bold;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    
-    /* Der extreme Glow */
-    text-shadow: 
-        0 0 5px #00f2ff,
-        0 0 10px rgba(0, 242, 255, 0.7),
-        0 0 20px rgba(0, 242, 255, 0.4);
-    
-    /* Die Puls-Animation */
-    animation: monthPulse 3s infinite alternate ease-in-out;
-}
-
-/* Die Animation lässt das Licht sanft atmen */
-@keyframes monthPulse {
-    from {
-        text-shadow: 0 0 5px #00f2ff, 0 0 10px rgba(0, 242, 255, 0.5);
-        opacity: 0.85;
-    }
-    to {
-        text-shadow: 0 0 8px #00f2ff, 0 0 20px #00f2ff, 0 0 30px rgba(0, 242, 255, 0.6);
-        opacity: 1;
-    }
-}
-
-
-
 
 /* Scrollbar innerhalb des Widgets stylen (falls nötig) */
 .tradingview-widget-container {
