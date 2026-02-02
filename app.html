@@ -446,6 +446,30 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
+		
+		/* Der Fade-Effekt für die gesamte Form */
+.container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Ein sanfter Verlauf von außen (dunkel) nach innen (transparent) */
+    background: linear-gradient(90deg, #0b0e11 0%, transparent 5%, transparent 95%, #0b0e11 100%);
+    
+    /* WICHTIG: Damit man durch den Schatten hindurch klicken kann */
+    pointer-events: none;
+    
+    /* Legt den Schatten über den Inhalt */
+    z-index: 99; 
+    
+    /* Damit die Ecken abgerundet bleiben wie beim Container */
+    border-radius: 15px;
+    
+    /* Optional: Ein zusätzlicher Schatten oben und unten für kompletten Fokus */
+    box-shadow: inset 0 0 50px rgba(11, 14, 17, 0.5);
+}
 
 /* REALISTIC CANDLESTICK CHART DIVIDER */
 .section-divider {
