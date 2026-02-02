@@ -3402,6 +3402,10 @@ window.addEventListener('load', () => {
 });
 
 
+// different Sessions 
+setInterval(updateSessions, 60000);
+updateSessions();
+
 function updateSessions() {
     const now = new Date();
     const hour = now.getHours();
