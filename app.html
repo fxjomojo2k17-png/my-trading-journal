@@ -867,7 +867,7 @@ tr.row-loss {
     flex: 1;
     min-width: 450px; 
     max-width: 500px;
-    height: 380px; /* Deine ursprüngliche Wunsch-Höhe */
+    height: 380px;
     background: rgba(10, 12, 16, 0.85);
     border: 1px solid rgba(0, 242, 255, 0.2);
     border-radius: 12px;
@@ -875,7 +875,10 @@ tr.row-loss {
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    overflow: hidden; /* Verhindert das Rausrutschen von Inhalten */
+    overflow: hidden;
+
+    /* DIESE ZEILE SETZT IHN IN DIE MITTE */
+    margin: 0 auto; 
 }
 
 /* Der Header (Monat + Pfeile) */
