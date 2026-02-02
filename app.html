@@ -955,6 +955,38 @@ tr.row-loss {
     margin-top: 6px;
 }
 
+/* Die Buttons für Monat vor/zurück */
+.calendar-header button {
+    background: transparent;
+    border: 1px solid rgba(0, 242, 255, 0.3);
+    color: #00f2ff;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    /* Ein dezenter Glow für die Buttons */
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+    box-shadow: 0 0 5px rgba(0, 242, 255, 0.1);
+}
+
+/* Hover-Effekt: Der Button fängt an zu leuchten */
+.calendar-header button:hover {
+    background: rgba(0, 242, 255, 0.1);
+    border-color: #00f2ff;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Aktiver Klick-Effekt */
+.calendar-header button:active {
+    transform: scale(0.9);
+}
+
 /* Profit & Loss Farben */
 .pl-positive { color: #00ffaa !important; text-shadow: 0 0 5px rgba(0, 255, 170, 0.4); }
 .pl-negative { color: #ff4a68 !important; text-shadow: 0 0 5px rgba(255, 74, 104, 0.4); }
@@ -1636,11 +1668,9 @@ body.pro-mode #screenshot.drag-active {
     <div class="section-divider"></div>
 
 <div class="calendar-container">
-    <div class="calendar-header">
-        <button onclick="changeMonth(-1)">&#10094;</button>
-        <div id="calendarMonth"></div>
-        <button onclick="changeMonth(1)">&#10095;</button>
-    </div>
+<div class="calendar-header">
+    <button onclick="changeMonth(-1)">‹</button> <div id="calendarMonth"></div>
+    <button onclick="changeMonth(1)">›</button>  </div>
     <div id="calendarGrid" class="calendar-grid"></div>
 </div>
 
