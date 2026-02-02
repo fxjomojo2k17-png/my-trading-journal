@@ -3402,45 +3402,25 @@ window.addEventListener('load', () => {
 });
 
 
-// different Sessions 
-setInterval(updateSessions, 60000);
-updateSessions();
-
 function updateSessions() {
     const now = new Date();
     const hour = now.getHours();
     const min = now.getMinutes();
-    
-    // Berechnet die Zeit als Dezimalzahl (z.B. 17:30 = 17.5)
     const currentTime = hour + min / 60;
     
     const londonEl = document.getElementById('session-london');
     const newyorkEl = document.getElementById('session-newyork');
     const tokyoEl = document.getElementById('session-tokyo');
     
-    // Präzise Logik für MEZ (Deutschland)
-    const isLondonActive = (currentTime >= 9 && currentTime < 17.5); // 09:00 - 17:30
-    const isNewyorkActive = (currentTime >= 15.5 && currentTime < 22); // 15:30 - 22:00
-    const isTokyoActive = (currentTime >= 1 && currentTime < 9);      // 01:00 - 09:00
+    // Deine Zeit-Logik bleibt gleich
+    const isLondonActive = (currentTime >= 9 && currentTime < 17.5);
+    const isNewyorkActive = (currentTime >= 15.5 && currentTime < 22);
+    const isTokyoActive = (currentTime >= 1 && currentTime < 9);
     
-    // Hilfsfunktion, um dein Design anzuwenden
-    const applyStyle = (el, isActive) => {
-        if (isActive) {
-            el.style.color = '#00f2ff';
-            el.style.textShadow = '0 0 15px rgba(0, 242, 255, 0.8), 0 0 30px rgba(0, 242, 255, 0.5)';
-            el.style.fontWeight = 'bold';
-            el.style.animation = 'pulse 2s ease-in-out infinite';
-        } else {
-            el.style.color = '#444';
-            el.style.textShadow = 'none';
-            el.style.fontWeight = 'normal';
-            el.style.animation = 'none';
-        }
-    };
-
-    applyStyle(londonEl, isLondonActive);
-    applyStyle(newyorkEl, isNewyorkActive);
-    applyStyle(tokyoEl, isTokyoActive);
+    // Wir setzen einfach nur die Klasse "active" - das CSS macht das Pulsieren!
+    londonEl.classList.toggle('active', isLondonActive);
+    newyorkEl.classList.toggle('active', isNewyorkActive);
+    tokyoEl.classList.toggle('active', isTokyoActive);
 }
 
 
