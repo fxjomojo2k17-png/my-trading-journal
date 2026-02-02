@@ -671,16 +671,7 @@
 .chart-box { background: rgba(37, 45, 55, 0.6); padding: 15px; border-radius: 12px; height: 320px; border: 1px solid rgba(255,255,255,0.05); }
 .chart-box-wide { grid-column: 1 / -1; height: 450px; }
 
-        .calendar-section { padding: 20px; max-width: 600px; margin: 0 auto; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: #8892b0; font-size: 0.95em; text-transform: uppercase; font-weight: bold; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: rgba(28, 34, 41, 0.6); padding: 12px; border-radius: 8px; }
-        
-  .calendar-day { background: rgba(37, 45, 55, 0.8); aspect-ratio: 1.2; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.9em; border: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s; }
-  .calendar-day:hover { background: #2d343c; transform: translateY(-2px); }
-        .calendar-day.selected { border-color: #764ba2; background: rgba(118, 75, 162, 0.2); }
-        .calendar-day.today { border-color: #00f2ff; }
-        .calendar-day .day-num { position: absolute; top: 3px; left: 5px; font-size: 0.75em; color: #5c6680; }
-        .calendar-day .day-pl { font-weight: bold; font-size: 0.95em; margin-top: 4px; }
+       
 
         .day-win { background: rgba(0, 255, 170, 0.2) !important; color: #00ffaa !important; border-color: rgba(0, 255, 170, 0.4) !important; box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.1); }
         .day-loss { background: rgba(255, 74, 104, 0.2) !important; color: #ff4a68 !important; border-color: rgba(255, 74, 104, 0.4) !important; box-shadow: inset 0 0 10px rgba(255, 74, 104, 0.1); }
@@ -871,15 +862,101 @@ tr.row-loss {
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
+/* Hauptcontainer mit Glassmorphismus */
 .calendar-container {
     flex: 1;
     min-width: 500px;
-    background: rgba(30, 34, 45, 0.4); /* Etwas dunkler */
-    border-radius: 12px;
-    padding: 15px;
-    border: 1px solid rgba(255, 74, 104, 0.2); /* Dezent roter Rand für News */
-    height: 380px;
-    overflow: hidden;
+    background: rgba(10, 12, 16, 0.6); 
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(0, 242, 255, 0.1); /* Cyan-Touch statt Rot */
+    height: auto; /* Lass den Kalender atmen */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Header (Monat/Jahr) */
+.calendar-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    color: #00f2ff; /* Neon-Farbe */
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+/* Das Grid */
+.calendar-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 8px; 
+    background: transparent; 
+    padding: 5px; 
+}
+
+/* Die einzelnen Tage */
+.calendar-day { 
+    background: rgba(255, 255, 255, 0.03); 
+    aspect-ratio: 1.1; 
+    border-radius: 6px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    font-size: 0.9em; 
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    cursor: pointer; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+/* Hover Effekt: Dezent leuchtend */
+.calendar-day:hover { 
+    background: rgba(0, 242, 255, 0.1); 
+    border-color: #00f2ff;
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* Heute: Starker Glow-Rand */
+.calendar-day.today { 
+    border-color: #00f2ff; 
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+}
+
+/* Selektierter Tag */
+.calendar-day.selected { 
+    background: rgba(0, 242, 255, 0.2); 
+    border-color: #00f2ff; 
+}
+
+/* Die kleine Zahl oben links */
+.calendar-day .day-num { 
+    position: absolute; 
+    top: 5px; 
+    left: 7px; 
+    font-size: 0.7em; 
+    color: #5c6680; 
+    font-family: monospace;
+}
+
+/* P&L Anzeige im Tag */
+.calendar-day .day-pl { 
+    font-weight: bold; 
+    font-size: 0.85em; 
+    margin-top: 8px; 
+}
+
+/* Profit & Loss Farben mit leichtem Glow */
+.pl-positive { 
+    color: #00ffaa !important; 
+    text-shadow: 0 0 8px rgba(0, 255, 170, 0.4); 
+}
+
+.pl-negative { 
+    color: #ff4a68 !important; 
+    text-shadow: 0 0 8px rgba(255, 74, 104, 0.4); 
 }
 
 /* Scrollbar innerhalb des Widgets stylen (falls nötig) */
@@ -2444,26 +2521,71 @@ if (result === 'WIN') {
         populateLists(); 
     }
 
-    function renderCalendar() {
+function renderCalendar() {
     const grid = document.getElementById('calendarGrid');
+    if (!grid) return;
     grid.innerHTML = ''; 
-    const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
-    document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
-    const daysInMonth = new Date(year, month + 1, 0).getDate(), firstDayIndex = new Date(year, month, 1).getDay();
-    ['S','M','T','W','T','F','S'].forEach(l => grid.innerHTML += `<div class="calendar-day-label">${l}</div>`);
-    for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div></div>`;
+    
+    const year = currentViewDate.getFullYear();
+    const month = currentViewDate.getMonth();
+    const today = new Date();
+    
+    // Monat und Jahr im Header setzen
+    document.getElementById('calendarMonth').textContent = new Intl.DateTimeFormat('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+    }).format(currentViewDate);
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+
+    // Wochentage Labels
+    ['S','M','T','W','T','F','S'].forEach(l => {
+        grid.innerHTML += `<div class="calendar-header-day" style="text-align:center; font-size:0.7em; color:#5c6680; padding-bottom:10px;">${l}</div>`;
+    });
+
+    // Leere Felder vor dem ersten Tag des Monats
+    for (let i = 0; i < firstDayIndex; i++) {
+        grid.innerHTML += `<div></div>`;
+    }
+
+    // Die Tage generieren
     for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayTrades = trades.filter(t => t.date === dateStr);
-			
-            const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
-            const dayEl = document.createElement('div');
-            dayEl.className = `calendar-day ${dayPL > 0 ? 'day-win' : (dayPL < 0 ? 'day-loss' : '')} ${selectedDateFilter === dateStr ? 'selected' : ''}`;
-            dayEl.innerHTML = `<span class="day-num">${d}</span><span class="day-pl">${dayPL !== 0 ? dayPL.toFixed(0) : ''}</span>`;
-            dayEl.onclick = () => { selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr; renderCalendar(); updateStatsAndTable(); };
-            grid.appendChild(dayEl);
-        }
+        const dayPL = dayTrades.reduce((sum, t) => sum + Number(t.pl || 0), 0);
+        
+        const dayEl = document.createElement('div');
+        
+        // Klassen-Logik für Profit, Verlust und Heute
+        let statusClass = '';
+        if (dayPL > 0) statusClass = 'pl-positive';
+        else if (dayPL < 0) statusClass = 'pl-negative';
+
+        const isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
+        
+        dayEl.className = `calendar-day ${statusClass} ${selectedDateFilter === dateStr ? 'selected' : ''} ${isToday ? 'today' : ''}`;
+        
+        // Inhalt des Tages-Feldes
+        // Zeigt P&L nur an, wenn Trades gemacht wurden
+        const plDisplay = dayPL !== 0 ? `${dayPL > 0 ? '+' : ''}${dayPL.toFixed(0)}$` : '';
+        
+        dayEl.innerHTML = `
+            <span class="day-num">${d}</span>
+            <span class="day-pl">${plDisplay}</span>
+        `;
+
+        dayEl.onclick = () => { 
+            selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr; 
+            renderCalendar(); 
+            updateStatsAndTable(); 
+        };
+        
+        grid.appendChild(dayEl);
     }
+}
+
+
 
     function prepareEdit(id) {
         const t = trades.find(tr => tr.id === id);
