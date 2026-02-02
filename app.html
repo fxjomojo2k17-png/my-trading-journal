@@ -1310,7 +1310,38 @@ body.pro-mode #screenshot.drag-active {
 }
 
 
+/* Container, der Header und Chart hält */
+.header-chart-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0; /* Hinter dem Text */
+}
 
+/* Das Canvas selbst */
+#headerChartCanvas {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6; /* Transparenz, damit der Text lesbar bleibt */
+}
+
+/* Vignette/Fade Effekt an den Seiten */
+.chart-fade-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, #0b0e11 0%, transparent 20%, transparent 80%, #0b0e11 100%);
+    pointer-events: none;
+}
+
+/* Wichtig: Text muss über dem Canvas liegen */
+.candle-chart-text {
+    position: relative;
+    z-index: 2; /* Über dem Chart */
+    /* ... deine restlichen Styles für den Text ... */
+}
     </style>
 </head>
 <body>
