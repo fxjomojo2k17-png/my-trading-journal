@@ -498,18 +498,54 @@
         }
         
 		
-        .header {
-            background-color: #0b0e11;
-            /* background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), 
-                              url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=1200'); */
-            background-size: cover;
-            background-position: center;
-            padding: 40px 15px 30px 15px;
-            text-align: center;
-            border-bottom: 3px solid #764ba2;
-        }
+      .header {
+    background-color: #0b0e11;
+    padding: 40px 15px 30px 15px;
+    text-align: center;
+    border-bottom: 2px solid rgba(0, 242, 255, 0.2); /* Dezentere Linie in Cyan */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
 
-        .header h1 { font-size: 1.5em; letter-spacing: 1px; text-transform: uppercase; color: #00f2ff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
+/* Dein leuchtender Schriftzug */
+.candle-chart-text {
+    font-size: 1.8em;
+    font-weight: bold;
+    letter-spacing: 8px;
+    color: #00f2ff;
+    text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
+    animation: glow 3s infinite alternate;
+    text-transform: uppercase;
+}
+
+/* Die Sessions unter der Überschrift */
+.session-wrapper {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+}
+
+.session-wrapper span {
+    font-size: 0.75em;
+    letter-spacing: 1.5px;
+    color: #444; /* Standard: Dezent im Hintergrund */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Falls eine Session aktiv ist (für dein Script) */
+.session-wrapper span.active {
+    color: #00f2ff;
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); opacity: 0.8; }
+    to { text-shadow: 0 0 25px rgba(0, 242, 255, 1); opacity: 1; }
+}
 
 .candle-chart-text {
     position: relative;
@@ -1310,38 +1346,7 @@ body.pro-mode #screenshot.drag-active {
 }
 
 
-/* Container, der Header und Chart hält */
-.header-chart-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0; /* Hinter dem Text */
-}
 
-/* Das Canvas selbst */
-#headerChartCanvas {
-    width: 100%;
-    height: 100%;
-    opacity: 0.6; /* Transparenz, damit der Text lesbar bleibt */
-}
-
-/* Vignette/Fade Effekt an den Seiten */
-.chart-fade-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(90deg, #0b0e11 0%, transparent 20%, transparent 80%, #0b0e11 100%);
-    pointer-events: none;
-}
-
-/* Wichtig: Text muss über dem Canvas liegen */
-.candle-chart-text {
-    position: relative;
-    z-index: 2; /* Über dem Chart */
-    /* ... deine restlichen Styles für den Text ... */
-}
     </style>
 </head>
 <body>
@@ -1445,48 +1450,15 @@ body.pro-mode #screenshot.drag-active {
     </div>
 </div>
 
-    <div class="header">
-	<!-- MOCKUP 5 -->
-        <div class="mockup-section">
-            
-        
-            <div class="header-demo">
-                <div style="position: relative; display: inline-block;">
-                   <!--   <div class="chart-overlay">
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 60px;"></div>
-                        <div class="mini-candle" style="height: 35px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 45px;"></div>
-                        <div class="mini-candle" style="height: 55px;"></div>
-                        <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 65px;"></div>
-                        <div class="mini-candle" style="height: 40px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-						    <div class="mini-candle" style="height: 50px;"></div>
-                        <div class="mini-candle" style="height: 70px;"></div>
-                        <div class="mini-candle" style="height: 58px;"></div>
-                        <div class="mini-candle" style="height: 42px;"></div>
-                        <div class="mini-candle" style="height: 68px;"></div>
-                    </div>-->
-					
-					
-					
-            <div class="candle-chart-text">TRADING JOURNAL</div>
-
-
-
-
-                </div>
-							<div style="display: flex; gap: 15px; margin-top: 10px; font-size: 1.0em; font-family: monospace;">
-<span id="session-london" style="color: #444;"> LONDON session</span>
-    <span id="session-newyork" style="color: #444;"> NEW YORK session</span>
-    <span id="session-tokyo" style="color: #444;"> TOKYO session</span>
+<div class="header">
+    <div class="candle-chart-text">TRADING JOURNAL</div>
+    
+    <div class="session-container">
+        <span id="session-london" class="session-tag">LONDON session</span>
+        <span id="session-newyork" class="session-tag">NEW YORK session</span>
+        <span id="session-tokyo" class="session-tag">TOKYO session</span>
+    </div>
 </div>
-            </div></div>
-	</div>
 
     <div class="stats-grid">
         <div class="stat-card" id="card-balance">
