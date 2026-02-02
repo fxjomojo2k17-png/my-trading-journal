@@ -1308,7 +1308,42 @@ body.pro-mode #screenshot.drag-active {
     animation: pulse-cyan 1.5s infinite;
     transform: translateY(-2px); /* Hebt sich leicht ab */
 }
+.chart-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.4; /* Dezent im Hintergrund */
+    pointer-events: none;
+}
 
+.mini-candle {
+    width: 6px;
+    position: relative;
+    /* Zufällige Farbe: Jede zweite Kerze rot, sonst grün */
+    background: #00ff88; 
+}
+
+/* Jede ungerade Kerze wird rot (Bearish) */
+.mini-candle:nth-child(odd) {
+    background: #ff3366;
+}
+
+/* Der Docht (Wick) */
+.mini-candle::before {
+    content: '';
+    position: absolute;
+    top: -10px;    /* Steht oben über */
+    bottom: -10px; /* Steht unten über */
+    left: 50%;
+    width: 1px;
+    background: inherit; /* Farbe vom Body übernehmen */
+    transform: translateX(-50%);
+    z-index: -1;
+}
 
 
     </style>
