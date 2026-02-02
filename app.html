@@ -3458,9 +3458,6 @@ async function loadUserSettings() {
     console.log("loadUserSettings - Nach populateLists - customTags:", customTags); // DEBUG
 }
 
-
-
-
 async function saveUserSettings() {
     if (!currentUser) return;
     
@@ -3475,11 +3472,6 @@ async function saveUserSettings() {
         })
         .eq('user_id', currentUser.id);
 }
-
-
-
-
-
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
