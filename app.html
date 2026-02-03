@@ -777,42 +777,47 @@
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
         
-        /* Der Haupt-Button (Save) */
-.btn-primary { 
-    background: linear-gradient(135deg, #764ba2, #667eea); 
-    color: white; 
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 500;
+        /* Haupt-Button: Nur der Rahmen leuchtet, der Hintergrund ist fast transparent */
+.btn-primary {
+    background: rgba(118, 75, 162, 0.1); /* Hauch von Lila */
+    color: #b794f4;
+    border: 1px solid #764ba2;
+    padding: 10px 24px;
+    border-radius: 4px; /* Eckiger wirkt oft technischer/professioneller */
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase; /* Wirkt wie ein Terminal/Trading-Tool */
     cursor: pointer;
-    transition: all 0.3s ease;
-    /* Ein sanfter Glow-Effekt in der Farbe des Buttons */
-    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(118, 75, 162, 0.4);
-    filter: brightness(1.1);
+    background: #764ba2;
+    color: white;
+    box-shadow: 0 0 20px rgba(118, 75, 162, 0.4);
+    transform: scale(1.02);
 }
 
-/* Der Neben-Button (Cancel / Secondary) */
-.btn-secondary { 
-    background: rgba(255, 255, 255, 0.05); /* Transparent statt massiv grau */
-    color: #a0aec0; 
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Feine Linie wie bei deinen Stat-Cards */
-    padding: 10px 20px;
-    border-radius: 8px;
+/* Secondary/Cancel: Komplett reduziert */
+.btn-secondary {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.btn-secondary:hover { 
-    background: rgba(255, 255, 255, 0.1); 
+.btn-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.3);
     color: white;
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
 }
         .btn-export { background: transparent !important; border: 1px solid #00f2ff !important; color: #00f2ff !important; padding: 0 12px; height: 32px; font-size: 0.7em; font-weight: bold; border-radius: 4px; cursor: pointer; }
 
