@@ -1786,10 +1786,17 @@ body.pro-mode #screenshot.drag-active {
                 <div class="form-group"><label>Screenshot</label><input type="text" id="screenshot" placeholder="Link or drag file..."></div>
                 <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
-            <div class="button-group">
+			
+			    <div class="combo-container">
+       
+        <button type="submit" id="submitBtn" class="btn-action btn-add" onclick="addNewTag()">Save Trade</button>
+        <button type="button" class="btn-action btn-del" onclick="resetForm()">Cancel</button>
+    </div>
+			
+          <!--  <div class="button-group">
                 <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
-            </div>
+            </div> -->
         </form>
     </div>
 
