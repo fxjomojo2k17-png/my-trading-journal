@@ -828,6 +828,54 @@
     box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
 }
 
+.btn-3action { 
+    /* Etwas flacher und eleganter */
+	margin-top: 10px;
+    width: 150px; 
+    height: 38px; 
+    
+    /* Hintergrund dezent statt massiv */
+    background: rgba(255, 255, 255, 0.05); 
+    color: #a0aec0; 
+    
+    border-radius: 6px; 
+    /* Ein feiner Border gibt Struktur ohne zu drücken */
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    
+    cursor: pointer;
+    font-size: 16px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* Plus-Button: Nutzt dein Lila als Akzent-Border */
+.btn-3add { 
+    border-color: rgba(118, 75, 162, 0.4);
+    color: #b794f4; /* Ein helleres Lila für bessere Lesbarkeit */
+}
+
+.btn-3add:hover { 
+    background: rgba(118, 75, 162, 0.2); 
+    color: white;
+    border-color: #764ba2;
+    box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+}
+
+/* Delete-Button: Dezent grau, wird bei Hover rot */
+.btn-3del { 
+    font-size: 16px; 
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-3del:hover { 
+    background: rgba(245, 101, 101, 0.1); 
+    color: #fc8181; /* Softes Rot */
+    border-color: #f56565;
+    box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
+}
 
 
 
@@ -1952,7 +2000,7 @@ body.pro-mode #screenshot.drag-active {
     placeholder="Paste TradingView export here (Balance History)... Example:
 2026-01-23 14:51:48,10000,10000.01174,0.01174,USD,&quot;Close long position for symbol BLACKBULL:GER40 at price 24847.20...&quot;">
 </textarea>
-            <button onclick="processBulkImport()" class="btn-2action btn-2add">Import Trades Now</button>
+            <button onclick="processBulkImport()" class="btn-3action btn-3add">Import Trades Now</button>
         </div><br><br>
 
 
