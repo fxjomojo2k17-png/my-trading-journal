@@ -777,46 +777,54 @@
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
         
-       /* Haupt-Buttons (Save/Cancel) exakt wie deine + / - Buttons */
+      /* Gemeinsame Basis für Save und Cancel */
 .btn-primary, .btn-secondary {
-    /* Kopie deiner .btn-action Werte */
-    background: #3d4651; 
-    color: white; 
-    border-radius: 6px; 
-    border: none; /* Da deine .btn-action 'border: none' haben */
-    cursor: pointer;
-    font-size: 16px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    transition: 0.2s;
-    
-    /* Anpassung für die Größe */
-    padding: 0 25px;
-    height: 42px; /* Die Höhe deiner .btn-action */
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 15px;
     font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    
+    /* DER ENTSCHEIDENDE BORDER: Permanent sichtbar wie bei den kleinen Buttons */
+    border: 1px solid rgba(255, 255, 255, 0.15); 
+    
+    color: #a0aec0;
+    flex-shrink: 0;
 }
 
-/* Der Save-Button (Wie dein lila .btn-add) */
-.btn-primary { 
-    background: #764ba2; 
+/* Der Save-Button (entspricht dem + Button) */
+.btn-primary {
+    /* Lila Akzent-Border schon im Ruhezustand leicht sichtbar */
+    border-color: rgba(118, 75, 162, 0.5); 
+    color: #b794f4;
 }
 
 .btn-primary:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 10px rgba(118, 75, 162, 0.4);
+    background: rgba(118, 75, 162, 0.2); 
+    border-color: #764ba2; /* Voll kräftiges Lila beim Hover */
+    color: white;
+    box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
+    transform: translateY(-1px);
 }
 
-/* Der Cancel-Button (Wie dein grauer .btn-del) */
-.btn-secondary { 
-    background: #4a5568; 
+/* Der Cancel-Button (entspricht dem - Button) */
+.btn-secondary {
+    /* Grauer Border im Ruhezustand */
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .btn-secondary:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 10px rgba(74, 85, 104, 0.3);
+    background: rgba(245, 101, 101, 0.1); 
+    border-color: #f56565; /* Roter Border beim Hover */
+    color: #fc8181;
+    box-shadow: 0 0 15px rgba(245, 101, 101, 0.2);
+    transform: translateY(-1px);
 }
-		
 		
 		
 		
