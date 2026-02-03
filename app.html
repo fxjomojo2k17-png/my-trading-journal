@@ -728,9 +728,9 @@
         .combo-container { display: flex; gap: 4px; height: 42px; align-items: center; width: 100%; }
 		
 		
-	.btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }	
+
 		
-        .btn-action { 
+.btn-action { 
     /* Etwas flacher und eleganter */
     width: 32px; 
     height: 32px; 
@@ -778,6 +778,54 @@
     box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
 }
 
+
+.btn-2action { 
+    /* Etwas flacher und eleganter */
+    width: 50px; 
+    height: 32px; 
+    
+    /* Hintergrund dezent statt massiv */
+    background: rgba(255, 255, 255, 0.05); 
+    color: #a0aec0; 
+    
+    border-radius: 6px; 
+    /* Ein feiner Border gibt Struktur ohne zu drücken */
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    
+    cursor: pointer;
+    font-size: 16px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* Plus-Button: Nutzt dein Lila als Akzent-Border */
+.btn-2add { 
+    border-color: rgba(118, 75, 162, 0.4);
+    color: #b794f4; /* Ein helleres Lila für bessere Lesbarkeit */
+}
+
+.btn-2add:hover { 
+    background: rgba(118, 75, 162, 0.2); 
+    color: white;
+    border-color: #764ba2;
+    box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+}
+
+/* Delete-Button: Dezent grau, wird bei Hover rot */
+.btn-2del { 
+    font-size: 20px; 
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-2del:hover { 
+    background: rgba(245, 101, 101, 0.1); 
+    color: #fc8181; /* Softes Rot */
+    border-color: #f56565;
+    box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
+}
 
 
 
@@ -1789,8 +1837,8 @@ body.pro-mode #screenshot.drag-active {
 			
 			    <div class="combo-container">
        
-        <button type="submit" id="submitBtn" class="btn-action btn-add" onclick="addNewTag()">Save Trade</button>
-        <button type="button" class="btn-action btn-del" onclick="resetForm()">Cancel</button>
+        <button type="submit" id="submitBtn" class="btn-2action btn-2add" onclick="addNewTag()">Save Trade</button>
+        <button type="button" class="btn-2action btn-2del" onclick="resetForm()">Cancel</button>
     </div>
 			
           <!--  <div class="button-group">
