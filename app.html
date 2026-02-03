@@ -2206,7 +2206,7 @@ function copyToClip(id) {
 
     function validateNumber(input) { input.value = input.value.replace(/[^0-9.\-]/g, ''); }
 
-function animateValue(id, start, end, duration, isCurrency = false, isPercent = false, suffix = "") {
+function animateValue(id, start, end, duration, isCurrency = false, isPercent = false, suffix = "", decimals = 0) {
     const obj = document.getElementById(id);
     if (!obj) return;
     let startTimestamp = null;
@@ -2220,8 +2220,8 @@ function animateValue(id, start, end, duration, isCurrency = false, isPercent = 
         } else if (isPercent) {
             obj.textContent = val.toFixed(1) + '%';
         } else {
-            // NEU: Wenn es weder Währung noch Prozent ist, runden wir auf ganze Zahlen
-            obj.textContent = Math.floor(val) + suffix;
+            // NEU: Nutze den 'decimals' Parameter (Standard ist 0 für Trades)
+            obj.textContent = val.toFixed(decimals) + suffix;
         }
         
         if (progress < 1) window.requestAnimationFrame(step);
@@ -2371,7 +2371,9 @@ const biggestLossVal = allLosses.length > 0 ? Math.max(...allLosses.map(t => Mat
     animateValue('winRateTotal', 0, totalWinRateVal, 800, false, true);
     animateValue('totalPLTotal', 0, totalNetPL, 800, true);
 
-    if(document.getElementById('profitFactor')) animateValue('profitFactor', 0, pf, 800);
+    if(document.getElementById('profitFactor')) {
+    animateValue('profitFactor', 0, pf, 800, false, false, "", 2);
+}
 
     // 4. Glow Effekt
     const plCard = document.getElementById('card-pl');
