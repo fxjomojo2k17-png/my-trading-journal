@@ -777,10 +777,10 @@
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
         
-        /* Gemeinsame Basis für Save und Cancel */
+       /* Gemeinsame Basis für Save und Cancel */
 .btn-primary, .btn-secondary {
     padding: 10px 24px;
-    border-radius: 6px; /* Gleicher Radius wie deine + / - Buttons */
+    border-radius: 6px;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
@@ -788,36 +788,42 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.05); /* Dezenter Hintergrund wie bei .btn-action */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    
+    /* DER ENTSCHEIDENDE BORDER: Permanent sichtbar wie bei den kleinen Buttons */
+    border: 1px solid rgba(255, 255, 255, 0.15); 
+    
     color: #a0aec0;
     flex-shrink: 0;
 }
 
-/* Der Save-Button (analog zum + Button) */
+/* Der Save-Button (entspricht dem + Button) */
 .btn-primary {
-    border-color: rgba(118, 75, 162, 0.4); /* Dein Lila als Rahmen-Akzent */
+    /* Lila Akzent-Border schon im Ruhezustand leicht sichtbar */
+    border-color: rgba(118, 75, 162, 0.5); 
     color: #b794f4;
 }
 
 .btn-primary:hover {
-    background: rgba(118, 75, 162, 0.15); /* Sanftes Aufleuchten */
-    border-color: #764ba2;
+    background: rgba(118, 75, 162, 0.2); 
+    border-color: #764ba2; /* Voll kräftiges Lila beim Hover */
     color: white;
     box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
     transform: translateY(-1px);
 }
 
-/* Der Cancel-Button (analog zum - Button) */
+/* Der Cancel-Button (entspricht dem - Button) */
 .btn-secondary {
-    border-color: rgba(255, 255, 255, 0.1);
+    /* Grauer Border im Ruhezustand */
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .btn-secondary:hover {
-    background: rgba(245, 101, 101, 0.1); /* Softes Rot beim Hover wie beim Löschen */
-    border-color: #f56565;
+    background: rgba(245, 101, 101, 0.1); 
+    border-color: #f56565; /* Roter Border beim Hover */
     color: #fc8181;
     box-shadow: 0 0 15px rgba(245, 101, 101, 0.2);
+    transform: translateY(-1px);
 }
 		
 		
