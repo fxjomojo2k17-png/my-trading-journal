@@ -780,47 +780,58 @@
 
 
 
-/* Container */
-.button-group { 
-    display: flex; 
-    gap: 10px; 
-    margin-top: 20px; 
-    flex-wrap: wrap; 
-}
 
-/* Basis-Button Style (Kopie von .btn-action, aber flexibel in der Breite) */
-.button-group button { 
-    height: 42px;             /* WICHTIG: Exakt die Höhe deiner + Buttons */
-    padding: 0 24px;          /* Breite passt sich dem Text an */
-    border-radius: 6px;       /* Exakt dein Radius */
-    border: none;             /* Kein Rahmen, wie oben */
-    cursor: pointer; 
-    font-size: 16px;          /* Lesbare Größe, nah an den 18px icons */
-    font-weight: bold; 
-    display: flex; 
+/* Container für die Buttons unten */
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    /* Wichtig: Damit sie nicht gequetscht werden */
     align-items: center; 
-    justify-content: center; 
-    transition: 0.2s;
-    color: white;             /* Text immer weiß */
 }
 
-/* Save Trade (Exakt wie dein lila + Button) */
-.btn-primary { 
-    background: #764ba2;      /* KEIN Gradient mehr, nur die feste Farbe */
+/* Basis-Styling: Wir kopieren hier exakt die Werte deiner kleinen Buttons */
+.btn-primary, .btn-secondary {
+    /* 1. DIE HÖHE: Das ist der wichtigste Punkt. 
+       Wenn deine Inputs 38px oder 42px hoch sind, muss das hier exakt gleich sein. */
+    height: 35px;  /* Ich schätze anhand des Screenshots auf ca. 35-38px */
+    
+    /* 2. Radius und Rahmen */
+    border-radius: 4px; /* Sieht im Screenshot eher eckig/kompakt aus, wie die Inputs */
+    border: none;
+    
+    /* 3. Schrift */
+    font-size: 13px; /* Kleiner, damit es elegant wirkt */
+    font-weight: 600;
+    text-transform: uppercase; /* Macht es technischer (optional) */
+    letter-spacing: 0.5px;
+    
+    /* 4. Layout */
+    padding: 0 20px; /* Breite durch Padding definiert */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
+/* SAVE BUTTON: Exakt das Lila der kleinen Plus-Buttons, aber MATT (kein Gradient) */
+.btn-primary {
+    background: #764ba2; /* Dein Standard-Lila (Hex aus deinem Code) */
+    color: white;
+}
 .btn-primary:hover {
-    background: #8e5ubf;      /* Leicht heller beim Hover */
-    box-shadow: 0 0 8px rgba(118, 75, 162, 0.5);
+    background: #8757b8; /* Leicht heller beim Hover */
 }
 
-/* Cancel (Exakt wie dein grauer Button) */
-.btn-secondary { 
-    background: #3d4651;      /* Exakt dein Dunkelgrau */
+/* CANCEL BUTTON: Exakt das Dunkelgrau der Minus-Buttons */
+.btn-secondary {
+    background: #3d4651; /* Dein Standard-Grau (Hex aus deinem Code) */
+    color: #cbd5e0;
 }
-
 .btn-secondary:hover {
-    background: #4a5568;      /* Etwas heller beim Hover */
+    background: #4a5568;
+    color: white;
 }
 		
 		
