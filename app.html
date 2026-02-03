@@ -727,13 +727,52 @@
 
         .combo-container { display: flex; gap: 4px; height: 42px; align-items: center; width: 100%; }
         .btn-action { 
-            background: #3d4651; color: white; width: 32px; height: 42px; 
-            border-radius: 6px; border: none; cursor: pointer;
-            font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            transition: 0.2s;
-        }
-        .btn-add { background: #764ba2; }
-        .btn-del { background: #4a5568; font-size: 22px; }
+    /* Etwas flacher und eleganter */
+    width: 32px; 
+    height: 32px; 
+    
+    /* Hintergrund dezent statt massiv */
+    background: rgba(255, 255, 255, 0.05); 
+    color: #a0aec0; 
+    
+    border-radius: 6px; 
+    /* Ein feiner Border gibt Struktur ohne zu drücken */
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    
+    cursor: pointer;
+    font-size: 16px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* Plus-Button: Nutzt dein Lila als Akzent-Border */
+.btn-add { 
+    border-color: rgba(118, 75, 162, 0.4);
+    color: #b794f4; /* Ein helleres Lila für bessere Lesbarkeit */
+}
+
+.btn-add:hover { 
+    background: rgba(118, 75, 162, 0.2); 
+    color: white;
+    border-color: #764ba2;
+    box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+}
+
+/* Delete-Button: Dezent grau, wird bei Hover rot */
+.btn-del { 
+    font-size: 20px; 
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-del:hover { 
+    background: rgba(245, 101, 101, 0.1); 
+    color: #fc8181; /* Softes Rot */
+    border-color: #f56565;
+    box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
+}
 
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
