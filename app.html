@@ -780,12 +780,48 @@
 
 
 
+/* Container */
+.button-group { 
+    display: flex; 
+    gap: 10px; 
+    margin-top: 20px; 
+    flex-wrap: wrap; 
+}
 
-        .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
-        
-        .btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }
-        .btn-secondary { background: #3d4651; color: white; }
+/* Basis-Button Style (Kopie von .btn-action, aber flexibel in der Breite) */
+.button-group button { 
+    height: 42px;             /* WICHTIG: Exakt die Höhe deiner + Buttons */
+    padding: 0 24px;          /* Breite passt sich dem Text an */
+    border-radius: 6px;       /* Exakt dein Radius */
+    border: none;             /* Kein Rahmen, wie oben */
+    cursor: pointer; 
+    font-size: 16px;          /* Lesbare Größe, nah an den 18px icons */
+    font-weight: bold; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: 0.2s;
+    color: white;             /* Text immer weiß */
+}
+
+/* Save Trade (Exakt wie dein lila + Button) */
+.btn-primary { 
+    background: #764ba2;      /* KEIN Gradient mehr, nur die feste Farbe */
+}
+
+.btn-primary:hover {
+    background: #8e5ubf;      /* Leicht heller beim Hover */
+    box-shadow: 0 0 8px rgba(118, 75, 162, 0.5);
+}
+
+/* Cancel (Exakt wie dein grauer Button) */
+.btn-secondary { 
+    background: #3d4651;      /* Exakt dein Dunkelgrau */
+}
+
+.btn-secondary:hover {
+    background: #4a5568;      /* Etwas heller beim Hover */
+}
 		
 		
 		
