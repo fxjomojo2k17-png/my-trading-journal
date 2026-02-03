@@ -1657,10 +1657,14 @@ body.pro-mode #screenshot.drag-active {
                    style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.0em; font-weight: bold; text-align: center; height: auto; padding: 0;"></input>
         </div>
         <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
-        <div class="stat-card" id="card-trades"><h3>Trades</h3><div class="value" id="totalTrades">0</div></div>
 		
+		<div class="stat-card">
+    <h3>Trades (Month)</h3>
+    <div class="value" id="totalTrades">0</div>
+    <div class="total-sub-value">Total: <span id="totalTradesOverall">0</span></div>
+</div>
 		
-		<!--
+      <!--  <div class="stat-card" id="card-trades"><h3>Trades</h3><div class="value" id="totalTrades">0</div></div>
         <div class="stat-card" id="card-winrate"><h3>Win Rate</h3><div class="value" id="winRate">0%</div></div>
         <div class="stat-card" id="card-pl"><h3>P/L ($)</h3><div class="value" id="totalPL">$0.00</div></div>
 		-->
@@ -2309,6 +2313,7 @@ function setupDragAndDrop() {
     const totalNetPL = traderAllTrades.reduce((sum, t) => sum + Number(t.pl), 0);
     const totalWinsCount = traderAllTrades.filter(t => t.result === 'WIN').length;
     const totalWinRateVal = traderAllTrades.length > 0 ? (totalWinsCount / traderAllTrades.length) * 100 : 0;
+	const totalTradesOverallVal = traderAllTrades.length;
     // ---------------------------------
 
     // 3. Stats & Profit Factor Berechnung (Aktuelle Ansicht)
@@ -2336,6 +2341,7 @@ function setupDragAndDrop() {
     // --- ANIMATION DER WERTE ---
     // Monat/Filter Werte
     animateValue('totalTrades', 0, filtered.length, 800);
+	animateValue('totalTradesOverall', 0, totalTradesOverallVal, 800);
     animateValue('winRate', 0, winRateVal, 800, false, true);
     animateValue('totalPL', 0, viewPL, 800, true);
     
