@@ -2324,8 +2324,7 @@ function setupDragAndDrop() {
     const totalWinsCount = traderAllTrades.filter(t => t.result === 'WIN').length;
     const totalWinRateVal = traderAllTrades.length > 0 ? (totalWinsCount / traderAllTrades.length) * 100 : 0;
 	const totalTradesOverallVal = traderAllTrades.length;
-	const biggestWinVal = wins.length > 0 ? Math.max(...wins.map(t => Number(t.pl))) : 0;
-    const biggestLossVal = losses.length > 0 ? Math.max(...losses.map(t => Math.abs(Number(t.pl)))) : 0;
+	
     // ---------------------------------
 
     // 3. Stats & Profit Factor Berechnung (Aktuelle Ansicht)
@@ -2346,9 +2345,7 @@ function setupDragAndDrop() {
 
     if(document.getElementById('avgWin')) animateValue('avgWin', 0, avgWinVal, 800, true);
     if(document.getElementById('avgLoss')) animateValue('avgLoss', 0, avgLossVal, 800, true);
-	if(document.getElementById('biggestWin')) animateValue('biggestWin', 0, biggestWinVal, 800, true);
-    if(document.getElementById('biggestLoss')) animateValue('biggestLoss', 0, biggestLossVal, 800, true);
-    if (typeof renderAvgChart === "function") renderAvgChart(avgWinVal, avgLossVal,biggestWin,biggestLoss);
+    if (typeof renderAvgChart === "function") renderAvgChart(avgWinVal, avgLossVal);
 
     let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
 
