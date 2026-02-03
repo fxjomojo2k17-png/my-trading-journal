@@ -774,57 +774,24 @@
     box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
 }
 
+.btn-primary { 
+    border-color: rgba(118, 75, 162, 0.4);
+    color: #b794f4; /* Ein helleres Lila für bessere Lesbarkeit */
+}
+
+
+.btn-primary:hover { 
+    background: rgba(245, 101, 101, 0.1); 
+    color: #fc8181; /* Softes Rot */
+    border-color: #f56565;
+    box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
+}
+
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
         
-      /* Gemeinsame Basis für Save und Cancel */
-.btn-primary, .btn-secondary {
-    padding: 10px 24px;
-    border-radius: 6px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.05);
-     border-color: rgba(118, 75, 162, 0.4);
-    color: #b794f4; /* Ein helleres Lila für bessere Lesbarkeit */
-   
-    
-    color: #a0aec0;
-    flex-shrink: 0;
-}
-
-/* Der Save-Button (entspricht dem + Button) */
-.btn-primary {
-    /* Lila Akzent-Border schon im Ruhezustand leicht sichtbar */
-    border-color: rgba(118, 75, 162, 0.5); 
-    color: #b794f4;
-}
-
-.btn-primary:hover {
-    background: rgba(118, 75, 162, 0.2); 
-    border-color: #764ba2; /* Voll kräftiges Lila beim Hover */
-    color: white;
-    box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
-    transform: translateY(-1px);
-}
-
-/* Der Cancel-Button (entspricht dem - Button) */
-.btn-secondary {
-    /* Grauer Border im Ruhezustand */
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-.btn-secondary:hover {
-    background: rgba(245, 101, 101, 0.1); 
-    border-color: #f56565; /* Roter Border beim Hover */
-    color: #fc8181;
-    box-shadow: 0 0 15px rgba(245, 101, 101, 0.2);
-    transform: translateY(-1px);
-}
+      
+        .btn-secondary { background: #3d4651; color: white; }
 		
 		
 		
