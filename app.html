@@ -1681,18 +1681,20 @@ body.pro-mode #screenshot.drag-active {
 </div>
 
 
-		
-		
-		
-        <div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
+<div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
         <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
-		<div class="stat-card">
-    <h3>Avg Win</h3>
-    <div id="avgWin" class="value win">$0.00</div>
+		
+		
+<div class="stat-card" id="card-avgwin">
+    <h3>Avg / Biggest Win</h3>
+    <div class="value" id="avgWin">$0.00</div>
+    <div class="total-sub-value">Max: <span id="biggestWin">$0.00</span></div>
 </div>
-<div class="stat-card">
-    <h3>Avg Loss</h3>
-    <div id="avgLoss" class="value loss">$0.00</div>
+
+<div class="stat-card" id="card-avgloss">
+    <h3>Avg / Biggest Loss</h3>
+    <div class="value" id="avgLoss">$0.00</div>
+    <div class="total-sub-value">Max: <span id="biggestLoss">$0.00</span></div>
 </div>
 
     </div>
@@ -2322,6 +2324,8 @@ function setupDragAndDrop() {
     const totalWinsCount = traderAllTrades.filter(t => t.result === 'WIN').length;
     const totalWinRateVal = traderAllTrades.length > 0 ? (totalWinsCount / traderAllTrades.length) * 100 : 0;
 	const totalTradesOverallVal = traderAllTrades.length;
+	const biggestWinVal = wins.length > 0 ? Math.max(...wins.map(t => Number(t.pl))) : 0;
+    const biggestLossVal = losses.length > 0 ? Math.max(...losses.map(t => Math.abs(Number(t.pl)))) : 0;
     // ---------------------------------
 
     // 3. Stats & Profit Factor Berechnung (Aktuelle Ansicht)
@@ -2342,6 +2346,8 @@ function setupDragAndDrop() {
 
     if(document.getElementById('avgWin')) animateValue('avgWin', 0, avgWinVal, 800, true);
     if(document.getElementById('avgLoss')) animateValue('avgLoss', 0, avgLossVal, 800, true);
+	if(document.getElementById('biggestWin')) animateValue('biggestWin', 0, biggestWinVal, 800, true);
+    if(document.getElementById('biggestLoss')) animateValue('biggestLoss', 0, biggestLossVal, 800, true);
     if (typeof renderAvgChart === "function") renderAvgChart(avgWinVal, avgLossVal);
 
     let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
