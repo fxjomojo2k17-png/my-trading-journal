@@ -2348,7 +2348,7 @@ function setupDragAndDrop() {
     if(document.getElementById('avgLoss')) animateValue('avgLoss', 0, avgLossVal, 800, true);
 	if(document.getElementById('biggestWin')) animateValue('biggestWin', 0, biggestWinVal, 800, true);
     if(document.getElementById('biggestLoss')) animateValue('biggestLoss', 0, biggestLossVal, 800, true);
-    if (typeof renderAvgChart === "function") renderAvgChart(avgWinVal, avgLossVal);
+    if (typeof renderAvgChart === "function") renderAvgChart(avgWinVal, avgLossVal,biggestWin,biggestLoss);
 
     let pf = totalLossAmount === 0 ? (totalWinAmount > 0 ? totalWinAmount : 0) : (totalWinAmount / totalLossAmount);
 
