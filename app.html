@@ -781,57 +781,57 @@
 
 
 
-/* Container für die Buttons unten */
-.modal-footer {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    /* Wichtig: Damit sie nicht gequetscht werden */
-    align-items: center; 
-}
+      /* 1. GRUNDGERÜST FÜR ALLE BUTTONS (Klein und Groß) */
+.btn-action, .btn-primary, .btn-secondary {
+    /* Die Höhe festnageln - das ist der Schlüssel! */
+    height: 34px !important; 
+    min-height: 34px !important;
+    max-height: 34px !important;
 
-/* Basis-Styling: Wir kopieren hier exakt die Werte deiner kleinen Buttons */
-.btn-primary, .btn-secondary {
-    /* 1. DIE HÖHE: Das ist der wichtigste Punkt. 
-       Wenn deine Inputs 38px oder 42px hoch sind, muss das hier exakt gleich sein. */
-    height: 35px;  /* Ich schätze anhand des Screenshots auf ca. 35-38px */
+    /* Kein vertikales Padding, das den Button aufbläht */
+    padding: 0 16px !important; 
     
-    /* 2. Radius und Rahmen */
-    border-radius: 4px; /* Sieht im Screenshot eher eckig/kompakt aus, wie die Inputs */
-    border: none;
-    
-    /* 3. Schrift */
-    font-size: 13px; /* Kleiner, damit es elegant wirkt */
-    font-weight: 600;
-    text-transform: uppercase; /* Macht es technischer (optional) */
-    letter-spacing: 0.5px;
-    
-    /* 4. Layout */
-    padding: 0 20px; /* Breite durch Padding definiert */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* Flexbox sorgt dafür, dass Text/Icon in der Mitte sitzt */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    /* Optik */
+    border-radius: 4px !important; /* Gleiche Ecken wie Inputs */
+    border: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
     cursor: pointer;
-    transition: background 0.2s;
+    line-height: 1 !important;
+    text-transform: none; /* Kein Uppercase, falls das stört */
 }
 
-/* SAVE BUTTON: Exakt das Lila der kleinen Plus-Buttons, aber MATT (kein Gradient) */
+/* 2. BUTTON 'SAVE' (Muss exakt aussehen wie dein + Button) */
 .btn-primary {
-    background: #764ba2; /* Dein Standard-Lila (Hex aus deinem Code) */
-    color: white;
+    background-color: #764ba2 !important; /* Dein Lila */
+    color: white !important;
+    background-image: none !important; /* Killt jeden Gradient */
+    box-shadow: none !important;
 }
 .btn-primary:hover {
-    background: #8757b8; /* Leicht heller beim Hover */
+    background-color: #885bb5 !important;
 }
 
-/* CANCEL BUTTON: Exakt das Dunkelgrau der Minus-Buttons */
+/* 3. BUTTON 'CANCEL' (Muss exakt aussehen wie dein - Button) */
 .btn-secondary {
-    background: #3d4651; /* Dein Standard-Grau (Hex aus deinem Code) */
-    color: #cbd5e0;
+    background-color: #3d4651 !important; /* Dein Grau */
+    color: white !important;
+    background-image: none !important;
+    box-shadow: none !important;
 }
 .btn-secondary:hover {
-    background: #4a5568;
-    color: white;
+    background-color: #4b5663 !important;
+}
+
+/* Optional: Die kleinen Buttons haben weniger Padding, weil sie quadratisch sein sollen */
+.btn-action {
+    padding: 0 !important;
+    width: 34px !important; /* Damit sie quadratisch sind */
 }
 		
 		
