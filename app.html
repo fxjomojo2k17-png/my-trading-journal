@@ -2343,9 +2343,13 @@ function setupDragAndDrop() {
     const avgWinVal = wins.length > 0 ? (totalWinAmount / wins.length) : 0;
     const avgLossVal = losses.length > 0 ? (totalLossAmount / losses.length) : 0;
 
-// --- NEU: MAXIMA BERECHNEN (Biggest Win/Loss) ---
-    const biggestWinVal = wins.length > 0 ? Math.max(...wins.map(t => Number(t.pl))) : 0;
-    const biggestLossVal = losses.length > 0 ? Math.max(...losses.map(t => Math.abs(Number(t.pl)))) : 0;
+// --- NEU: MAXIMA BERECHNEN (Historisch über alle Trades) ---
+// Wir nutzen hier 'traderAllTrades' statt 'filtered', damit es zeitunabhängig ist
+const allWins = traderAllTrades.filter(t => t.result === 'WIN');
+const allLosses = traderAllTrades.filter(t => t.result === 'LOSS');
+
+const biggestWinVal = allWins.length > 0 ? Math.max(...allWins.map(t => Number(t.pl))) : 0;
+const biggestLossVal = allLosses.length > 0 ? Math.max(...allLosses.map(t => Math.abs(Number(t.pl)))) : 0;
 
     if(document.getElementById('avgWin')) animateValue('avgWin', 0, avgWinVal, 800, true);
     if(document.getElementById('avgLoss')) animateValue('avgLoss', 0, avgLossVal, 800, true);
