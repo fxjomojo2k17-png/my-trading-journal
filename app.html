@@ -828,6 +828,25 @@
     box-shadow: 0 0 10px rgba(245, 101, 101, 0.2);
 }
 
+/* Import-Button: Nutzt ein helles Blau/Türkis als Akzent */
+.btn-2import { 
+    border-color: rgba(0, 242, 255, 0.3);
+    color: #00f2ff; /* Ein leuchtendes Türkis */
+}
+
+.btn-2import:hover { 
+    background: rgba(0, 242, 255, 0.15); 
+    color: white;
+    border-color: #00f2ff;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+}
+
+/* Falls der Import-Button oben in der Leiste steht, 
+   nimm das margin-top von 30px für diesen Button weg: */
+.header-actions .btn-2import {
+    margin-top: 0;
+}
+
 
 
         .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
@@ -1950,7 +1969,7 @@ body.pro-mode #screenshot.drag-active {
     placeholder="Paste TradingView export here (Balance History)... Example:
 2026-01-23 14:51:48,10000,10000.01174,0.01174,USD,&quot;Close long position for symbol BLACKBULL:GER40 at price 24847.20...&quot;">
 </textarea>
-            <button onclick="processBulkImport()" class="btn-primary" style="width:15%; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Import Trades Now</button>
+            <button onclick="processBulkImport()" class="btn-2action btn-2import" style="width:15%; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Import Trades Now</button>
         </div><br><br>
 
 
