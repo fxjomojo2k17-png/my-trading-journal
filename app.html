@@ -781,58 +781,11 @@
 
 
 
-      /* 1. GRUNDGERÜST FÜR ALLE BUTTONS (Klein und Groß) */
-.btn-action, .btn-primary, .btn-secondary {
-    /* Die Höhe festnageln - das ist der Schlüssel! */
-    height: 34px !important; 
-    min-height: 34px !important;
-    max-height: 34px !important;
-
-    /* Kein vertikales Padding, das den Button aufbläht */
-    padding: 0 16px !important; 
-    
-    /* Flexbox sorgt dafür, dass Text/Icon in der Mitte sitzt */
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    /* Optik */
-    border-radius: 4px !important; /* Gleiche Ecken wie Inputs */
-    border: none !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    cursor: pointer;
-    line-height: 1 !important;
-    text-transform: none; /* Kein Uppercase, falls das stört */
-}
-
-/* 2. BUTTON 'SAVE' (Muss exakt aussehen wie dein + Button) */
-.btn-primary {
-    background-color: #764ba2 !important; /* Dein Lila */
-    color: white !important;
-    background-image: none !important; /* Killt jeden Gradient */
-    box-shadow: none !important;
-}
-.btn-primary:hover {
-    background-color: #885bb5 !important;
-}
-
-/* 3. BUTTON 'CANCEL' (Muss exakt aussehen wie dein - Button) */
-.btn-secondary {
-    background-color: #3d4651 !important; /* Dein Grau */
-    color: white !important;
-    background-image: none !important;
-    box-shadow: none !important;
-}
-.btn-secondary:hover {
-    background-color: #4b5663 !important;
-}
-
-/* Optional: Die kleinen Buttons haben weniger Padding, weil sie quadratisch sein sollen */
-.btn-action {
-    padding: 0 !important;
-    width: 34px !important; /* Damit sie quadratisch sind */
-}
+        .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
+        
+        .btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }
+        .btn-secondary { background: #3d4651; color: white; }
 		
 		
 		
