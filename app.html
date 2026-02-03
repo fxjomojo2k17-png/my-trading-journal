@@ -781,9 +781,10 @@
 
 
 
-       
+        .button-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .button-group button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75em; min-height: 38px; }
         
-   
+        .btn-primary { background: linear-gradient(135deg, #764ba2, #667eea); color: white; }
         .btn-secondary { background: #3d4651; color: white; }
 		
 		
@@ -1786,7 +1787,7 @@ body.pro-mode #screenshot.drag-active {
                 <div class="form-group span-2"><label>Notes</label><textarea id="notes" rows="1" placeholder="Details..."></textarea></div>
             </div>
             <div class="button-group">
-                <button type="submit" id="submitBtn" class="btn-action btn-add">Save Trade</button>
+                <button type="submit" id="submitBtn" class="btn-primary">Save Trade</button>
                 <button type="button" class="btn-secondary" onclick="resetForm()">Cancel</button>
             </div>
         </form>
