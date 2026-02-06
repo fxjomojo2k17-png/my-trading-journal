@@ -498,45 +498,41 @@
         }
         
 		
-.header {
-    display: flex;             /* Macht den Header zur Reihe */
-    align-items: center;       /* Zentriert alles vertikal */
-    justify-content: flex-start; /* Richtet alles am linken Rand aus */
-    gap: 30px;                 /* Abstand zwischen Stats, Titel und Sessions */
-    padding: 10px 25px;
-    background: rgba(5, 7, 10, 0.95);
-    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-    height: 60px;              /* Feste Höhe für Ordnung */
-    width: 100%;
-    position: fixed;           /* Bleibt oben kleben */
-    top: 0;
-    left: 0;
-    z-index: 1000;
-}
-
-.header-stats {
+    .header {
+    background-color: #0b0e11;
+    padding: 60px 15px 40px 15px; /* Mehr Platz nach oben/unten */
+    text-align: center;
+    border-bottom: 2px solid rgba(0, 242, 255, 0.1);
     display: flex;
-    gap: 15px;
+    flex-direction: column;
     align-items: center;
-    background: rgba(0, 242, 255, 0.05);
-    padding: 4px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(0, 242, 255, 0.1);
-    min-width: fit-content;    /* Verhindert Umbruch */
+    gap: 25px; /* Abstand zwischen Titel und Sessions */
 }
 
-/* Verhindert, dass der Titel zu viel Platz wegnimmt */
 .candle-chart-text {
-    font-size: 1.1rem;
-    white-space: nowrap;
-    margin: 0;
+    font-size: 2.2em;
+    font-weight: bold;
+    letter-spacing: 12px; /* Etwas mehr Abstand zwischen den Buchstaben für den Glow */
+    color: #00f2ff;
+    text-transform: uppercase;
+    
+    /* EXTREMER GLOW: Mehrere Ebenen für maximale Leuchtkraft */
+    text-shadow: 
+        0 0 10px #00f2ff,
+        0 0 20px #00f2ff,
+        0 0 40px #00f2ff,
+        0 0 80px rgba(0, 242, 255, 0.8),
+        0 0 120px rgba(0, 242, 255, 0.4);
+        
+    animation: pulseGlow 2.5s infinite alternate;
 }
 
-/* Sessions etwas kleiner, damit alles passt */
 .session-container {
     display: flex;
-    gap: 10px;
-    margin-left: auto; /* Schiebt die Sessions ganz nach RECHTS (optional) */
+    gap: 30px;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    margin-top: 10px;
 }
 
 .session-tag {
