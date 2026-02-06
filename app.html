@@ -1686,9 +1686,46 @@ body.pro-mode #screenshot.drag-active {
     line-height: 1.1;
 }
 
+
+.header-stat-item {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.header-stat-label {
+    font-size: 8px;
+    color: #8892b0;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.header-stat-value {
+    color: #00f2ff;
+    font-weight: bold;
+    font-size: 13px;
+    font-family: 'monospace';
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
+}
+
     </style>
 </head>
 <body>
+
+<div class="user-switcher">
+        <div id="headerStats" style="display: flex; gap: 15px; align-items: center;">
+            <div class="header-stat-item">
+                <span class="header-stat-label">USERS</span>
+                <span id="statUserCount" class="header-stat-value">0</span>
+            </div>
+            <div style="width: 1px; height: 18px; background: rgba(0, 242, 255, 0.2);"></div>
+            <div class="header-stat-item">
+                <span class="header-stat-label">TRADES</span>
+                <span id="statTradeCount" class="header-stat-value">0</span>
+            </div>
+        </div>
+    </div>
 
 <canvas id="bgCanvas"></canvas>
 
@@ -3866,6 +3903,30 @@ async function saveUserSettings() {
         })
         .eq('user_id', currentUser.id);
 }
+
+async function updateGlobalHeaderStats() {
+    try {
+        // User zählen (aus der user_settings Tabelle)
+        const { count: uCount } = await _supabase
+            .from('user_settings')
+            .select('*', { count: 'exact', head: true });
+
+        // Alle Trades zählen
+        const { count: tCount } = await _supabase
+            .from('trades')
+            .select('*', { count: 'exact', head: true });
+
+        document.getElementById('statUserCount').innerText = uCount || 0;
+        document.getElementById('statTradeCount').innerText = tCount || 0;
+    } catch (err) {
+        console.error("Fehler beim Stats-Update:", err);
+    }
+}
+
+// Ruf die Funktion in deiner loadData() oder init() auf
+// Beispiel:
+// updateGlobalHeaderStats();
+
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
