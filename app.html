@@ -2336,11 +2336,14 @@ async function checkAuth() {
         // Initialisiere alle wichtigen Funktionen
         populateLists();
         fetchTrades();
+		updateHeaderStats();
     } else {
         document.getElementById('loginScreen').style.display = 'flex';
         document.getElementById('mainApp').style.display = 'none';
     }
 	
+}
+
 	async function updateHeaderStats() {
     try {
         // 1. Alle User zählen (Tabelle 'user_settings')
@@ -2364,8 +2367,7 @@ async function checkAuth() {
         console.error("Fehler beim Header-Stats Update:", err);
     }
 }
-	
-}
+
 
 function copyToClip(id) {
     const el = document.getElementById(id);
