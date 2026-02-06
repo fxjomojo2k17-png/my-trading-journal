@@ -498,15 +498,33 @@
         }
         
 		
-    .header {
+.header {
     background-color: #0b0e11;
-    padding: 60px 15px 40px 15px; /* Mehr Platz nach oben/unten */
-    text-align: center;
+    padding: 15px 15px 40px 15px;
     border-bottom: 2px solid rgba(0, 242, 255, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 25px; /* Abstand zwischen Titel und Sessions */
+    gap: 25px;
+    position: relative;
+}
+
+/* Top bar container für Stats oben links */
+.header-top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 0;
+}
+
+.header-stats {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 242, 255, 0.1);
 }
 
 .candle-chart-text {
@@ -1710,15 +1728,6 @@ body.pro-mode #screenshot.drag-active {
     color: #00f2ff;
 }
 
-.header-stats {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 5px 15px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 242, 255, 0.1);
-}
 
 .stat-group {
     display: flex;
@@ -1848,15 +1857,17 @@ body.pro-mode #screenshot.drag-active {
 </div>
 
 <div class="header">
-    <div class="header-stats">
-        <div class="stat-group">
-            <span class="stat-label">USERS</span>
-            <span id="statUserCount" class="stat-value">--</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-group">
-            <span class="stat-label">TRADES</span>
-            <span id="statTradeCount" class="stat-value">--</span>
+    <div class="header-top-bar">
+        <div class="header-stats">
+            <div class="stat-group">
+                <span class="stat-label">USERS</span>
+                <span id="statUserCount" class="stat-value">--</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-group">
+                <span class="stat-label">TRADES</span>
+                <span id="statTradeCount" class="stat-value">--</span>
+            </div>
         </div>
     </div>
 
