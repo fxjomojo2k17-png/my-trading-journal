@@ -2028,8 +2028,11 @@ body.pro-mode #screenshot.drag-active {
 	
 	
 	
-    <div class="chart-box chart-box-wide"><canvas id="heatmapChart"></canvas></div>
-
+ 
+<div class="chart-box chart-box-wide">
+    <canvas id="heatmapChart"></canvas>
+    <div id="heatmapLegend"></div>
+</div>
 
 </div>
 
@@ -3210,78 +3213,147 @@ async function processBulkImport() {
     const values = matrixData.map(d => d.v);
     const absMax = Math.max(...values.map(Math.abs), 1);
     
-    // Chart erstellen
-    if (heatmapChart) heatmapChart.destroy();
-    
-    heatmapChart = new Chart(document.getElementById('heatmapChart').getContext('2d'), {
-        type: 'bubble',
-        data: {
-            datasets: [{
-                label: 'Avg P/L',
-                data: matrixData,
-                backgroundColor: matrixData.map(d => {
-                    const intensity = Math.abs(d.v) / absMax;
-                    if (d.v > 0) return `rgba(0, 255, 170, ${0.3 + intensity * 0.6})`;
-                    if (d.v < 0) return `rgba(255, 74, 104, ${0.3 + intensity * 0.6})`;
-                    return 'rgba(100, 100, 100, 0.3)';
-                }),
-                borderColor: matrixData.map(d => d.v > 0 ? '#00ffaa' : '#ff4a68'),
-                borderWidth: 1,
-                radius: matrixData.map(d => 8 + Math.min(d.count * 3, 15))
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: { display: true, text: 'Hour of Day', color: '#8892b0' },
-                    ticks: { 
-                        color: '#8892b0',
-                        callback: (val) => val + ':00'
-                    },
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    min: 0,
-                    max: 23
+// Chart erstellen
+if (heatmapChart) heatmapChart.destroy();
+
+heatmapChart = new Chart(document.getElementById('heatmapChart').getContext('2d'), {
+    type: 'bubble',
+    data: {
+        datasets: [{
+            label: 'Avg P/L',
+            data: matrixData,
+            backgroundColor: matrixData.map(d => {
+                const intensity = Math.abs(d.v) / absMax;
+                if (d.v > 0) return `rgba(0, 255, 170, ${0.3 + intensity * 0.6})`;
+                if (d.v < 0) return `rgba(255, 74, 104, ${0.3 + intensity * 0.6})`;
+                return 'rgba(100, 100, 100, 0.3)';
+            }),
+            borderColor: matrixData.map(d => d.v > 0 ? '#00ffaa' : '#ff4a68'),
+            borderWidth: 1,
+            radius: matrixData.map(d => 8 + Math.min(d.count * 3, 15))
+        }]
+    },
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: { display: true, text: 'Hour of Day', color: '#8892b0' },
+                ticks: { 
+                    color: '#8892b0',
+                    callback: (val) => val + ':00'
                 },
-                y: {
-                    title: { display: true, text: 'Day of Week', color: '#8892b0' },
-                    ticks: { 
-                        color: '#8892b0',
-                        callback: (val) => days[val]
-                    },
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    min: 0,
-                    max: 6
-                }
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                min: 0,
+                max: 23
             },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'PERFORMANCE HEATMAP (Day vs Hour)',
-                    color: '#00f2ff',
-                    font: { size: 14, weight: 'bold' }
+            y: {
+                title: { display: true, text: 'Day of Week', color: '#8892b0' },
+                ticks: { 
+                    color: '#8892b0',
+                    callback: (val) => days[val]
                 },
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: (items) => {
-                            const d = items[0].raw;
-                            return `${days[d.y]} at ${d.x}:00`;
-                        },
-                        label: (item) => {
-                            const d = item.raw;
-                            return [
-                                `Avg P/L: $${d.v.toFixed(2)}`,
-                                `Total P/L: $${d.totalPL.toFixed(2)}`,
-                                `Trades: ${d.count}`
-                            ];
-                        }
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                min: 0,
+                max: 6
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'PERFORMANCE HEATMAP (Day vs Hour)',
+                color: '#00f2ff',
+                font: { size: 14, weight: 'bold' }
+            },
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    title: (items) => {
+                        const d = items[0].raw;
+                        return `${days[d.y]} at ${d.x}:00`;
+                    },
+                    label: (item) => {
+                        const d = item.raw;
+                        return [
+                            `Avg P/L: $${d.v.toFixed(2)}`,
+                            `Total P/L: $${d.totalPL.toFixed(2)}`,
+                            `Trades: ${d.count}`
+                        ];
                     }
                 }
             }
         }
-    });
-}
+    }
+});
+
+// ============================================
+// LEGEND HINZUFÜGEN - NEU!
+// ============================================
+const legendContainer = document.getElementById('heatmapLegend');
+legendContainer.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+        
+        <!-- Performance Scale -->
+        <div style="text-align: center; flex: 1; max-width: 350px;">
+            <div style="font-size: 11px; color: #8892b0; margin-bottom: 8px; font-weight: bold; letter-spacing: 1px;">PERFORMANCE SCALE</div>
+            <div style="display: flex; gap: 2px; height: 24px; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                ${Array.from({length: 20}, (_, i) => {
+                    const isLoss = i < 10;
+                    const intensity = isLoss ? (10 - i) / 10 : (i - 9) / 10;
+                    const color = isLoss 
+                        ? `rgba(255, 74, 104, ${0.3 + intensity * 0.6})`
+                        : `rgba(0, 255, 170, ${0.3 + intensity * 0.6})`;
+                    return `<div style="flex: 1; background: ${color};"></div>`;
+                }).join('')}
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #666; margin-top: 5px; padding: 0 5px;">
+                <span>📉 Heavy Loss</span>
+                <span style="color: #888;">Breakeven</span>
+                <span>📈 Big Win</span>
+            </div>
+        </div>
+        
+        <!-- Bubble Size Indicator -->
+        <div style="text-align: center;">
+            <div style="font-size: 11px; color: #8892b0; margin-bottom: 8px; font-weight: bold; letter-spacing: 1px;">BUBBLE SIZE = TRADES</div>
+            <div style="display: flex; gap: 12px; align-items: center; justify-content: center;">
+                <div style="text-align: center;">
+                    <div style="width: 10px; height: 10px; background: rgba(0,242,255,0.3); border-radius: 50%; border: 1px solid #00f2ff; margin: 0 auto 4px;"></div>
+                    <span style="font-size: 9px; color: #666;">1-2</span>
+                </div>
+                <div style="text-align: center;">
+                    <div style="width: 16px; height: 16px; background: rgba(0,242,255,0.3); border-radius: 50%; border: 1px solid #00f2ff; margin: 0 auto 4px;"></div>
+                    <span style="font-size: 9px; color: #666;">3-5</span>
+                </div>
+                <div style="text-align: center;">
+                    <div style="width: 22px; height: 22px; background: rgba(0,242,255,0.3); border-radius: 50%; border: 1px solid #00f2ff; margin: 0 auto 4px;"></div>
+                    <span style="font-size: 9px; color: #666;">5+</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Color Meaning -->
+        <div style="text-align: center;">
+            <div style="font-size: 11px; color: #8892b0; margin-bottom: 8px; font-weight: bold; letter-spacing: 1px;">COLOR CODE</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 20px; height: 20px; background: rgba(0,255,170,0.6); border-radius: 4px; border: 1px solid #00ffaa;"></div>
+                    <span style="font-size: 11px; color: #00ffaa;">Profitable</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 20px; height: 20px; background: rgba(255,74,104,0.6); border-radius: 4px; border: 1px solid #ff4a68;"></div>
+                    <span style="font-size: 11px; color: #ff4a68;">Loss</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 20px; height: 20px; background: rgba(100,100,100,0.3); border-radius: 4px; border: 1px solid #666;"></div>
+                    <span style="font-size: 11px; color: #888;">No Data</span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+`;
+
+}  // <-- Diese schließende Klammer war schon da
 	
     function showPreview(url) { const p = document.getElementById('screenshot-preview-popup'); p.src = url; p.style.display = 'block'; }
     function hidePreview() { const p = document.getElementById('screenshot-preview-popup'); p.style.display = 'none'; p.src = ''; }
