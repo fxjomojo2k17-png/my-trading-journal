@@ -1768,7 +1768,7 @@ body.pro-mode #screenshot.drag-active {
         <div id="errorMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
         
-        <div id="loginForm" class="login-form">
+        <form id="loginForm" class="login-form" onsubmit="handleLogin(event)">
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" id="loginEmail" placeholder="your@email.com" required>
@@ -1777,13 +1777,13 @@ body.pro-mode #screenshot.drag-active {
                 <label>Password</label>
                 <input type="password" id="loginPassword" placeholder="••••••••" required>
             </div>
-            <button onclick="handleLogin()">Login</button>
+            <button type="submit">Login</button>
             <div class="login-toggle">
                 Don't have an account? <a onclick="toggleAuthMode()">Sign Up</a>
             </div>
-        </div>
+        </form>
         
-        <div id="signupForm" class="login-form" style="display:none;">
+        <form id="signupForm" class="login-form" style="display:none;" onsubmit="handleSignup(event)">
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" id="signupEmail" placeholder="your@email.com" required>
@@ -1792,11 +1792,11 @@ body.pro-mode #screenshot.drag-active {
                 <label>Password</label>
                 <input type="password" id="signupPassword" placeholder="••••••••" required>
             </div>
-            <button onclick="handleSignup()">Create Account</button>
+            <button type="submit">Create Account</button>
             <div class="login-toggle">
                 Already have an account? <a onclick="toggleAuthMode()">Login</a>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -2387,42 +2387,46 @@ function copyToClip(id) {
 }
 
 
-    async function handleLogin() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        
-        const { data, error } = await _supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) {
-            showError(error.message);
-        } else {
-            checkAuth();
-        }
+async function handleLogin(event) {
+    if (event) event.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+    
+    if (error) {
+        showError(error.message);
+    } else {
+        checkAuth();
     }
+}
 
-    async function handleSignup() {
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        
-        if (password.length < 6) {
-            showError('Password must be at least 6 characters');
-            return;
-        }
-        
-        const { data, error } = await _supabase.auth.signUp({
-            email: email,
-            password: password
-        });
-        
-        if (error) {
-            showError(error.message);
-        } else {
-            showSuccess('Account created! Please check your email to verify.');
-        }
+async function handleSignup(event) {
+    if (event) event.preventDefault();
+    
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    
+    if (password.length < 6) {
+        showError('Password must be at least 6 characters');
+        return;
     }
+    
+    const { data, error } = await _supabase.auth.signUp({
+        email: email,
+        password: password
+    });
+    
+    if (error) {
+        showError(error.message);
+    } else {
+        showSuccess('Account created! Please check your email to verify.');
+    }
+}
 
     async function handleLogout() {
         await _supabase.auth.signOut();
