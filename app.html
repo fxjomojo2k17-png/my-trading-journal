@@ -2440,10 +2440,14 @@ class CacheManager {
 const statsCache = new CacheManager(30000);
 
 // 4. Chart Renderer mit Cleanup
-let equityCurveChart = null;
-let winRateChart = null;
-let instrumentChart = null;
-let strategyChart = null;
+// 4. Chart Renderer mit Cleanup
+let equityChart = null;
+let drawdownChart = null;
+let distributionChart = null;
+let weekdayChart = null;
+let strategyPLChart = null;
+let heatmapChart = null;
+let avgChartInstance = null;
 
 function renderChart(canvasId, config) {
     const canvas = document.getElementById(canvasId);
@@ -2618,7 +2622,7 @@ async function handleSignup(event) {
 	let customInstruments = ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
 	let customStrategies = ["Breakout", "Retest", "Trend", "Scalp"];
 	let customTags = ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"];
-    let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
+
     let currentViewDate = new Date();
     let selectedDateFilter = null;
 
