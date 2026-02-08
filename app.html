@@ -2352,6 +2352,12 @@ async function checkAuth() {
 	
 }
 
+// Beim Laden der Seite Session prüfen  ← NEU
+document.addEventListener('DOMContentLoaded', () => {  ← NEU
+    checkAuth();  ← NEU
+});  ← NEU
+
+
 	async function updateHeaderStats() {
     try {
         // 1. Alle User zählen (Tabelle 'user_settings')
