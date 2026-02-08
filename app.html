@@ -2327,157 +2327,6 @@ document.addEventListener('DOMContentLoaded', setupBG);
     const { createClient } = supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ============================================================================
-// PERFORMANCE UTILITIES - Neu hinzugefügt
-// ============================================================================
-
-// 1. Interval Manager - Stoppt Updates bei inaktivem Tab
-class IntervalManager {
-    constructor() {
-        this.intervals = new Map();
-        this.isVisible = !document.hidden;
-        
-        document.addEventListener('visibilitychange', () => {
-            this.isVisible = !document.hidden;
-            if (this.isVisible) {
-                this.resumeAll();
-            } else {
-                this.pauseAll();
-            }
-        });
-    }
-    
-    add(name, callback, delay) {
-        if (this.intervals.has(name)) {
-            clearInterval(this.intervals.get(name).id);
-        }
-        
-        if (this.isVisible) callback();
-        
-        if (this.isVisible) {
-            const id = setInterval(callback, delay);
-            this.intervals.set(name, { id, callback, delay });
-        }
-    }
-    
-    pauseAll() {
-        this.intervals.forEach(({ id }) => clearInterval(id));
-    }
-    
-    resumeAll() {
-        this.intervals.forEach((item, name) => {
-            item.callback();
-            item.id = setInterval(item.callback, item.delay);
-            this.intervals.set(name, item);
-        });
-    }
-    
-    remove(name) {
-        if (this.intervals.has(name)) {
-            clearInterval(this.intervals.get(name).id);
-            this.intervals.delete(name);
-        }
-    }
-}
-
-const intervalManager = new IntervalManager();
-
-// 2. Debounce & Throttle
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function throttle(func, limit) {
-    let inThrottle;
-    return function(...args) {
-        if (!inThrottle) {
-            func.apply(this, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
-
-// 3. Cache Manager
-class CacheManager {
-    constructor(ttl = 30000) {
-        this.cache = new Map();
-        this.ttl = ttl;
-    }
-    
-    set(key, value) {
-        this.cache.set(key, {
-            value,
-            timestamp: Date.now()
-        });
-    }
-    
-    get(key) {
-        const item = this.cache.get(key);
-        if (!item) return null;
-        
-        if (Date.now() - item.timestamp > this.ttl) {
-            this.cache.delete(key);
-            return null;
-        }
-        
-        return item.value;
-    }
-    
-    clear() {
-        this.cache.clear();
-    }
-}
-
-const statsCache = new CacheManager(30000);
-
-// 4. Chart Renderer mit Cleanup
-// 4. Chart Renderer mit Cleanup
-let equityChart = null;
-let drawdownChart = null;
-let distributionChart = null;
-let weekdayChart = null;
-let strategyPLChart = null;
-let heatmapChart = null;
-let avgChartInstance = null;
-
-function renderChart(canvasId, config) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) {
-        console.warn(`Canvas ${canvasId} not found`);
-        return null;
-    }
-    
-    const existingChart = Chart.getChart(canvas);
-    if (existingChart) {
-        existingChart.destroy();
-    }
-    
-    return new Chart(canvas, config);
-}
-
-// 5. Recent Trades Cache
-let recentTradesCache = null;
-let lastTradesHash = null;
-
-function getTradesHash(trades) {
-    return trades.length + '_' + (trades[0]?.id || '');
-}
-
-// ============================================================================
-// ENDE PERFORMANCE UTILITIES
-// ============================================================================
-
-let currentUser = null;
-
 let currentUser = null;
 
     // Auth Funktionen
@@ -2622,7 +2471,7 @@ async function handleSignup(event) {
 	let customInstruments = ["XAUUSD", "UK100", "GER40", "BTC", "SPX", "NASDAQ"];
 	let customStrategies = ["Breakout", "Retest", "Trend", "Scalp"];
 	let customTags = ["PLAN", "FOMO", "EARLY_EXIT", "REVENGE", "LATE_ENTRY", "MISTAKE"];
-
+    let equityChart, drawdownChart, distributionChart, weekdayChart, strategyPLChart, heatmapChart;
     let currentViewDate = new Date();
     let selectedDateFilter = null;
 
@@ -2657,13 +2506,7 @@ async function fetchTrades() {
     if (error) console.error('Error:', error);
     else { 
         trades = data || []; 
-        await loadUserSettings();
-        
-        // ✅ Cache invalidieren bei neuen Daten
-        statsCache.clear();
-        recentTradesCache = null;
-        lastTradesHash = null;
-        
+         await loadUserSettings(); // TEMPORÄR DEAKTIVIERT
         refreshApp(); 
     }
 }
@@ -3994,19 +3837,10 @@ function updateRecentTrades(currentTrades) {
     const container = document.getElementById('recentTradesList');
     if (!container) return;
 
-    // ✅ CACHE CHECK - Nur neu rendern wenn sich Daten geändert haben
-    const hash = getTradesHash(currentTrades);
-    if (hash === lastTradesHash && recentTradesCache) {
-        container.innerHTML = recentTradesCache;
-        return;
-    }
-
-    if (currentTrades.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">No activity yet</div>';
-        return;
-    }
-
+    // Wir kopieren das Array und sortieren es so, dass 
+    // die neuesten Einträge (höchster Index/Datum) oben stehen
     const sorted = [...currentTrades].sort((a, b) => {
+        // Falls ein Zeitstempel da ist, nutzen wir den, sonst die ID/Position
         const timeA = new Date(a.date + ' ' + (a.time || '00:00'));
         const timeB = new Date(b.date + ' ' + (b.time || '00:00'));
         return timeB - timeA;
@@ -4014,7 +3848,12 @@ function updateRecentTrades(currentTrades) {
 
     const last5 = sorted.slice(0, 5);
 
-    const html = last5.map(t => {
+    if (last5.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">No activity yet</div>';
+        return;
+    }
+
+    container.innerHTML = last5.map(t => {
         const pl = parseFloat(t.pl) || 0;
         const plClass = pl >= 0 ? 'win' : 'loss';
         
@@ -4032,12 +3871,6 @@ function updateRecentTrades(currentTrades) {
             </div>
         </div>`;
     }).join('');
-
-    // ✅ Cache speichern
-    recentTradesCache = html;
-    lastTradesHash = hash;
-    
-    container.innerHTML = html;
 }
 
 
@@ -4048,24 +3881,28 @@ function updateLiveTime() {
     const timeInput = document.getElementById('time');
     const editId = document.getElementById('editId').value;
     
+    // Nicht überschreiben wenn: Feld nicht existiert, User tippt gerade, oder im Edit-Modus
     if (!timeInput || document.activeElement === timeInput || editId) return;
+
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     
+    // Setzt die Zeit im Format HH:MM
     timeInput.value = `${hours}:${minutes}`;
 }
 
-// Initial beim Laden - OPTIMIERT mit Interval Manager
+// Initial beim Laden einmal setzen
 window.addEventListener('load', () => {
     updateLiveTime();
-    updateSessions();
-    
-    // Stoppt automatisch bei inaktivem Tab
-    intervalManager.add('liveTime', updateLiveTime, 10000);
-    intervalManager.add('sessions', updateSessions, 60000);
+    // Danach jede Minute aktualisieren (reicht für type="time" völlig aus)
+    setInterval(updateLiveTime, 10000); 
 });
 
+
+// different Sessions 
+setInterval(updateSessions, 60000);
+updateSessions();
 
 function updateSessions() {
     const now = new Date();
@@ -4213,33 +4050,6 @@ async function saveUserSettings() {
         })
         .eq('user_id', currentUser.id);
 }
-
-// ============================================================================
-// CLEANUP BEI TAB-CLOSE - Verhindert Memory Leaks
-// ============================================================================
-
-window.addEventListener('beforeunload', () => {
-    // Alle Chart-Instanzen zerstören
-    if (equityChart) equityChart.destroy();
-    if (drawdownChart) drawdownChart.destroy();
-    if (strategyPLChart) strategyPLChart.destroy();
-    if (distributionChart) distributionChart.destroy();
-    if (weekdayChart) weekdayChart.destroy();
-    if (heatmapChart) heatmapChart.destroy();
-    if (avgChartInstance) avgChartInstance.destroy();
-    
-    // Alle Intervals stoppen
-    intervalManager.pauseAll();
-    
-    // Cache leeren
-    statsCache.clear();
-    recentTradesCache = null;
-    lastTradesHash = null;
-});
-
-// ============================================================================
-// ENDE - PERFORMANCE OPTIMIERUNG
-// ============================================================================
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
 
