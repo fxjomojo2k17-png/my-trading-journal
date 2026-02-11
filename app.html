@@ -1319,6 +1319,18 @@ tr.row-loss {
     box-shadow: 0 0 15px rgba(0, 136, 204, 0.4);
 }
 
+/* Glow Animation für Funded Target Button (wenn ON) */
+#fundedToggleBtn .led.on {
+    background: #ffa726;
+    box-shadow: 0 0 8px #ffa726, 0 0 15px #ffa726;
+    animation: fundedGlow 2s ease-in-out infinite;
+}
+
+@keyframes fundedGlow {
+    0%, 100% { box-shadow: 0 0 8px #ffa726, 0 0 15px #ffa726; }
+    50% { box-shadow: 0 0 12px #ffa726, 0 0 25px #ffa726; }
+}
+
 /* Styling für den Performance-Toggle */
 .perf-btn {
     background: rgba(26, 30, 35, 0.8);
