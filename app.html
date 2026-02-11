@@ -2671,6 +2671,18 @@ const biggestLossVal = allLosses.length > 0 ? Math.max(...allLosses.map(t => Mat
         else if (viewPL < 0) plCard.classList.add('glow-loss');
     }
 
+// Daily P/L Farbe setzen    
+    const dailyPLElement = document.getElementById('dailyPL');
+    if (dailyPLElement) {
+        dailyPLElement.classList.remove('win', 'loss');
+        if (dailyPL > 0) {
+            dailyPLElement.classList.add('win');
+        } else if (dailyPL < 0) {
+            dailyPLElement.classList.add('loss');
+        }
+    }
+
+
 
     // 5. Durchschnittlicher R-Multiplikator
     const totalR = filtered.reduce((sum, t) => sum + (Number(t.pl) / (parseFloat(t.risk) || 1)), 0);
