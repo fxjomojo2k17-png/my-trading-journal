@@ -1856,6 +1856,9 @@ input[type="text"] {
         <button id="perfToggleBtn" onclick="togglePerformanceMode()" class="perf-btn" style="width: 100%; justify-content: center;">
             <div class="led"></div> FX_RENDER
         </button>
+		<button id="fundedToggleBtn" onclick="toggleFundedTarget()" class="perf-btn" style="width: 100%; justify-content: center; margin-top: 8px;">
+    <div class="led" id="fundedLed"></div> FUNDED_TARGET
+</button>
 
        <!--  <div class="style-switch-wrapper" style="display:flex; align-items:center; gap:6px;">
             <span style="font-size:9px; color:#555; font-weight:bold; letter-spacing:1px;">CLASSIC</span>
@@ -1893,15 +1896,24 @@ input[type="text"] {
 </div>
 
     <div class="stats-grid">
- <div class="stat-card" id="card-balance">
+<div class="stat-card" id="card-balance">
     <h3>Initial Balance</h3>
     <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
            style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.0em; font-weight: bold; text-align: center; height: auto; padding: 0;">
+    
     <div class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px;">
         Target: $<input type="text" id="monthlyTargetInput" value="500" 
             style="background: transparent !important; border: none !important; color: #8892b0 !important; 
             font-size: 0.7rem; text-align: center; width: 50px; padding: 0; outline: none;"
             onchange="saveUserSettings(); updateStatsAndTable();">
+    </div>
+    
+    <!-- FUNDED TARGET (versteckt by default) -->
+    <div id="fundedTargetInput" class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px; display: none;">
+        Funded: <input type="text" id="fundedTargetPercent" value="2" 
+            style="background: transparent !important; border: none !important; color: #8892b0 !important; 
+            font-size: 0.7rem; text-align: center; width: 30px; padding: 0; outline: none;"
+            onchange="saveUserSettings(); updateStatsAndTable();">%
     </div>
 </div>
         <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
@@ -1942,6 +1954,18 @@ input[type="text"] {
     </div>
     <div style="font-size: 0.65em; color: #8892b0; margin-top: 4px;">
         <span id="targetPercent">0%</span>
+    </div>
+</div>
+
+<!-- FUNDED TARGET BAR (versteckt by default) -->
+<div class="stat-card" id="card-funded" style="display: none;">
+    <h3>Funded Target</h3>
+    <div class="value" id="fundedProgress" style="font-size: 0.85em;">$0 / $600</div>
+    <div style="width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+        <div id="fundedBar" style="height: 100%; background: linear-gradient(90deg, #ffa726, #ff6f00); width: 0%; transition: width 0.8s ease;"></div>
+    </div>
+    <div style="font-size: 0.65em; color: #8892b0; margin-top: 4px;">
+        <span id="fundedPercent">0%</span>
     </div>
 </div>
 		
@@ -2766,6 +2790,7 @@ if (typeof updateRecentTrades === "function") {
 updateRecentTrades(filtered); 
     }
     updateMonthlyTarget(); 
+	updateFundedTarget();
 }
 
 // Variable für den Status
@@ -2793,6 +2818,15 @@ window.addEventListener('load', () => {
         isProMode = true;
         document.getElementById('proModeToggle').checked = true;
         document.body.classList.add('pro-mode');
+    }
+    
+    // Funded Target Status wiederherstellen
+    const fundedEnabled = localStorage.getItem('funded_target_enabled') === 'true';
+    const led = document.getElementById('fundedLed');
+    if (fundedEnabled) {
+        led.classList.add('on');
+        document.getElementById('fundedTargetInput').style.display = 'block';
+        document.getElementById('card-funded').style.display = 'flex';
     }
 });
 
@@ -4132,6 +4166,56 @@ function updateMonthlyTarget() {
         bar.style.background = 'linear-gradient(90deg, #764ba2, #00f2ff)'; // Lila-Cyan
     } else {
         bar.style.background = 'linear-gradient(90deg, #ff4a68, #764ba2)'; // Rot-Lila
+    }
+}
+
+// Toggle Funded Target Feature
+function toggleFundedTarget() {
+    const isOn = localStorage.getItem('funded_target_enabled') === 'true';
+    const newState = !isOn;
+    
+    localStorage.setItem('funded_target_enabled', newState);
+    
+    // LED updaten (genau wie beim FX Button)
+    const led = document.getElementById('fundedLed');
+    if (newState) {
+        led.classList.add('on');
+    } else {
+        led.classList.remove('on');
+    }
+    
+    // Cards zeigen/verstecken
+    document.getElementById('fundedTargetInput').style.display = newState ? 'block' : 'none';
+    document.getElementById('card-funded').style.display = newState ? 'flex' : 'none';
+    
+    updateStatsAndTable();
+}
+
+// Funded Target updaten
+function updateFundedTarget() {
+    if (localStorage.getItem('funded_target_enabled') !== 'true') return;
+    
+    const initialBalance = parseFloat(document.getElementById('initialBalanceInput').value) || 0;
+    const fundedPercent = parseFloat(document.getElementById('fundedTargetPercent').value) || 2;
+    const fundedTarget = (initialBalance * fundedPercent) / 100;
+    
+    // Gesamter P/L (nicht nur Monat!)
+    const totalPL = trades.reduce((sum, t) => sum + Number(t.pl), 0);
+    
+    const percent = Math.min((totalPL / fundedTarget) * 100, 100);
+    
+    document.getElementById('fundedProgress').textContent = `$${totalPL.toFixed(2)} / $${fundedTarget.toFixed(2)}`;
+    document.getElementById('fundedBar').style.width = percent + '%';
+    document.getElementById('fundedPercent').textContent = percent.toFixed(0) + '%';
+    
+    // Farbe: Orange-Gradient, wird grün bei 100%
+    const bar = document.getElementById('fundedBar');
+    if (percent >= 100) {
+        bar.style.background = 'linear-gradient(90deg, #00ffaa, #00ff88)';
+    } else if (percent >= 75) {
+        bar.style.background = 'linear-gradient(90deg, #ffa726, #00f2ff)';
+    } else {
+        bar.style.background = 'linear-gradient(90deg, #ff4a68, #ffa726)';
     }
 }
 </script>
