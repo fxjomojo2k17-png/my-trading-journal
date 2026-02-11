@@ -4186,8 +4186,18 @@ function toggleFundedTarget() {
     
     localStorage.setItem('funded_target_enabled', newState);
     
-    // LED updaten
+    const btn = document.getElementById('fundedToggleBtn');
     const led = document.getElementById('fundedLed');
+    
+    // Glitch Animation (wie beim FX Button)
+    if (btn) {
+        btn.classList.add('glitch-active');
+        setTimeout(() => {
+            btn.classList.remove('glitch-active');
+        }, 300);
+    }
+    
+    // LED updaten
     if (newState) {
         led.classList.add('on');
     } else {
