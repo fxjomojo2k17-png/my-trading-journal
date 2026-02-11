@@ -1934,7 +1934,16 @@ input[type="text"] {
 
 
 <div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
-        <div class="stat-card" id="card-pf"><h3>Profit Factor</h3><div class="value" id="profitFactor">0.00</div></div>
+        <div class="stat-card" id="card-target">
+    <h3>Monthly Target</h3>
+    <div class="value" id="targetProgress" style="font-size: 0.85em;">$0 / $500</div>
+    <div style="width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+        <div id="targetBar" style="height: 100%; background: linear-gradient(90deg, #764ba2, #00f2ff); width: 0%; transition: width 0.8s ease;"></div>
+    </div>
+    <div style="font-size: 0.65em; color: #8892b0; margin-top: 4px;">
+        <span id="targetPercent">0%</span>
+    </div>
+</div>
 		
 		
 <div class="stat-card" id="card-avgwin">
@@ -2754,7 +2763,9 @@ const biggestLossVal = allLosses.length > 0 ? Math.max(...allLosses.map(t => Mat
     if (typeof updateCharts === "function") updateCharts(traderAllTrades);
 if (typeof updateRecentTrades === "function") {
         updateRecentTrades(filtered); 
+updateRecentTrades(filtered); 
     }
+    updateMonthlyTarget(); 
 }
 
 // Variable für den Status
@@ -4096,6 +4107,32 @@ async function saveUserSettings() {
             updated_at: new Date().toISOString()
         })
         .eq('user_id', currentUser.id);
+}
+
+
+function updateMonthlyTarget() {
+    const monthlyTarget = parseFloat(document.getElementById('monthlyTargetInput')?.value) || 500;
+    const currentMonth = trades.filter(t => {
+        const d = new Date(t.date);
+        return d.getMonth() === currentViewDate.getMonth() && d.getFullYear() === currentViewDate.getFullYear();
+    });
+    const monthPL = currentMonth.reduce((sum, t) => sum + Number(t.pl), 0);
+    
+    const percent = Math.min((monthPL / monthlyTarget) * 100, 100);
+    
+    document.getElementById('targetProgress').textContent = `$${monthPL.toFixed(2)} / $${monthlyTarget}`;
+    document.getElementById('targetBar').style.width = percent + '%';
+    document.getElementById('targetPercent').textContent = percent.toFixed(0) + '%';
+    
+    // Farbe ändern je nach Fortschritt
+    const bar = document.getElementById('targetBar');
+    if (percent >= 100) {
+        bar.style.background = 'linear-gradient(90deg, #00ffaa, #00ff88)'; // Grün wenn erreicht
+    } else if (percent >= 75) {
+        bar.style.background = 'linear-gradient(90deg, #764ba2, #00f2ff)'; // Lila-Cyan
+    } else {
+        bar.style.background = 'linear-gradient(90deg, #ff4a68, #764ba2)'; // Rot-Lila
+    }
 }
 </script>
 <div id="flashOverlay" class="flash-overlay"></div>
