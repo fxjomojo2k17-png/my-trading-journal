@@ -1881,11 +1881,17 @@ body.pro-mode #screenshot.drag-active {
 </div>
 
     <div class="stats-grid">
-        <div class="stat-card" id="card-balance">
-            <h3>Initial Balance</h3>
-            <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
-                   style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.0em; font-weight: bold; text-align: center; height: auto; padding: 0;"></input>
-        </div>
+      <div class="stat-card" id="card-balance">
+    <h3>Initial Balance</h3>
+    <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
+           style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.0em; font-weight: bold; text-align: center; height: auto; padding: 0;">
+    <div class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px;">
+        Target: $<input type="number" id="monthlyTargetInput" value="500" 
+            style="width: 60px; background: rgba(37,45,55,0.8) !important; border: 1px solid #3d4651 !important; 
+            color: #00f2ff !important; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; text-align: center;"
+            onchange="saveUserSettings(); updateStatsAndTable();">
+    </div>
+</div>
         <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
 		
 		<div class="stat-card">
