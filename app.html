@@ -1905,9 +1905,13 @@ body.pro-mode #screenshot.drag-active {
 </div>
 
 <div class="stat-card" id="card-pl">
-    <h3>P/L ($month)</h3>
-    <div class="value" id="totalPL">$0.00</div>
-    <div class="total-sub-value">Total: <span id="totalPLTotal">$0.00</span></div>
+    <h3>Daily</h3>
+    <div class="value" id="dailyPL">$0.00</div>
+    <div class="total-sub-value" style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+        <span>Month: <span id="totalPL">$0.00</span></span>
+        <span style="color: rgba(255,255,255,0.2);">|</span>
+        <span>Total: <span id="totalPLTotal">$0.00</span></span>
+    </div>
 </div>
 
 
@@ -2602,6 +2606,12 @@ function setupDragAndDrop() {
     const totalWinRateVal = traderAllTrades.length > 0 ? (totalWinsCount / traderAllTrades.length) * 100 : 0;
 	const totalTradesOverallVal = traderAllTrades.length;
 	
+	// --- BERECHNUNG DAILY P/L ---
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const todayTrades = trades.filter(t => t.date === today);
+    const dailyPL = todayTrades.reduce((sum, t) => sum + Number(t.pl), 0);
+    // ---------------------------------
+	
     // ---------------------------------
 
     // 3. Stats & Profit Factor Berechnung (Aktuelle Ansicht)
@@ -2643,7 +2653,8 @@ const biggestLossVal = allLosses.length > 0 ? Math.max(...allLosses.map(t => Mat
 	animateValue('totalTradesOverall', 0, totalTradesOverallVal, 800);
     animateValue('winRate', 0, winRateVal, 800, false, true);
     animateValue('totalPL', 0, viewPL, 800, true);
-    
+    animateValue('dailyPL', 0, dailyPL, 800, true);
+	
     // Gesamt Werte (Die neuen Felder)
     animateValue('winRateTotal', 0, totalWinRateVal, 800, false, true);
     animateValue('totalPLTotal', 0, totalNetPL, 800, true);
