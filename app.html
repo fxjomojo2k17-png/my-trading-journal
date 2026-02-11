@@ -1358,6 +1358,14 @@ tr.row-loss {
     transition: all 0.3s shadow;
 }
 
+/* Aktiv-Zustand für Funded Button */
+#fundedToggleBtn.active {
+    border-color: #ffa726;
+    color: #fff;
+    background: rgba(255, 167, 38, 0.05);
+}
+
+
 /* Aktiv-Zustand für den Button */
 .perf-btn.active {
     border-color: #00f2ff;
@@ -2830,14 +2838,16 @@ window.addEventListener('load', () => {
         document.body.classList.add('pro-mode');
     }
     
-    // Funded Target Status wiederherstellen
-    const fundedEnabled = localStorage.getItem('funded_target_enabled') === 'true';
-    const led = document.getElementById('fundedLed');
-    if (fundedEnabled) {
-        led.classList.add('on');
-        document.getElementById('fundedTargetInput').style.display = 'block';
-        document.getElementById('card-funded-section').style.display = 'block';
-    }
+ // Funded Target Status wiederherstellen
+const fundedEnabled = localStorage.getItem('funded_target_enabled') === 'true';
+const led = document.getElementById('fundedLed');
+const btn = document.getElementById('fundedToggleBtn');
+if (fundedEnabled) {
+    btn.classList.add('active');
+    led.classList.add('on');
+    document.getElementById('fundedTargetInput').style.display = 'block';
+    document.getElementById('card-funded-section').style.display = 'block';
+}
 });
 
 // DIE NEUE INTELLIGENTE CHART-FUNKTION
@@ -4189,7 +4199,7 @@ function toggleFundedTarget() {
     const btn = document.getElementById('fundedToggleBtn');
     const led = document.getElementById('fundedLed');
     
-    // Glitch Animation (wie beim FX Button)
+    // Glitch Animation
     if (btn) {
         btn.classList.add('glitch-active');
         setTimeout(() => {
@@ -4197,10 +4207,12 @@ function toggleFundedTarget() {
         }, 300);
     }
     
-    // LED updaten
+    // Active State toggle
     if (newState) {
+        btn.classList.add('active');
         led.classList.add('on');
     } else {
+        btn.classList.remove('active');
         led.classList.remove('on');
     }
     
