@@ -1926,15 +1926,17 @@ input[type="text"] {
     <input type="text" id="initialBalanceInput" onchange="updateStatsAndTable()" value="300" 
            style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.0em; font-weight: bold; text-align: center; height: auto; padding: 0;">
     
-    <div class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px; line-height: 1.2;">
-        <span style="display: block; margin: 0; padding: 0;">Target: $<input type="text" id="monthlyTargetInput" value="500" 
+    <div class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+        <span>Target: $<input type="text" id="monthlyTargetInput" value="500" 
             style="background: transparent !important; border: none !important; color: #8892b0 !important; 
-            font-size: 0.7rem; text-align: center; width: 50px; padding: 0; outline: none; margin: 0; vertical-align: baseline;"
+            font-size: 0.7rem; text-align: center; width: 50px; padding: 0; outline: none;"
             onchange="saveUserSettings(); updateStatsAndTable();"></span>
         
-        <span id="fundedTargetInput" style="display: none; margin: 0; padding: 0;">Funded: <input type="text" id="fundedTargetPercent" value="2" 
+        <span id="fundedTargetDivider" style="color: rgba(255,255,255,0.2); display: none;">|</span>
+        
+        <span id="fundedTargetInput" style="display: none;">Funded: <input type="text" id="fundedTargetPercent" value="2" 
             style="background: transparent !important; border: none !important; color: #8892b0 !important; 
-            font-size: 0.7rem; text-align: center; width: 30px; padding: 0; outline: none; margin: 0; vertical-align: baseline;"
+            font-size: 0.7rem; text-align: center; width: 30px; padding: 0; outline: none;"
             onchange="saveUserSettings(); updateStatsAndTable();">%</span>
     </div>
 </div>
@@ -2840,14 +2842,15 @@ window.addEventListener('load', () => {
         document.body.classList.add('pro-mode');
     }
     
- // Funded Target Status wiederherstellen
+// Funded Target Status wiederherstellen
 const fundedEnabled = localStorage.getItem('funded_target_enabled') === 'true';
 const led = document.getElementById('fundedLed');
 const btn = document.getElementById('fundedToggleBtn');
 if (fundedEnabled) {
     btn.classList.add('active');
     led.classList.add('on');
-    document.getElementById('fundedTargetInput').style.display = 'block';
+    document.getElementById('fundedTargetInput').style.display = 'inline';
+    document.getElementById('fundedTargetDivider').style.display = 'inline';
     document.getElementById('card-funded-section').style.display = 'block';
 }
 });
@@ -4218,8 +4221,9 @@ function toggleFundedTarget() {
         led.classList.remove('on');
     }
     
-    // Input und Bar zeigen/verstecken
-    document.getElementById('fundedTargetInput').style.display = newState ? 'block' : 'none';
+    // Input, Divider und Bar zeigen/verstecken
+    document.getElementById('fundedTargetInput').style.display = newState ? 'inline' : 'none';
+    document.getElementById('fundedTargetDivider').style.display = newState ? 'inline' : 'none';
     document.getElementById('card-funded-section').style.display = newState ? 'block' : 'none';
     
     updateStatsAndTable();
