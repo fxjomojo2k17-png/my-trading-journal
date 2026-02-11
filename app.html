@@ -1902,18 +1902,18 @@ input[type="text"] {
            style="background: transparent !important; border: none !important; color: #e0e0e0 !important; font-size: 1.0em; font-weight: bold; text-align: center; height: auto; padding: 0;">
     
     <div class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px;">
-        Target: $<input type="text" id="monthlyTargetInput" value="500" 
+        <div>Target: $<input type="text" id="monthlyTargetInput" value="500" 
             style="background: transparent !important; border: none !important; color: #8892b0 !important; 
             font-size: 0.7rem; text-align: center; width: 50px; padding: 0; outline: none;"
-            onchange="saveUserSettings(); updateStatsAndTable();">
-    </div>
-    
-    <!-- FUNDED TARGET (versteckt by default) -->
-    <div id="fundedTargetInput" class="total-sub-value" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 6px; margin-top: 6px; display: none;">
-        Funded: <input type="text" id="fundedTargetPercent" value="2" 
-            style="background: transparent !important; border: none !important; color: #8892b0 !important; 
-            font-size: 0.7rem; text-align: center; width: 30px; padding: 0; outline: none;"
-            onchange="saveUserSettings(); updateStatsAndTable();">%
+            onchange="saveUserSettings(); updateStatsAndTable();"></div>
+        
+        <!-- FUNDED TARGET (versteckt by default, KEIN eigener Divider) -->
+        <div id="fundedTargetInput" style="display: none; margin-top: 4px;">
+            Funded: <input type="text" id="fundedTargetPercent" value="2" 
+                style="background: transparent !important; border: none !important; color: #8892b0 !important; 
+                font-size: 0.7rem; text-align: center; width: 30px; padding: 0; outline: none;"
+                onchange="saveUserSettings(); updateStatsAndTable();">%
+        </div>
     </div>
 </div>
         <div class="stat-card" id="card-equity"><h3>Current Equity</h3><div class="value" id="currentEquity">$0.00</div></div>
@@ -1944,9 +1944,7 @@ input[type="text"] {
     </div>
 </div>
 
-
-<div class="stat-card" id="card-avgr"><h3>Avg R</h3><div class="value" id="avgR">0.0R</div></div>
-        <div class="stat-card" id="card-target">
+<div class="stat-card" id="card-target">
     <h3>Monthly Target</h3>
     <div class="value" id="targetProgress" style="font-size: 0.85em;">$0 / $500</div>
     <div style="width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
@@ -1955,17 +1953,17 @@ input[type="text"] {
     <div style="font-size: 0.65em; color: #8892b0; margin-top: 4px;">
         <span id="targetPercent">0%</span>
     </div>
-</div>
-
-<!-- FUNDED TARGET BAR (versteckt by default) -->
-<div class="stat-card" id="card-funded" style="display: none;">
-    <h3>Funded Target</h3>
-    <div class="value" id="fundedProgress" style="font-size: 0.85em;">$0 / $600</div>
-    <div style="width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
-        <div id="fundedBar" style="height: 100%; background: linear-gradient(90deg, #ffa726, #ff6f00); width: 0%; transition: width 0.8s ease;"></div>
-    </div>
-    <div style="font-size: 0.65em; color: #8892b0; margin-top: 4px;">
-        <span id="fundedPercent">0%</span>
+    
+    <!-- FUNDED TARGET BAR (versteckt by default, MIT Divider) -->
+    <div id="card-funded-section" style="display: none; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-top: 12px; width: 100%;">
+        <h3 style="font-size: 0.75em; margin-bottom: 6px;">Funded Target</h3>
+        <div class="value" id="fundedProgress" style="font-size: 0.85em;">$0 / $600</div>
+        <div style="width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+            <div id="fundedBar" style="height: 100%; background: linear-gradient(90deg, #ffa726, #ff6f00); width: 0%; transition: width 0.8s ease;"></div>
+        </div>
+        <div style="font-size: 0.65em; color: #8892b0; margin-top: 4px;">
+            <span id="fundedPercent">0%</span>
+        </div>
     </div>
 </div>
 		
@@ -2826,7 +2824,7 @@ window.addEventListener('load', () => {
     if (fundedEnabled) {
         led.classList.add('on');
         document.getElementById('fundedTargetInput').style.display = 'block';
-        document.getElementById('card-funded').style.display = 'flex';
+        document.getElementById('card-funded-section').style.display = 'block';
     }
 });
 
@@ -4176,7 +4174,7 @@ function toggleFundedTarget() {
     
     localStorage.setItem('funded_target_enabled', newState);
     
-    // LED updaten (genau wie beim FX Button)
+    // LED updaten
     const led = document.getElementById('fundedLed');
     if (newState) {
         led.classList.add('on');
@@ -4184,9 +4182,9 @@ function toggleFundedTarget() {
         led.classList.remove('on');
     }
     
-    // Cards zeigen/verstecken
+    // Input und Bar zeigen/verstecken
     document.getElementById('fundedTargetInput').style.display = newState ? 'block' : 'none';
-    document.getElementById('card-funded').style.display = newState ? 'flex' : 'none';
+    document.getElementById('card-funded-section').style.display = newState ? 'block' : 'none';
     
     updateStatsAndTable();
 }
